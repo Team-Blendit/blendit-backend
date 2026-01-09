@@ -1,0 +1,5 @@
+rootProject.name = 'blendit'
+
+include 'blendit-api'
+include 'blendit-chat'
+include 'blendit-common'
