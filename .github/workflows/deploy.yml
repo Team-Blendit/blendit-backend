@@ -7,19 +7,22 @@ on:
 permissions:
   contents: read
 
+env:
+  NCR_REGISTRY: ${{ secrets.NCR_REGISTRY }}
+  NCP_ACCESS_KEY: ${{ secrets.NCP_ACCESS_KEY }}
+  NCP_SECRET_KEY: ${{ secrets.NCP_SECRET_KEY }}
+
+  SOURCE_DEPLOY_BASE_URL: https://vpcsourcedeploy.apigw.ntruss.com
+  SOURCE_DEPLOY_PROJECT_ID_API: ${{ secrets.SOURCE_DEPLOY_PROJECT_ID_API }}
+  SOURCE_DEPLOY_STAGE_ID_API: ${{ secrets.SOURCE_DEPLOY_STAGE_ID_API }}
+  SOURCE_DEPLOY_SCENARIO_ID_API: ${{ secrets.SOURCE_DEPLOY_SCENARIO_ID_API }}
+  SOURCE_DEPLOY_PROJECT_ID_CHAT: ${{ secrets.SOURCE_DEPLOY_PROJECT_ID_CHAT }}
+  SOURCE_DEPLOY_STAGE_ID_CHAT: ${{ secrets.SOURCE_DEPLOY_STAGE_ID_CHAT }}
+  SOURCE_DEPLOY_SCENARIO_ID_CHAT: ${{ secrets.SOURCE_DEPLOY_SCENARIO_ID_CHAT }}
+
 jobs:
   build_push:
     runs-on: ubuntu-latest
-
-    env:
-      NCR_REGISTRY: ${{ secrets.NCR_REGISTRY }}
-      NCP_ACCESS_KEY: ${{ secrets.NCP_ACCESS_KEY }}
-      NCP_SECRET_KEY: ${{ secrets.NCP_SECRET_KEY }}
-
-      SOURCE_DEPLOY_BASE_URL: https://vpcsourcedeploy.apigw.ntruss.com
-      SOURCE_DEPLOY_PROJECT_ID_API: ${{ secrets.SOURCE_DEPLOY_PROJECT_ID_API }}
-      SOURCE_DEPLOY_STAGE_ID_API: ${{ secrets.SOURCE_DEPLOY_STAGE_ID_API }}
-      SOURCE_DEPLOY_SCENARIO_ID_API: ${{ secrets.SOURCE_DEPLOY_SCENARIO_ID_API }}
 
     steps:
       - name: Checkout
@@ -30,7 +33,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-          cache: 'gradle'
+          cache: gradle
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
@@ -98,6 +101,11 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+  deploy_api:
+    runs-on: ubuntu-latest
+    needs: build_push
+
+    steps:
       - name: Trigger SourceDeploy scenario (API)
         shell: bash
         run: |
@@ -109,7 +117,31 @@ jobs:
 
           SIGNATURE="$(printf "%b" "${METHOD} ${URL}\n${TIMESTAMP}\n${NCP_ACCESS_KEY}" \
             | openssl dgst -sha256 -hmac "${NCP_SECRET_KEY}" -binary \
-            | base64)"
+            | openssl base64 -A)"
+
+          curl -sS -X "${METHOD}" "${SOURCE_DEPLOY_BASE_URL}${URL}" \
+            -H "x-ncp-apigw-timestamp: ${TIMESTAMP}" \
+            -H "x-ncp-iam-access-key: ${NCP_ACCESS_KEY}" \
+            -H "x-ncp-apigw-signature-v2: ${SIGNATURE}" \
+            -H "Content-Type: application/json"
+
+  deploy_chat:
+    runs-on: ubuntu-latest
+    needs: build_push
+
+    steps:
+      - name: Trigger SourceDeploy scenario (CHAT)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          METHOD="POST"
+          URL="/api/v1/project/${SOURCE_DEPLOY_PROJECT_ID_CHAT}/stage/${SOURCE_DEPLOY_STAGE_ID_CHAT}/scenario/${SOURCE_DEPLOY_SCENARIO_ID_CHAT}/deploy"
+          TIMESTAMP="$(date +%s%3N)"
+
+          SIGNATURE="$(printf "%b" "${METHOD} ${URL}\n${TIMESTAMP}\n${NCP_ACCESS_KEY}" \
+            | openssl dgst -sha256 -hmac "${NCP_SECRET_KEY}" -binary \
+            | openssl base64 -A)"
 
           curl -sS -X "${METHOD}" "${SOURCE_DEPLOY_BASE_URL}${URL}" \
             -H "x-ncp-apigw-timestamp: ${TIMESTAMP}" \
