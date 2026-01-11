@@ -11,6 +11,16 @@ jobs:
   build_push:
     runs-on: ubuntu-latest
 
+    env:
+      NCR_REGISTRY: ${{ secrets.NCR_REGISTRY }}
+      NCP_ACCESS_KEY: ${{ secrets.NCP_ACCESS_KEY }}
+      NCP_SECRET_KEY: ${{ secrets.NCP_SECRET_KEY }}
+
+      SOURCE_DEPLOY_BASE_URL: https://vpcsourcedeploy.apigw.ntruss.com
+      SOURCE_DEPLOY_PROJECT_ID_API: ${{ secrets.SOURCE_DEPLOY_PROJECT_ID_API }}
+      SOURCE_DEPLOY_STAGE_ID_API: ${{ secrets.SOURCE_DEPLOY_STAGE_ID_API }}
+      SOURCE_DEPLOY_SCENARIO_ID_API: ${{ secrets.SOURCE_DEPLOY_SCENARIO_ID_API }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,9 +63,9 @@ jobs:
       - name: Login to NCR
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.NCR_REGISTRY }}
-          username: ${{ secrets.NCP_ACCESS_KEY }}
-          password: ${{ secrets.NCP_SECRET_KEY }}
+          registry: ${{ env.NCR_REGISTRY }}
+          username: ${{ env.NCP_ACCESS_KEY }}
+          password: ${{ env.NCP_SECRET_KEY }}
 
       - name: Build & Push API image
         uses: docker/build-push-action@v6
@@ -67,8 +77,8 @@ jobs:
           build-args: |
             JAR_FILE=${{ steps.jars.outputs.api_jar }}
           tags: |
-            ${{ secrets.NCR_REGISTRY }}/blendit-api:${{ github.sha }}
-            ${{ secrets.NCR_REGISTRY }}/blendit-api:latest
+            ${{ env.NCR_REGISTRY }}/blendit-api:${{ github.sha }}
+            ${{ env.NCR_REGISTRY }}/blendit-api:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -82,7 +92,26 @@ jobs:
           build-args: |
             JAR_FILE=${{ steps.jars.outputs.chat_jar }}
           tags: |
-            ${{ secrets.NCR_REGISTRY }}/blendit-chat:${{ github.sha }}
-            ${{ secrets.NCR_REGISTRY }}/blendit-chat:latest
+            ${{ env.NCR_REGISTRY }}/blendit-chat:${{ github.sha }}
+            ${{ env.NCR_REGISTRY }}/blendit-chat:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Trigger SourceDeploy scenario (API)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          METHOD="POST"
+          URL="/api/v1/project/${SOURCE_DEPLOY_PROJECT_ID_API}/stage/${SOURCE_DEPLOY_STAGE_ID_API}/scenario/${SOURCE_DEPLOY_SCENARIO_ID_API}/deploy"
+          TIMESTAMP="$(date +%s%3N)"
+
+          SIGNATURE="$(printf "%b" "${METHOD} ${URL}\n${TIMESTAMP}\n${NCP_ACCESS_KEY}" \
+            | openssl dgst -sha256 -hmac "${NCP_SECRET_KEY}" -binary \
+            | base64)"
+
+          curl -sS -X "${METHOD}" "${SOURCE_DEPLOY_BASE_URL}${URL}" \
+            -H "x-ncp-apigw-timestamp: ${TIMESTAMP}" \
+            -H "x-ncp-iam-access-key: ${NCP_ACCESS_KEY}" \
+            -H "x-ncp-apigw-signature-v2: ${SIGNATURE}" \
+            -H "Content-Type: application/json"
