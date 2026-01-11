@@ -1,0 +1,150 @@
+name: deploy
+
+on:
+  push:
+    branches: [ "dev" ]
+
+permissions:
+  contents: read
+
+env:
+  NCR_REGISTRY: ${{ secrets.NCR_REGISTRY }}
+  NCP_ACCESS_KEY: ${{ secrets.NCP_ACCESS_KEY }}
+  NCP_SECRET_KEY: ${{ secrets.NCP_SECRET_KEY }}
+
+  SOURCE_DEPLOY_BASE_URL: https://vpcsourcedeploy.apigw.ntruss.com
+  SOURCE_DEPLOY_PROJECT_ID_API: ${{ secrets.SOURCE_DEPLOY_PROJECT_ID_API }}
+  SOURCE_DEPLOY_STAGE_ID_API: ${{ secrets.SOURCE_DEPLOY_STAGE_ID_API }}
+  SOURCE_DEPLOY_SCENARIO_ID_API: ${{ secrets.SOURCE_DEPLOY_SCENARIO_ID_API }}
+  SOURCE_DEPLOY_PROJECT_ID_CHAT: ${{ secrets.SOURCE_DEPLOY_PROJECT_ID_CHAT }}
+  SOURCE_DEPLOY_STAGE_ID_CHAT: ${{ secrets.SOURCE_DEPLOY_STAGE_ID_CHAT }}
+  SOURCE_DEPLOY_SCENARIO_ID_CHAT: ${{ secrets.SOURCE_DEPLOY_SCENARIO_ID_CHAT }}
+
+jobs:
+  build_push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      - name: Build bootJars (skip tests)
+        run: |
+          ./gradlew --no-daemon :blendit-api:bootJar :blendit-chat:bootJar -x test
+
+      - name: Resolve JAR paths
+        id: jars
+        shell: bash
+        run: |
+          API_JAR="$(ls -1 blendit-api/build/libs/*.jar | grep -v 'plain' | head -n 1)"
+          CHAT_JAR="$(ls -1 blendit-chat/build/libs/*.jar | grep -v 'plain' | head -n 1)"
+
+          if [[ -z "$API_JAR" || -z "$CHAT_JAR" ]]; then
+            echo "ERROR: jar not found"
+            echo "API_JAR=$API_JAR"
+            echo "CHAT_JAR=$CHAT_JAR"
+            ls -al blendit-api/build/libs || true
+            ls -al blendit-chat/build/libs || true
+            exit 1
+          fi
+
+          echo "api_jar=$API_JAR" >> $GITHUB_OUTPUT
+          echo "chat_jar=$CHAT_JAR" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to NCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.NCR_REGISTRY }}
+          username: ${{ env.NCP_ACCESS_KEY }}
+          password: ${{ env.NCP_SECRET_KEY }}
+
+      - name: Build & Push API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.api
+          push: true
+          platforms: linux/amd64
+          build-args: |
+            JAR_FILE=${{ steps.jars.outputs.api_jar }}
+          tags: |
+            ${{ env.NCR_REGISTRY }}/blendit-api:${{ github.sha }}
+            ${{ env.NCR_REGISTRY }}/blendit-api:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build & Push CHAT image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.chat
+          push: true
+          platforms: linux/amd64
+          build-args: |
+            JAR_FILE=${{ steps.jars.outputs.chat_jar }}
+          tags: |
+            ${{ env.NCR_REGISTRY }}/blendit-chat:${{ github.sha }}
+            ${{ env.NCR_REGISTRY }}/blendit-chat:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy_api:
+    runs-on: ubuntu-latest
+    needs: build_push
+
+    steps:
+      - name: Trigger SourceDeploy scenario (API)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          METHOD="POST"
+          URL="/api/v1/project/${SOURCE_DEPLOY_PROJECT_ID_API}/stage/${SOURCE_DEPLOY_STAGE_ID_API}/scenario/${SOURCE_DEPLOY_SCENARIO_ID_API}/deploy"
+          TIMESTAMP="$(date +%s%3N)"
+
+          SIGNATURE="$(printf "%b" "${METHOD} ${URL}\n${TIMESTAMP}\n${NCP_ACCESS_KEY}" \
+            | openssl dgst -sha256 -hmac "${NCP_SECRET_KEY}" -binary \
+            | openssl base64 -A)"
+
+          curl -sS -X "${METHOD}" "${SOURCE_DEPLOY_BASE_URL}${URL}" \
+            -H "x-ncp-apigw-timestamp: ${TIMESTAMP}" \
+            -H "x-ncp-iam-access-key: ${NCP_ACCESS_KEY}" \
+            -H "x-ncp-apigw-signature-v2: ${SIGNATURE}" \
+            -H "Content-Type: application/json"
+
+  deploy_chat:
+    runs-on: ubuntu-latest
+    needs: build_push
+
+    steps:
+      - name: Trigger SourceDeploy scenario (CHAT)
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          METHOD="POST"
+          URL="/api/v1/project/${SOURCE_DEPLOY_PROJECT_ID_CHAT}/stage/${SOURCE_DEPLOY_STAGE_ID_CHAT}/scenario/${SOURCE_DEPLOY_SCENARIO_ID_CHAT}/deploy"
+          TIMESTAMP="$(date +%s%3N)"
+
+          SIGNATURE="$(printf "%b" "${METHOD} ${URL}\n${TIMESTAMP}\n${NCP_ACCESS_KEY}" \
+            | openssl dgst -sha256 -hmac "${NCP_SECRET_KEY}" -binary \
+            | openssl base64 -A)"
+
+          curl -sS -X "${METHOD}" "${SOURCE_DEPLOY_BASE_URL}${URL}" \
+            -H "x-ncp-apigw-timestamp: ${TIMESTAMP}" \
+            -H "x-ncp-iam-access-key: ${NCP_ACCESS_KEY}" \
+            -H "x-ncp-apigw-signature-v2: ${SIGNATURE}" \
+            -H "Content-Type: application/json"
