@@ -68,7 +68,7 @@ jobs:
             JAR_FILE=${{ steps.jars.outputs.api_jar }}
           tags: |
             ${{ secrets.NCR_REGISTRY }}/blendit-api:${{ github.sha }}
-            ${{ secrets.NCR_REGISTRY }}/blendit-api:main
+            ${{ secrets.NCR_REGISTRY }}/blendit-api:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -83,6 +83,6 @@ jobs:
             JAR_FILE=${{ steps.jars.outputs.chat_jar }}
           tags: |
             ${{ secrets.NCR_REGISTRY }}/blendit-chat:${{ github.sha }}
-            ${{ secrets.NCR_REGISTRY }}/blendit-chat:main
+            ${{ secrets.NCR_REGISTRY }}/blendit-chat:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
