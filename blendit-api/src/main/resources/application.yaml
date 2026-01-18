@@ -1,3 +1,42 @@
 spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
   application:
-    name: blendit-api
+    name: blendit
+  mvc:
+    format:
+      date: yyyy-MM-dd
+      date-time: yyyy-MM-dd HH:mm:ss
+      time: HH:mm:ss
+  main:
+    allow-bean-definition-overriding: true
+  data:
+    web:
+      pageable:
+        default-page-size: 10
+        max-page-size: 200
+        page-parameter: page
+
+jwt:
+  token:
+    secret-key: ${JWT_SECRET_KEY:e6c02391cc71b0518fa50e01a454401f23f117d74fc591091564a898613b893f}
+    exp-minute-time: 60
+    refresh-exp-minute-time: 20160
+    issuer: blendit-api
+
+springdoc:
+  default-consumes-media-type: application/json;charset=UTF-8
+  default-produces-media-type: application/json;charset=UTF-8
+  swagger-ui:
+    path: /docs/swagger
+
+security:
+  public-paths:
+    - /api/blendit/auth/**
+    - /api/blendit/public/**
+    - /swagger-ui/**
+    - /swagger-ui.html
+    - /v3/api-docs/**
+    - /docs/**
+    - /h2-console/**
+    - /actuator/**
