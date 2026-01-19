@@ -11,11 +11,10 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@EntityListeners(AuditingEntityListener.class)
 @MappedSuperclass
 @Getter
 @Setter(AccessLevel.PROTECTED)
-public class BaseEntity {
+public class BaseEntity extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,13 +25,6 @@ public class BaseEntity {
 
     @Column(name = "use_flag", nullable = false)
     private boolean useFlag = true;
-
-    @CreatedDate
-    @Column(updatable = false)
-    private LocalDateTime createdDate;
-
-    @LastModifiedDate
-    private LocalDateTime lastModifiedDate;
 
     @PrePersist
     protected void onCreate() {

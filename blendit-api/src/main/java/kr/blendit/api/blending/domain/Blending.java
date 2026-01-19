@@ -1,35 +1,35 @@
-package kr.blendit.api.networking.domain;
+package kr.blendit.api.blending.domain;
 
 import jakarta.persistence.*;
+import kr.blendit.api.blending.constant.Status;
+import kr.blendit.common.entity.BaseTimeEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "networking")
+@Table(name = "blending")
 @Builder
-@Setter
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Networking {
+public class Blending extends BaseTimeEntity {
 
     @Id
-    @Column(name = "networking_id")
+    @Column(name = "blending_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // todo: private User host;
+    @OneToMany(mappedBy = "blending",  cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<BlendingUser> participants = new ArrayList<>();
 
-    /*
-    todo:
-        ManyToMany 관계이므로 중간 테이블 설계 필요
-        private List<User> participants;
-     */
+    @Column(nullable = false, length = 50)
+    private String title;
 
     @Column(columnDefinition = "TEXT", nullable = false)
-    @Lob
     private String content;
 
     @Column
@@ -43,20 +43,6 @@ public class Networking {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private List<Position> position;
-
-    @Column
-    @Enumerated(EnumType.STRING)
-    private List<Keyword> keywords;
-
-    /*
-    todo:
-        ManyToMany 관계이므로 중간테이블 설계 필요
-        private List<User> bookmark = 0;
-     */
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
     @Builder.Default
     private Status status = Status.RECRUITING;
 
@@ -66,5 +52,7 @@ public class Networking {
     @Column(nullable = false)
     private LocalDateTime schedule;
 
-    // todo: @MappedSuperclass로 createdAt, updatedAt 추가 필요
+    @Column
+    @Builder.Default
+    private boolean useFlag = true;
 }
