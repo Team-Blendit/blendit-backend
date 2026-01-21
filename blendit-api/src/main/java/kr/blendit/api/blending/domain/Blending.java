@@ -1,7 +1,7 @@
 package kr.blendit.api.blending.domain;
 
 import jakarta.persistence.*;
-import kr.blendit.api.blending.constant.Status;
+import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.common.entity.BaseTimeEntity;
 import lombok.*;
 
@@ -22,7 +22,7 @@ public class Blending extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToMany(mappedBy = "blending",  cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "blending", orphanRemoval = true)
     @Builder.Default
     private List<BlendingUser> participants = new ArrayList<>();
 
@@ -44,7 +44,7 @@ public class Blending extends BaseTimeEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private Status status = Status.RECRUITING;
+    private BlendingStatus status = BlendingStatus.RECRUITING;
 
     @Column
     private String openChattingUrl;
