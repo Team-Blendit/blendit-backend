@@ -34,9 +34,12 @@ security:
   public-paths:
     - /api/blendit/auth/**
     - /api/blendit/public/**
-    - /swagger-ui/**
-    - /swagger-ui.html
-    - /v3/api-docs/**
-    - /docs/**
-    - /h2-console/**
-    - /actuator/**
+
+oidc:
+  kakao:
+    client-id: ${KAKAO_CLIENT_ID:your-kakao-client-id}
+    client-secret: ${KAKAO_CLIENT_SECRET:your-kakao-client-secret}
+    redirect-uri: ${KAKAO_REDIRECT_URI:http://localhost:3000/oidc/kakao}
+    token-uri: https://kauth.kakao.com/oauth/token
+    jwks-uri: https://kauth.kakao.com/.well-known/jwks.json
+    issuer: https://kauth.kakao.com
