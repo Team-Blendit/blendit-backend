@@ -6,9 +6,7 @@ import jakarta.validation.Valid;
 import kr.blendit.api.auth.dto.OidcLoginRequest;
 import kr.blendit.api.auth.dto.OidcLoginResponse;
 import kr.blendit.api.auth.facade.OidcFacade;
-import kr.blendit.common.response.CommonResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +23,12 @@ public class OidcController {
     @Operation(summary = "카카오 로그인", description = "카카오 인가 코드로 로그인합니다. (OIDC 방식)")
     @PostMapping("/kakao")
     public OidcLoginResponse kakaoLogin(@Valid @RequestBody OidcLoginRequest request) {
-      return oidcFacade.kakaoLogin(request.code());
+        return oidcFacade.kakaoLogin(request.code());
+    }
+
+    @Operation(summary = "구글 로그인", description = "구글 인가 코드로 로그인합니다. (OIDC 방식)")
+    @PostMapping("/google")
+    public OidcLoginResponse googleLogin(@Valid @RequestBody OidcLoginRequest request) {
+        return oidcFacade.googleLogin(request.code());
     }
 }

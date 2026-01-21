@@ -26,7 +26,7 @@ public class UserService {
     public User findOrCreateBySocialLogin(LoginType loginType, OidcUserInfo userInfo) {
         return userRepository.findByLoginTypeAndSocialCompanyUserId(loginType, userInfo.socialCompanyUserId())
                 .map(existingUser -> {
-                    existingUser.updateProfile(userInfo.nickname(), userInfo.profileImage());
+                    existingUser.updateProfile(userInfo.nickname(), userInfo.profileImage(), userInfo.email());
                     return existingUser;
                 })
                 .orElseGet(() -> userRepository.save(User.createSocialUser(loginType, userInfo)));

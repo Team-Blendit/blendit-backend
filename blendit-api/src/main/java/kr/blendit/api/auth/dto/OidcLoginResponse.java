@@ -19,6 +19,7 @@ public record OidcLoginResponse(
 
     public record UserInfo(
             String uuid,
+            String email,
             String nickname,
             String profileImage,
             LoginType loginType
@@ -26,6 +27,7 @@ public record OidcLoginResponse(
         public static UserInfo from(User user) {
             return new UserInfo(
                     user.getUuid(),
+                    user.getEmail(),
                     user.getNickname(),
                     user.getProfileImage(),
                     user.getLoginType()

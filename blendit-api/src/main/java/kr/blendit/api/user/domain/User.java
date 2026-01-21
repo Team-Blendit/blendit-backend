@@ -47,6 +47,7 @@ public class User extends BaseEntity {
                 .socialCompanyUserId(userInfo.socialCompanyUserId())
                 .nickname(userInfo.nickname())
                 .profileImage(userInfo.profileImage())
+                .email(userInfo.email())
                 .role(UserRole.USER)
                 .build();
     }
@@ -66,12 +67,15 @@ public class User extends BaseEntity {
         this.tokenVersion++;
     }
 
-    public void updateProfile(String nickname, String profileImage) {
+    public void updateProfile(String nickname, String profileImage, String email) {
         if (nickname != null) {
             this.nickname = nickname;
         }
         if (profileImage != null) {
             this.profileImage = profileImage;
+        }
+        if (email != null && this.email == null) {
+            this.email = email;
         }
     }
 }
