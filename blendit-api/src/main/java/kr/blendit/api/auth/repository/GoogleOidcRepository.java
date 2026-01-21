@@ -2,7 +2,6 @@ package kr.blendit.api.auth.repository;
 
 import com.auth0.jwk.Jwk;
 import com.auth0.jwk.JwkProvider;
-import com.auth0.jwk.JwkProviderBuilder;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
@@ -15,26 +14,34 @@ import kr.blendit.api.auth.repository.dto.GoogleIdTokenPayload;
 import kr.blendit.api.auth.repository.dto.GoogleTokenResponse;
 import kr.blendit.common.exception.BaseErrorCode;
 import kr.blendit.common.exception.BaseException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
-import java.net.URL;
 import java.security.interfaces.RSAPublicKey;
-import java.util.concurrent.TimeUnit;
 
 @Repository
-@RequiredArgsConstructor
 @Slf4j
 public class GoogleOidcRepository implements OidcRepository {
 
     private final GoogleOidcProperties googleProperties;
     private final RestClient restClient;
-    private JwkProvider jwkProvider;
+    private final JwkProvider jwkProvider;
+
+    public GoogleOidcRepository(
+            GoogleOidcProperties googleProperties,
+            RestClient restClient,
+            @Qualifier("googleJwkProvider") JwkProvider jwkProvider
+    ) {
+        this.googleProperties = googleProperties;
+        this.restClient = restClient;
+        this.jwkProvider = jwkProvider;
+    }
 
     @Override
     public OidcTokenResponse requestToken(String code) {
@@ -53,8 +60,11 @@ public class GoogleOidcRepository implements OidcRepository {
                     .retrieve()
                     .body(GoogleTokenResponse.class);
 
+        } catch (RestClientResponseException e) {
+            log.error("구글 토큰 요청 실패 - status: {}, body: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new BaseException(BaseErrorCode.OAUTH_TOKEN_REQUEST_FAILED);
         } catch (Exception e) {
-            log.error("구글 토큰 요청 실패: {}", e.getMessage());
+            log.error("구글 토큰 요청 실패: {}", e.getMessage(), e);
             throw new BaseException(BaseErrorCode.OAUTH_TOKEN_REQUEST_FAILED);
         }
     }
@@ -67,8 +77,7 @@ public class GoogleOidcRepository implements OidcRepository {
             String kid = decodedJwt.getKeyId();
 
             // JWKS에서 공개키 조회
-            JwkProvider provider = getJwkProvider();
-            Jwk jwk = provider.get(kid);
+            Jwk jwk = jwkProvider.get(kid);
             RSAPublicKey publicKey = (RSAPublicKey) jwk.getPublicKey();
 
             // 서명 검증 및 클레임 검증
@@ -101,21 +110,4 @@ public class GoogleOidcRepository implements OidcRepository {
         }
     }
 
-    /**
-     * JWKS Provider (공개키 캐싱)
-     */
-    private JwkProvider getJwkProvider() {
-        if (jwkProvider == null) {
-            try {
-                jwkProvider = new JwkProviderBuilder(new URL(googleProperties.jwksUri()))
-                        .cached(10, 24, TimeUnit.HOURS)
-                        .rateLimited(10, 1, TimeUnit.MINUTES)
-                        .build();
-            } catch (Exception e) {
-                log.error("JWKS Provider 초기화 실패: {}", e.getMessage());
-                throw new BaseException(BaseErrorCode.OAUTH_JWKS_FETCH_FAILED);
-            }
-        }
-        return jwkProvider;
-    }
 }
