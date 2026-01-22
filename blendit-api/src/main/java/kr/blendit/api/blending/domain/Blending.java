@@ -2,7 +2,7 @@ package kr.blendit.api.blending.domain;
 
 import jakarta.persistence.*;
 import kr.blendit.api.blending.constant.BlendingStatus;
-import kr.blendit.common.entity.BaseTimeEntity;
+import kr.blendit.common.entity.BaseEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -11,19 +11,11 @@ import java.util.List;
 
 @Entity
 @Table(name = "blending")
-@Builder
 @Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Blending extends BaseTimeEntity {
-
-    @Id
-    @Column(name = "blending_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Blending extends BaseEntity {
 
     @OneToMany(mappedBy = "blending", orphanRemoval = true)
-    @Builder.Default
     private List<BlendingUser> participants = new ArrayList<>();
 
     @Column(nullable = false, length = 50)
@@ -32,7 +24,10 @@ public class Blending extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @Column
+    @OneToMany(mappedBy = "blending", orphanRemoval = true)
+    private List<BlendingKeyword> keywords = new ArrayList<>();
+
+    @Column(nullable = false)
     private int capacity;
 
     @Column(nullable = false)
@@ -43,16 +38,46 @@ public class Blending extends BaseTimeEntity {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private BlendingStatus status = BlendingStatus.RECRUITING;
+    private BlendingStatus status;
 
     @Column
     private String openChattingUrl;
 
-    @Column(nullable = false)
+    @Column
     private LocalDateTime schedule;
 
-    @Column
-    @Builder.Default
-    private boolean useFlag = true;
+    @Builder(access = AccessLevel.PRIVATE)
+    public Blending(String title, String content, int capacity, String region, String place, String openChattingUrl, LocalDateTime schedule) {
+        this.title = title;
+        this.content = content;
+        this.capacity = capacity;
+        this.region = region;
+        this.place = place;
+        this.status = BlendingStatus.RECRUITING;
+        this.openChattingUrl = openChattingUrl;
+        this.schedule = schedule;
+    }
+
+    public static Blending create(String title, String content, int capacity, String region, String place, String openChattingUrl, LocalDateTime schedule) {
+        // TODO: capacity, schedule 유효성 검사
+        return Blending.builder()
+                .title(title)
+                .content(content)
+                .capacity(capacity)
+                .region(region)
+                .place(place)
+                .openChattingUrl(openChattingUrl)
+                .schedule(schedule)
+                .build();
+    }
+
+    public void addKeyword(Keyword keyword) {
+        BlendingKeyword blendingKeyword = BlendingKeyword.create(this, keyword);
+
+        this.keywords.add(blendingKeyword);
+    }
+
 }
+
+
+

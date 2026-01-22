@@ -17,22 +17,19 @@ import lombok.*;
                 )
         }
 )
-@Builder
 @Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BlendingUser extends BaseTimeEntity {
 
     @Id
-    @Column(name = "blending_user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private User user;
 
-    @JoinColumn(name = "blending_id")
+    @JoinColumn(name = "blending_id", nullable = false)
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Blending blending;
 
@@ -45,6 +42,26 @@ public class BlendingUser extends BaseTimeEntity {
 
     @Column(name = "join_status", length = 20)
     @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private JoinStatus joinStatus = JoinStatus.PENDING;
+    private JoinStatus joinStatus;
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private BlendingUser(User user, Blending blending, Grade grade, String message, JoinStatus joinStatus) {
+        this.user = user;
+        this.blending = blending;
+        this.grade = grade;
+        this.message = message;
+        this.joinStatus = joinStatus;
+    }
+
+    public static BlendingUser create(User user, Blending blending, Grade grade, String message, JoinStatus joinStatus) {
+        // Todo: null 체크
+
+        return BlendingUser.builder()
+                .user(user)
+                .blending(blending)
+                .grade(grade)
+                .message(message)
+                .joinStatus(joinStatus)
+                .build();
+    }
 }

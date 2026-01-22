@@ -14,15 +14,12 @@ import lombok.*;
                 )
         }
 )
-@Builder
 @Getter
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class BlendingBookmark {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "blending_bookmark_id")
     private Long id;
 
     @JoinColumn(name = "user_id")
@@ -32,4 +29,19 @@ public class BlendingBookmark {
     @JoinColumn(name = "blending_id")
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Blending blending;
+
+    @Builder(access = AccessLevel.PRIVATE)
+    private BlendingBookmark(User user, Blending blending) {
+        this.user = user;
+        this.blending = blending;
+    }
+
+    public static BlendingBookmark create(User user, Blending blending) {
+        // Todo: null 체크
+
+        return BlendingBookmark.builder()
+                .user(user)
+                .blending(blending)
+                .build();
+    }
 }

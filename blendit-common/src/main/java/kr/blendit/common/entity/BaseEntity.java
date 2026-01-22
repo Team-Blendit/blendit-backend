@@ -18,7 +18,7 @@ public class BaseEntity extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long seq;
+    private Long id;
 
     @Column(name = "uuid", length = 36, unique = true, nullable = false, updatable = false)
     private String uuid;
