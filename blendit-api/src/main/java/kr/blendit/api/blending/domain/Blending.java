@@ -2,6 +2,9 @@ package kr.blendit.api.blending.domain;
 
 import jakarta.persistence.*;
 import kr.blendit.api.blending.constant.BlendingStatus;
+import kr.blendit.api.blending.constant.Grade;
+import kr.blendit.api.blending.constant.JoinStatus;
+import kr.blendit.api.user.domain.User;
 import kr.blendit.common.entity.BaseEntity;
 import lombok.*;
 
@@ -69,6 +72,12 @@ public class Blending extends BaseEntity {
                 .openChattingUrl(openChattingUrl)
                 .schedule(schedule)
                 .build();
+    }
+
+    public BlendingUser addParticipant(User user, Grade grade, String message, JoinStatus joinStatus) {
+        BlendingUser blendingUser = BlendingUser.create(user, this, grade, message, joinStatus);
+        this.participants.add(blendingUser);
+        return blendingUser;
     }
 
     public void addKeyword(Keyword keyword) {
