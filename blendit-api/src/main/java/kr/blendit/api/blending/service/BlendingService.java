@@ -1,5 +1,6 @@
 package kr.blendit.api.blending.service;
 
+import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.constant.Grade;
 import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;
@@ -112,6 +113,17 @@ public class BlendingService {
                 blendingRequest.getOpenChattingUrl(),
                 blendingRequest.getSchedule()
         );
+    }
+
+    @Transactional
+    public void updateStatus(String userUuid, String blendingUuid, BlendingStatus blendingStatus) {
+
+        Blending blending = blendingRepository.findByUuid(blendingUuid)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+
+        validateHostPermission(userUuid, blending);
+
+        blending.updateStatus(blendingStatus);
     }
 
 

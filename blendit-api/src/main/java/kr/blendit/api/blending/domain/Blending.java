@@ -64,7 +64,6 @@ public class Blending extends BaseEntity {
     }
 
     public static Blending create(String title, String content, Integer capacity, String region, String place, String openChattingUrl, LocalDateTime schedule) {
-        // TODO: capacity, schedule 유효성 검사
 
         if(capacity < 2) {
             throw new BaseException(BaseErrorCode.BLENDING_CAPACITY_BELOW_MIN);
@@ -121,6 +120,16 @@ public class Blending extends BaseEntity {
         this.openChattingUrl = openChattingUrl;
         this.schedule = schedule;
     }
+
+    public void updateStatus(BlendingStatus blendingStatus) {
+
+        if(blendingStatus == BlendingStatus.RECRUITING && this.participants.size() >= this.capacity) {
+            throw new BaseException(BaseErrorCode.BLENDING_CANNOT_RECRUIT_FULL);
+        }
+
+        this.status = blendingStatus;
+    }
+
 
 }
 
