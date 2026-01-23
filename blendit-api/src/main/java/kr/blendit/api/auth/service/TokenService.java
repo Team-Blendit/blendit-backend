@@ -92,11 +92,7 @@ public class TokenService {
     @Transactional
     public User createUserIfNotExists(String email, kr.blendit.common.constant.UserRole role) {
         return userRepository.findByEmail(email)
-                .orElseGet(() -> userRepository.save(User.builder()
-                        .uuid(UUID.randomUUID().toString())
-                        .email(email)
-                        .role(role)
-                        .build()));
+                .orElseGet(() -> userRepository.save(User.createLocalUser(email, role)));
     }
 
     private String createAndSaveRefreshToken(String userUuid, int tokenVersion) {

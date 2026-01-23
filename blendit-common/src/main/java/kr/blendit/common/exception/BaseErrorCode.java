@@ -30,7 +30,15 @@ public enum BaseErrorCode implements ErrorCode {
     ADMIN_ONLY("관리자만 접근할 수 있습니다."),
 
     // 사용자
-    USER_NOT_FOUND("사용자를 찾을 수 없습니다.");
+    USER_NOT_FOUND("사용자를 찾을 수 없습니다."),
+
+    // OAuth
+    OAUTH_TOKEN_REQUEST_FAILED("OAuth 토큰 요청에 실패했습니다."),
+    OAUTH_INVALID_ID_TOKEN("유효하지 않은 ID 토큰입니다."),
+    OAUTH_ID_TOKEN_EXPIRED("만료된 ID 토큰입니다."),
+    OAUTH_INVALID_ISSUER("ID 토큰 발급자가 일치하지 않습니다."),
+    OAUTH_INVALID_AUDIENCE("ID 토큰 대상이 일치하지 않습니다."),
+    OAUTH_JWKS_FETCH_FAILED("JWKS 공개키 조회에 실패했습니다.");
 
     private final String message;
 }

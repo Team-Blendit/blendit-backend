@@ -28,16 +28,10 @@ public class SecurityConfig {
 
     private final AuthenticationFailureHandler failureHandler;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
+    private final SecurityProperties securityProperties;
 
     @Value("${spring.application.name}")
     private String serviceName;
-
-    /**
-     * 추가 공개 경로 (application.yml에서 설정 가능)
-     * security.public-paths: /api/xxx/health, /api/xxx/version
-     */
-    @Value("${security.public-paths:}")
-    private List<String> additionalPublicPaths;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -48,24 +42,19 @@ public class SecurityConfig {
      * 인증 없이 접근 가능한 공개 경로
      */
     public List<String> getPublicPaths() {
-        String apiPath = "/api/" + serviceName;
-
         List<String> paths = new ArrayList<>();
 
-        // Swagger 관련
+        // 기본 공개 경로 (Swagger, 개발용)
         paths.add("/swagger-ui/**");
         paths.add("/swagger-ui.html");
         paths.add("/v3/api-docs/**");
         paths.add("/docs/**");
-        // 개발용
         paths.add("/h2-console/**");
         paths.add("/actuator/**");
         paths.add("/actuator/health");
 
-        // 추가 공개 경로 (설정 파일에서 지정)
-        if (additionalPublicPaths != null && !additionalPublicPaths.isEmpty()) {
-            paths.addAll(additionalPublicPaths);
-        }
+        // 추가 공개 경로 (application.yml에서 설정)
+        paths.addAll(securityProperties.publicPaths());
 
         return Collections.unmodifiableList(paths);
     }
