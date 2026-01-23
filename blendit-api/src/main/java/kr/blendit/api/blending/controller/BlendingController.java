@@ -2,6 +2,7 @@ package kr.blendit.api.blending.controller;
 
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.dto.BlendingRequest;
+import kr.blendit.api.blending.dto.BlendingResponse;
 import kr.blendit.api.blending.facade.BlendingFacade;
 import kr.blendit.api.blending.service.BlendingService;
 import lombok.RequiredArgsConstructor;
@@ -30,11 +31,19 @@ public class BlendingController {
 
     @PatchMapping("/blending/{blendingUuid}")
     public void update(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid, @RequestBody BlendingRequest blendingRequest) {
+
         blendingService.update(userUuid, blendingUuid, blendingRequest);
     }
 
     @PatchMapping("/blending/{blendingUuid}/status")
     public void updateStatus(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid, @RequestParam BlendingStatus blendingStatus) {
+
         blendingService.updateStatus(userUuid, blendingUuid, blendingStatus);
+    }
+
+    @GetMapping("/blending/{blendingUuid}")
+    public BlendingResponse find(@PathVariable String blendingUuid) {
+
+        return blendingService.find(blendingUuid);
     }
 }

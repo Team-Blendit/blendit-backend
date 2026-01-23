@@ -7,6 +7,8 @@ import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.blending.domain.Keyword;
 import kr.blendit.api.blending.dto.BlendingRequest;
+import kr.blendit.api.blending.dto.BlendingResponse;
+import kr.blendit.api.blending.repository.BlendingBookmarkRepository;
 import kr.blendit.api.blending.repository.BlendingRepository;
 import kr.blendit.api.blending.repository.BlendingUserRepository;
 import kr.blendit.api.blending.repository.KeywordRepository;
@@ -29,6 +31,7 @@ public class BlendingService {
     private final BlendingUserRepository blendingUserRepository;
     private final UserRepository userRepository;
     private final KeywordRepository keywordRepository;
+    private final BlendingBookmarkRepository blendingBookmarkRepository;
 
     @Transactional
     public void create(String userUuid, BlendingRequest blendingRequest) {
@@ -124,6 +127,17 @@ public class BlendingService {
         validateHostPermission(userUuid, blending);
 
         blending.updateStatus(blendingStatus);
+    }
+
+    @Transactional(readOnly = true)
+    public BlendingResponse find(String blendingUuid) {
+
+        Blending blending = blendingRepository.findByUuidWithParticipants(blendingUuid)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+
+        long bookmarkCount = blendingBookmarkRepository.countByBlending(blending);
+
+        return BlendingResponse.from(blending, bookmarkCount);
     }
 
 
