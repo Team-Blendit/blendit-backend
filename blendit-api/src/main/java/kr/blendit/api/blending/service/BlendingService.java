@@ -15,6 +15,7 @@ import kr.blendit.common.exception.BaseErrorCode;
 import kr.blendit.common.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,7 @@ public class BlendingService {
     private final UserRepository userRepository;
     private final KeywordRepository keywordRepository;
 
+    @Transactional
     public void create(String userUuid, BlendingRequest blendingRequest) {
 
         User user = userRepository.findByUuid(userUuid)
@@ -55,5 +57,27 @@ public class BlendingService {
 
         blendingRepository.save(blending);
         blendingUserRepository.save(blendingUser);
+    }
+
+
+    @Transactional
+    public void delete(String userUuid, String blendingUuid) {
+
+        Blending blending = blendingRepository.findByUuid(blendingUuid)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+
+        validateHostPermission(userUuid, blending);
+
+        blending.delete();
+    }
+
+
+    private void validateHostPermission(String userUuid, Blending blending) {
+        BlendingUser blendingHost = blendingUserRepository.findByBlendingAndGrade(blending, Grade.HOST)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.USER_NOT_FOUND));
+
+        if(!userUuid.equals(blendingHost.getUser().getUuid())) {
+            throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
+        }
     }
 }

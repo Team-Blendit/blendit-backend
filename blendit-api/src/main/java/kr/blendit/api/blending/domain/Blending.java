@@ -86,6 +86,10 @@ public class Blending extends BaseEntity {
         this.keywords.add(blendingKeyword);
     }
 
+    public void delete() {
+        this.setUseFlag(false);
+    }
+
 }
 
 

@@ -33,7 +33,11 @@ public enum BaseErrorCode implements ErrorCode {
     USER_NOT_FOUND("사용자를 찾을 수 없습니다."),
 
     // 키워드
-    KEYWORD_NOT_FOUND("키워드를 찾을 수 없습니다.");
+    KEYWORD_NOT_FOUND("키워드를 찾을 수 없습니다."),
+
+    // 블렌딩
+    BLENDING_NOT_FOUND("블렌딩을 찾을 수 없습니다."),
+    BLENDING_PERMISSION_DENIED("해당 블렌딩에 대한 접근 권한이 없습니다");
 
     private final String message;
 }
