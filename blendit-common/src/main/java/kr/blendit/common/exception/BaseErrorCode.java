@@ -34,10 +34,16 @@ public enum BaseErrorCode implements ErrorCode {
 
     // 키워드
     KEYWORD_NOT_FOUND("키워드를 찾을 수 없습니다."),
+    KEYWORD_IS_EMPTY("키워드 입력이 필요합니다."),
+    KEYWORD_LIMIT_EXCEEDED("키워드는 최대 3개까지 입력 가능합니다."),
+
 
     // 블렌딩
     BLENDING_NOT_FOUND("블렌딩을 찾을 수 없습니다."),
-    BLENDING_PERMISSION_DENIED("해당 블렌딩에 대한 접근 권한이 없습니다");
+    BLENDING_PERMISSION_DENIED("해당 블렌딩에 대한 접근 권한이 없습니다"),
+    BLENDING_INVALID_CAPACITY("현재 참여 인원보다 적은 수로 정원을 변경할 수 없습니다."),
+    BLENDING_CAPACITY_BELOW_MIN("모임 정원은 최소 2명 이상이어야 합니다."),
+    BLENDING_INVALID_SCHEDULE_TIME("유효하지 않은 블렌딩 일정입니다.");
 
     private final String message;
 }

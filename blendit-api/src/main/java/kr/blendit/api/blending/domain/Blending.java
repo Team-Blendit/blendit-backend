@@ -6,6 +6,8 @@ import kr.blendit.api.blending.constant.Grade;
 import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.user.domain.User;
 import kr.blendit.common.entity.BaseEntity;
+import kr.blendit.common.exception.BaseErrorCode;
+import kr.blendit.common.exception.BaseException;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -61,8 +63,20 @@ public class Blending extends BaseEntity {
         this.schedule = schedule;
     }
 
-    public static Blending create(String title, String content, int capacity, String region, String place, String openChattingUrl, LocalDateTime schedule) {
+    public static Blending create(String title, String content, Integer capacity, String region, String place, String openChattingUrl, LocalDateTime schedule) {
         // TODO: capacity, schedule 유효성 검사
+
+        if(capacity < 2) {
+            throw new BaseException(BaseErrorCode.BLENDING_CAPACITY_BELOW_MIN);
+        }
+
+        if(schedule != null) {
+            if(schedule.isBefore(LocalDateTime.now())) {
+                throw new BaseException(BaseErrorCode.BLENDING_INVALID_SCHEDULE_TIME);
+            }
+        }
+
+
         return Blending.builder()
                 .title(title)
                 .content(content)
@@ -86,8 +100,26 @@ public class Blending extends BaseEntity {
         this.keywords.add(blendingKeyword);
     }
 
+    public void updateKeyword(List<Keyword> keywords) {
+        this.keywords.clear();
+
+        for(Keyword keyword : keywords) {
+            addKeyword(keyword);
+        }
+    }
+
     public void delete() {
         this.setUseFlag(false);
+    }
+
+    public void update(String title, String content, Integer capacity, String region, String place, String openChattingUrl, LocalDateTime schedule) {
+        if(title != null) this.title = title;
+        if(content != null) this.content = content;
+        if(capacity != null) this.capacity = capacity;
+        if(region != null) this.region = region;
+        if(place != null) this.place = place;
+        this.openChattingUrl = openChattingUrl;
+        this.schedule = schedule;
     }
 
 }

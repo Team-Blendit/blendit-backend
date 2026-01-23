@@ -17,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class BlendingService {
@@ -29,9 +32,6 @@ public class BlendingService {
     @Transactional
     public void create(String userUuid, BlendingRequest blendingRequest) {
 
-        User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new BaseException(BaseErrorCode.USER_NOT_FOUND));
-
         Blending blending = Blending.create(
                 blendingRequest.getTitle(),
                 blendingRequest.getContent(),
@@ -42,11 +42,19 @@ public class BlendingService {
                 blendingRequest.getSchedule()
         );
 
-        for(String keywordStr : blendingRequest.getKeywords()) {
-            Keyword keyword = keywordRepository.findByName(keywordStr)
-                    .orElseThrow(() -> new BaseException(BaseErrorCode.KEYWORD_NOT_FOUND));
+        List<Keyword> keywords = keywordRepository.findAllByNameIn(blendingRequest.getKeywords());
+        for(Keyword keyword : keywords) {
             blending.addKeyword(keyword);
         }
+        if(blending.getKeywords().isEmpty()) {
+            throw new BaseException(BaseErrorCode.KEYWORD_IS_EMPTY);
+        }
+        if(blending.getKeywords().size() >= 4) {
+            throw new BaseException(BaseErrorCode.KEYWORD_LIMIT_EXCEEDED);
+        }
+
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.USER_NOT_FOUND));
 
         BlendingUser blendingUser = blending.addParticipant(
                 user,
@@ -69,6 +77,41 @@ public class BlendingService {
         validateHostPermission(userUuid, blending);
 
         blending.delete();
+    }
+
+
+    @Transactional
+    public void update(String userUuid, String blendingUuid, BlendingRequest blendingRequest) {
+
+        Blending blending = blendingRepository.findByUuid(blendingUuid)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+
+        validateHostPermission(userUuid, blending);
+
+        if(blending.getParticipants().size() > blendingRequest.getCapacity()) {
+            throw new BaseException(BaseErrorCode.BLENDING_INVALID_CAPACITY);
+        }
+
+        LocalDateTime schedule = blendingRequest.getSchedule();
+        if(schedule != null) {
+            if(schedule.isBefore(LocalDateTime.now())) {
+                throw new BaseException(BaseErrorCode.BLENDING_INVALID_SCHEDULE_TIME);
+            }
+        }
+
+
+        List<Keyword> newKeywords = keywordRepository.findAllByNameIn(blendingRequest.getKeywords());
+        blending.updateKeyword(newKeywords);
+
+        blending.update(
+                blendingRequest.getTitle(),
+                blendingRequest.getContent(),
+                blendingRequest.getCapacity(),
+                blendingRequest.getRegion(),
+                blendingRequest.getPlace(),
+                blendingRequest.getOpenChattingUrl(),
+                blendingRequest.getSchedule()
+        );
     }
 
 

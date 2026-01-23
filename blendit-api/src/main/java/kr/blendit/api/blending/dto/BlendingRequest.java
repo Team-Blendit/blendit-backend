@@ -15,7 +15,7 @@ public class BlendingRequest {
     private String title;
     private String content;
     private List<String> keywords;
-    private int capacity;
+    private Integer capacity;
     private String region;
     private String place;
     private String openChattingUrl;
