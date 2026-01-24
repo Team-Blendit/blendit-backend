@@ -15,5 +15,5 @@ public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long
      *
      * @apiNote BlendingService.validateHostPermission() 권한 검증 용도
      */
-    public Optional<BlendingUser> findByBlendingAndGrade(Blending blending, BlendingGrade blendingGrade);
+    public Optional<BlendingUser> findByBlendingAndBlendingGrade(Blending blending, BlendingGrade blendingGrade);
 }

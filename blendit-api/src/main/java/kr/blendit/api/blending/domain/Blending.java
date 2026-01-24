@@ -30,7 +30,7 @@ public class Blending extends BaseEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
-    @OneToMany(mappedBy = "blending", orphanRemoval = true)
+    @OneToMany(mappedBy = "blending", orphanRemoval = true, cascade = CascadeType.PERSIST)
     private List<BlendingKeyword> keywords = new ArrayList<>();
 
     @Column(nullable = false)
@@ -164,6 +164,7 @@ public class Blending extends BaseEntity {
      */
     public void updateStatus(BlendingStatus blendingStatus) {
 
+        // Todo: 호스트 + 승인된 사람이 정원 이상일 경우에만 예외 발생 (현재는 대기, 거절도 포함됨)
         if(blendingStatus == BlendingStatus.RECRUITING && this.participants.size() >= this.capacity) {
             throw new BaseException(BaseErrorCode.BLENDING_CANNOT_RECRUIT_FULL);
         }

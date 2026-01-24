@@ -20,7 +20,6 @@ import kr.blendit.common.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -41,7 +40,6 @@ public class BlendingService {
      *
      * @apiNote 모임장은 참여인원에 HOST로 추가됩니다.
      */
-    @Transactional
     public void create(String userUuid, BlendingCreateRequest blendingCreateRequest) {
 
         Blending blending = Blending.create(
@@ -83,7 +81,6 @@ public class BlendingService {
     /**
      * 블렌딩 논리 삭제
      */
-    @Transactional
     public void delete(String userUuid, String blendingUuid) {
 
         Blending blending = blendingRepository.findByUuid(blendingUuid)
@@ -98,7 +95,6 @@ public class BlendingService {
     /**
      * 블렌딩 정보 수정
      */
-    @Transactional
     public void update(String userUuid, String blendingUuid, BlendingUpdateRequest blendingUpdateRequest) {
 
         Blending blending = blendingRepository.findByUuid(blendingUuid)
@@ -135,7 +131,6 @@ public class BlendingService {
      *          보통 상태 변경은 수정 창에서 함께 하는 것보다는
      *          블렌딩 목록 화면에서 토글로 수정할 수 있게 하는게 좋지 않을까해서 정보 수정과 API 분리했습니다.
      */
-    @Transactional
     public void updateStatus(String userUuid, String blendingUuid, BlendingStatus blendingStatus) {
 
         Blending blending = blendingRepository.findByUuid(blendingUuid)
@@ -152,7 +147,6 @@ public class BlendingService {
      *
      * @return BlendingDetailResponse 참여자를 포함한 블렌딩 관련 모든 데이터
      */
-    @Transactional(readOnly = true)
     public BlendingDetailResponse find(String blendingUuid) {
 
         Blending blending = blendingRepository.findByUuidWithParticipants(blendingUuid)
@@ -168,7 +162,7 @@ public class BlendingService {
      * 블렌딩 Host 검증 내부 메서드
      */
     private void validateHostPermission(String userUuid, Blending blending) {
-        BlendingUser blendingHost = blendingUserRepository.findByBlendingAndGrade(blending, BlendingGrade.HOST)
+        BlendingUser blendingHost = blendingUserRepository.findByBlendingAndBlendingGrade(blending, BlendingGrade.HOST)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.USER_NOT_FOUND));
 
         if(!userUuid.equals(blendingHost.getUser().getUuid())) {

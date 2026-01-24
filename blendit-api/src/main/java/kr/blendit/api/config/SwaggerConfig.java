@@ -64,6 +64,15 @@ public class SwaggerConfig {
     }
 
     @Bean
+    public GroupedOpenApi blendingGroup() {
+        return GroupedOpenApi.builder()
+                .group("4. 블렌딩")
+                .displayName("블렌딩 (Blending)")
+                .pathsToMatch("/api/blendit/blending/**")
+                .build();
+    }
+
+    @Bean
     public GroupedOpenApi allGroup() {
         return GroupedOpenApi.builder()
                 .group("0. 전체")
