@@ -2,6 +2,7 @@ package kr.blendit.api.blending.domain;
 
 import jakarta.persistence.*;
 import kr.blendit.api.blending.constant.BlendingStatus;
+import kr.blendit.api.common.domain.Keyword;
 import kr.blendit.common.entity.BaseEntity;
 import lombok.*;
 
