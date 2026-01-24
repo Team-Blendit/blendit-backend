@@ -1,9 +1,10 @@
-package kr.blendit.api.blending.dto;
+package kr.blendit.api.blending.dto.response;
 
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingKeyword;
 import kr.blendit.api.blending.domain.BlendingUser;
+import kr.blendit.api.blending.dto.UserTmp;
 import lombok.*;
 
 import java.time.LocalDateTime;

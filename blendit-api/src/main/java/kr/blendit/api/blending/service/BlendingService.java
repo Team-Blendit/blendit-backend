@@ -6,8 +6,9 @@ import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.blending.domain.Keyword;
-import kr.blendit.api.blending.dto.BlendingRequest;
-import kr.blendit.api.blending.dto.BlendingResponse;
+import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
+import kr.blendit.api.blending.dto.response.BlendingResponse;
+import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
 import kr.blendit.api.blending.repository.BlendingBookmarkRepository;
 import kr.blendit.api.blending.repository.BlendingRepository;
 import kr.blendit.api.blending.repository.BlendingUserRepository;
@@ -34,19 +35,19 @@ public class BlendingService {
     private final BlendingBookmarkRepository blendingBookmarkRepository;
 
     @Transactional
-    public void create(String userUuid, BlendingRequest blendingRequest) {
+    public void create(String userUuid, BlendingCreateRequest blendingCreateRequest) {
 
         Blending blending = Blending.create(
-                blendingRequest.getTitle(),
-                blendingRequest.getContent(),
-                blendingRequest.getCapacity(),
-                blendingRequest.getRegion(),
-                blendingRequest.getPlace(),
-                blendingRequest.getOpenChattingUrl(),
-                blendingRequest.getSchedule()
+                blendingCreateRequest.getTitle(),
+                blendingCreateRequest.getContent(),
+                blendingCreateRequest.getCapacity(),
+                blendingCreateRequest.getRegion(),
+                blendingCreateRequest.getPlace(),
+                blendingCreateRequest.getOpenChattingUrl(),
+                blendingCreateRequest.getSchedule()
         );
 
-        List<Keyword> keywords = keywordRepository.findAllByNameIn(blendingRequest.getKeywords());
+        List<Keyword> keywords = keywordRepository.findAllByNameIn(blendingCreateRequest.getKeywords());
         for(Keyword keyword : keywords) {
             blending.addKeyword(keyword);
         }
@@ -85,18 +86,18 @@ public class BlendingService {
 
 
     @Transactional
-    public void update(String userUuid, String blendingUuid, BlendingRequest blendingRequest) {
+    public void update(String userUuid, String blendingUuid, BlendingUpdateRequest blendingUpdateRequest) {
 
         Blending blending = blendingRepository.findByUuid(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
         validateHostPermission(userUuid, blending);
 
-        if(blending.getParticipants().size() > blendingRequest.getCapacity()) {
+        if(blending.getParticipants().size() > blendingUpdateRequest.getCapacity()) {
             throw new BaseException(BaseErrorCode.BLENDING_INVALID_CAPACITY);
         }
 
-        LocalDateTime schedule = blendingRequest.getSchedule();
+        LocalDateTime schedule = blendingUpdateRequest.getSchedule();
         if(schedule != null) {
             if(schedule.isBefore(LocalDateTime.now())) {
                 throw new BaseException(BaseErrorCode.BLENDING_INVALID_SCHEDULE_TIME);
@@ -104,17 +105,17 @@ public class BlendingService {
         }
 
 
-        List<Keyword> newKeywords = keywordRepository.findAllByNameIn(blendingRequest.getKeywords());
+        List<Keyword> newKeywords = keywordRepository.findAllByNameIn(blendingUpdateRequest.getKeywords());
         blending.updateKeyword(newKeywords);
 
         blending.update(
-                blendingRequest.getTitle(),
-                blendingRequest.getContent(),
-                blendingRequest.getCapacity(),
-                blendingRequest.getRegion(),
-                blendingRequest.getPlace(),
-                blendingRequest.getOpenChattingUrl(),
-                blendingRequest.getSchedule()
+                blendingUpdateRequest.getTitle(),
+                blendingUpdateRequest.getContent(),
+                blendingUpdateRequest.getCapacity(),
+                blendingUpdateRequest.getRegion(),
+                blendingUpdateRequest.getPlace(),
+                blendingUpdateRequest.getOpenChattingUrl(),
+                blendingUpdateRequest.getSchedule()
         );
     }
 

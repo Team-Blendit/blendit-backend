@@ -1,4 +1,4 @@
-package kr.blendit.api.blending.dto;
+package kr.blendit.api.blending.dto.request;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BlendingRequest {
+public class BlendingCreateRequest {
 
     private String title;
     private String content;

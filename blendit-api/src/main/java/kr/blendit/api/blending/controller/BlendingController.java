@@ -1,47 +1,57 @@
 package kr.blendit.api.blending.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.blendit.api.blending.constant.BlendingStatus;
-import kr.blendit.api.blending.dto.BlendingRequest;
-import kr.blendit.api.blending.dto.BlendingResponse;
+import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
+import kr.blendit.api.blending.dto.response.BlendingResponse;
+import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
 import kr.blendit.api.blending.facade.BlendingFacade;
 import kr.blendit.api.blending.service.BlendingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Blending API")
 @RestController
-@RequestMapping("v1")
+@RequestMapping("/api/blendit/blending")
 @RequiredArgsConstructor
 public class BlendingController {
 
     private final BlendingService blendingService;
     private final BlendingFacade blendingFacade;
 
-    @PostMapping("/blending")
-    public void create(@AuthenticationPrincipal String userUuid, @RequestBody BlendingRequest blendingRequest) {
+    @Operation(summary = "블렌딩 생성 API", security = @SecurityRequirement(name = "bearerAuth"))
+    @PostMapping
+    public void create(@AuthenticationPrincipal String userUuid, @RequestBody BlendingCreateRequest blendingCreateRequest) {
 
-        blendingService.create(userUuid, blendingRequest);
+        blendingService.create(userUuid, blendingCreateRequest);
     }
 
-    @DeleteMapping("/blending/{blendingUuid}")
+    @Operation(summary = "블렌딩 논리 삭제 API", security = @SecurityRequirement(name = "bearerAuth"))
+    @DeleteMapping("/{blendingUuid}")
     public void delete(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid) {
 
         blendingService.delete(userUuid, blendingUuid);
     }
 
-    @PatchMapping("/blending/{blendingUuid}")
-    public void update(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid, @RequestBody BlendingRequest blendingRequest) {
+    @Operation(summary = "블렌딩 정보 수정 API", security = @SecurityRequirement(name = "bearerAuth"))
+    @PatchMapping("/{blendingUuid}")
+    public void update(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid, @RequestBody BlendingUpdateRequest blendingUpdateRequest) {
 
-        blendingService.update(userUuid, blendingUuid, blendingRequest);
+        blendingService.update(userUuid, blendingUuid, blendingUpdateRequest);
     }
 
-    @PatchMapping("/blending/{blendingUuid}/status")
+    @Operation(summary = "블렌딩 상태 변경 API", security = @SecurityRequirement(name = "bearerAuth"))
+    @PatchMapping("/{blendingUuid}/status")
     public void updateStatus(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid, @RequestParam BlendingStatus blendingStatus) {
 
         blendingService.updateStatus(userUuid, blendingUuid, blendingStatus);
     }
 
-    @GetMapping("/blending/{blendingUuid}")
+    @Operation(summary = "블렌딩 상세 조회 API")
+    @GetMapping("/{blendingUuid}")
     public BlendingResponse find(@PathVariable String blendingUuid) {
 
         return blendingService.find(blendingUuid);
