@@ -32,11 +32,18 @@ public enum BaseErrorCode implements ErrorCode {
     // 사용자
     USER_NOT_FOUND("사용자를 찾을 수 없습니다."),
 
+    // OAuth
+    OAUTH_TOKEN_REQUEST_FAILED("OAuth 토큰 요청에 실패했습니다."),
+    OAUTH_INVALID_ID_TOKEN("유효하지 않은 ID 토큰입니다."),
+    OAUTH_ID_TOKEN_EXPIRED("만료된 ID 토큰입니다."),
+    OAUTH_INVALID_ISSUER("ID 토큰 발급자가 일치하지 않습니다."),
+    OAUTH_INVALID_AUDIENCE("ID 토큰 대상이 일치하지 않습니다."),
+    OAUTH_JWKS_FETCH_FAILED("JWKS 공개키 조회에 실패했습니다."),
+
     // 키워드
     KEYWORD_NOT_FOUND("키워드를 찾을 수 없습니다."),
     KEYWORD_IS_EMPTY("키워드 입력이 필요합니다."),
     KEYWORD_LIMIT_EXCEEDED("키워드는 최대 3개까지 입력 가능합니다."),
-
 
     // 블렌딩
     BLENDING_NOT_FOUND("블렌딩을 찾을 수 없습니다."),

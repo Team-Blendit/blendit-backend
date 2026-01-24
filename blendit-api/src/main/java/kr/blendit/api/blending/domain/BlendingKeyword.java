@@ -1,6 +1,7 @@
 package kr.blendit.api.blending.domain;
 
 import jakarta.persistence.*;
+import kr.blendit.api.common.domain.Keyword;
 import lombok.*;
 
 @Entity

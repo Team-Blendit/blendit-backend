@@ -1,10 +1,11 @@
 package kr.blendit.api.blending.domain;
 
 import jakarta.persistence.*;
+import kr.blendit.api.blending.constant.BlendingGrade;
 import kr.blendit.api.blending.constant.BlendingStatus;
-import kr.blendit.api.blending.constant.Grade;
 import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.user.domain.User;
+import kr.blendit.api.common.domain.Keyword;
 import kr.blendit.common.entity.BaseEntity;
 import kr.blendit.common.exception.BaseErrorCode;
 import kr.blendit.common.exception.BaseException;
@@ -100,11 +101,11 @@ public class Blending extends BaseEntity {
     /**
      * 참여자 추가
      *
-     * @param grade 참여자 권한
+     * @param blendingGrade 참여자 권한
      * @param joinStatus 참여 상태(승인, 거절 등)
      */
-    public BlendingUser addParticipant(User user, Grade grade, String message, JoinStatus joinStatus) {
-        BlendingUser blendingUser = BlendingUser.create(user, this, grade, message, joinStatus);
+    public BlendingUser addParticipant(User user, BlendingGrade blendingGrade, String message, JoinStatus joinStatus) {
+        BlendingUser blendingUser = BlendingUser.create(user, this, blendingGrade, message, joinStatus);
         this.participants.add(blendingUser);
         return blendingUser;
     }

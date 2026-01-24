@@ -1,4 +1,4 @@
-package kr.blendit.api.blending.domain;
+package kr.blendit.api.common.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

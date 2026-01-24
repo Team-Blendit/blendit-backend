@@ -1,11 +1,10 @@
 package kr.blendit.api.blending.service;
 
+import kr.blendit.api.blending.constant.BlendingGrade;
 import kr.blendit.api.blending.constant.BlendingStatus;
-import kr.blendit.api.blending.constant.Grade;
 import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingUser;
-import kr.blendit.api.blending.domain.Keyword;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
 import kr.blendit.api.blending.dto.response.BlendingResponse;
 import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
@@ -13,6 +12,7 @@ import kr.blendit.api.blending.repository.BlendingBookmarkRepository;
 import kr.blendit.api.blending.repository.BlendingRepository;
 import kr.blendit.api.blending.repository.BlendingUserRepository;
 import kr.blendit.api.blending.repository.KeywordRepository;
+import kr.blendit.api.common.domain.Keyword;
 import kr.blendit.api.user.domain.User;
 import kr.blendit.api.user.repository.UserRepository;
 import kr.blendit.common.exception.BaseErrorCode;
@@ -70,7 +70,7 @@ public class BlendingService {
 
         BlendingUser blendingUser = blending.addParticipant(
                 user,
-                Grade.HOST,
+                BlendingGrade.HOST,
                 null,
                 JoinStatus.HOST
         );
@@ -168,7 +168,7 @@ public class BlendingService {
      * 블렌딩 Host 검증 내부 메서드
      */
     private void validateHostPermission(String userUuid, Blending blending) {
-        BlendingUser blendingHost = blendingUserRepository.findByBlendingAndGrade(blending, Grade.HOST)
+        BlendingUser blendingHost = blendingUserRepository.findByBlendingAndGrade(blending, BlendingGrade.HOST)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.USER_NOT_FOUND));
 
         if(!userUuid.equals(blendingHost.getUser().getUuid())) {

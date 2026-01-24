@@ -18,7 +18,7 @@ public class BlendingResponse {
 
     private Long id;
     private String uuid;
-    private List<UserTmp> participants;
+    private List<UserTmp> participants; // Todo: UserTmp에 BlendingGrade 추가
     private String title;
     private String content;
     private List<String> keywords;
@@ -46,10 +46,6 @@ public class BlendingResponse {
                 .schedule(blending.getSchedule())
                 .bookmarkCount(bookmarkCount)
                 .build();
-    }
-
-    private static Integer extractBookmarkCount(Blending blending) {
-
     }
 
     private static List<String> extractKeywords(List<BlendingKeyword> blendingKeywords) {

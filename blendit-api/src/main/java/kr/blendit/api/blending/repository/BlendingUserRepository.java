@@ -1,6 +1,6 @@
 package kr.blendit.api.blending.repository;
 
-import kr.blendit.api.blending.constant.Grade;
+import kr.blendit.api.blending.constant.BlendingGrade;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingUser;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,5 +15,5 @@ public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long
      *
      * @apiNote BlendingService.validateHostPermission() 권한 검증 용도
      */
-    public Optional<BlendingUser> findByBlendingAndGrade(Blending blending, Grade grade);
+    public Optional<BlendingUser> findByBlendingAndGrade(Blending blending, BlendingGrade blendingGrade);
 }
