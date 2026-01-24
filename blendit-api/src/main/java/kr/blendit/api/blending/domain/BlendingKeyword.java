@@ -2,6 +2,8 @@ package kr.blendit.api.blending.domain;
 
 import jakarta.persistence.*;
 import kr.blendit.api.common.domain.Keyword;
+import kr.blendit.common.exception.BaseErrorCode;
+import kr.blendit.common.exception.BaseException;
 import lombok.*;
 
 @Entity
@@ -45,7 +47,10 @@ public class BlendingKeyword {
      * 블렌딩 키워드 생성
      */
     public static BlendingKeyword create(Blending blending, Keyword keyword) {
-        // Todo: Blending, Keyword null 체크
+
+        if (blending == null || keyword == null) {
+            throw new BaseException(BaseErrorCode.INVALID_PARAMETER);
+        }
 
         return BlendingKeyword.builder()
                 .blending(blending)

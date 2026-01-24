@@ -5,6 +5,8 @@ import kr.blendit.api.blending.constant.BlendingGrade;
 import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.user.domain.User;
 import kr.blendit.common.entity.BaseTimeEntity;
+import kr.blendit.common.exception.BaseErrorCode;
+import kr.blendit.common.exception.BaseException;
 import lombok.*;
 
 @Entity
@@ -33,14 +35,14 @@ public class BlendingUser extends BaseTimeEntity {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Blending blending;
 
-    @Column(name = "blending_grade", length = 20)
+    @Column(name = "blending_grade", length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
     private BlendingGrade blendingGrade;
 
     @Column(name = "message")
     private String message;
 
-    @Column(name = "join_status", length = 20)
+    @Column(name = "join_status", length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
     private JoinStatus joinStatus;
 
@@ -62,7 +64,10 @@ public class BlendingUser extends BaseTimeEntity {
      * 블렌딩 유저 생성
      */
     public static BlendingUser create(User user, Blending blending, BlendingGrade blendingGrade, String message, JoinStatus joinStatus) {
-        // Todo: null 체크
+
+        if (user == null || blending == null || blendingGrade == null || joinStatus == null) {
+            throw new BaseException(BaseErrorCode.INVALID_PARAMETER);
+        }
 
         return BlendingUser.builder()
                 .user(user)
