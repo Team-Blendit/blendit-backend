@@ -6,5 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BlendingBookmarkRepository extends JpaRepository<BlendingBookmark, Long> {
 
+    /**
+     * 해당 블렌딩의 북마크 수 조회
+     */
     long countByBlending(Blending blending);
 }

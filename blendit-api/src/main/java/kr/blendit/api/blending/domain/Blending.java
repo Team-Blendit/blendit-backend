@@ -39,7 +39,7 @@ public class Blending extends BaseEntity {
     private String region;
 
     @Column(nullable = false)
-    private String place;
+    private String place; // Todo: 구체적인 장소는 제외된 것인지 확인 필요
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
@@ -48,9 +48,16 @@ public class Blending extends BaseEntity {
     @Column
     private String openChattingUrl;
 
-    @Column
+    @Column(nullable = false)
     private LocalDateTime schedule;
 
+    // Todo: 자동 승인 여부 필드 필요
+
+    // Todo: 직군 필드 필요 (User와 함께 사용해야한다. keyword 처럼 테이블로 분리하고 중간 테이블 연결 필요)
+
+    /**
+     * 블렌딩 생성자
+     */
     @Builder(access = AccessLevel.PRIVATE)
     public Blending(String title, String content, int capacity, String region, String place, String openChattingUrl, LocalDateTime schedule) {
         this.title = title;
@@ -63,18 +70,20 @@ public class Blending extends BaseEntity {
         this.schedule = schedule;
     }
 
+
+    /**
+     * 블렌딩 생성
+     *
+     * @apiNote 최소 인원 2명 / 일정은 과거 불가
+     */
     public static Blending create(String title, String content, Integer capacity, String region, String place, String openChattingUrl, LocalDateTime schedule) {
 
         if(capacity < 2) {
             throw new BaseException(BaseErrorCode.BLENDING_CAPACITY_BELOW_MIN);
         }
-
-        if(schedule != null) {
-            if(schedule.isBefore(LocalDateTime.now())) {
-                throw new BaseException(BaseErrorCode.BLENDING_INVALID_SCHEDULE_TIME);
-            }
+        if(schedule.isBefore(LocalDateTime.now())) {
+            throw new BaseException(BaseErrorCode.BLENDING_INVALID_SCHEDULE_TIME);
         }
-
 
         return Blending.builder()
                 .title(title)
@@ -87,18 +96,35 @@ public class Blending extends BaseEntity {
                 .build();
     }
 
+
+    /**
+     * 참여자 추가
+     *
+     * @param grade 참여자 권한
+     * @param joinStatus 참여 상태(승인, 거절 등)
+     */
     public BlendingUser addParticipant(User user, Grade grade, String message, JoinStatus joinStatus) {
         BlendingUser blendingUser = BlendingUser.create(user, this, grade, message, joinStatus);
         this.participants.add(blendingUser);
         return blendingUser;
     }
 
+
+    /**
+     * 키워드 추가
+     */
     public void addKeyword(Keyword keyword) {
         BlendingKeyword blendingKeyword = BlendingKeyword.create(this, keyword);
 
         this.keywords.add(blendingKeyword);
     }
 
+
+    /**
+     * 키워드 변경
+     *
+     * @apiNote addKeyword() 호출
+     */
     public void updateKeyword(List<Keyword> keywords) {
         this.keywords.clear();
 
@@ -107,10 +133,18 @@ public class Blending extends BaseEntity {
         }
     }
 
+
+    /**
+     * 블렌딩 논리 삭제
+     */
     public void delete() {
         this.setUseFlag(false);
     }
 
+
+    /**
+     * 블렌딩 정보 수정
+     */
     public void update(String title, String content, Integer capacity, String region, String place, String openChattingUrl, LocalDateTime schedule) {
         if(title != null) this.title = title;
         if(content != null) this.content = content;
@@ -118,9 +152,15 @@ public class Blending extends BaseEntity {
         if(region != null) this.region = region;
         if(place != null) this.place = place;
         this.openChattingUrl = openChattingUrl;
-        this.schedule = schedule;
+        if(schedule != null) this.schedule = schedule;
     }
 
+
+    /**
+     * 블렌딩 상태 변경
+     *
+     * @apiNote 인원이 가득찬 경우엔 모집 중으로 변경 불가
+     */
     public void updateStatus(BlendingStatus blendingStatus) {
 
         if(blendingStatus == BlendingStatus.RECRUITING && this.participants.size() >= this.capacity) {

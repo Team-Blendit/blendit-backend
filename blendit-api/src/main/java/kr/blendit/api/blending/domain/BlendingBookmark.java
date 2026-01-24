@@ -30,12 +30,20 @@ public class BlendingBookmark {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Blending blending;
 
+
+    /**
+     * 블렌딩 북마크 생성자
+     */
     @Builder(access = AccessLevel.PRIVATE)
     private BlendingBookmark(User user, Blending blending) {
         this.user = user;
         this.blending = blending;
     }
 
+
+    /**
+     * 블렌딩 북마크 생성
+     */
     public static BlendingBookmark create(User user, Blending blending) {
         // Todo: null 체크
 

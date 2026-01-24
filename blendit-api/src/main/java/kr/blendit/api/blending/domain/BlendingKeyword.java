@@ -30,12 +30,19 @@ public class BlendingKeyword {
     private Keyword keyword;
 
 
+    /**
+     * 블렌딩 키워드 생성자
+     */
     @Builder(access = AccessLevel.PRIVATE)
     private BlendingKeyword(Blending blending, Keyword keyword) {
         this.blending = blending;
         this.keyword = keyword;
     }
 
+
+    /**
+     * 블렌딩 키워드 생성
+     */
     public static BlendingKeyword create(Blending blending, Keyword keyword) {
         // Todo: Blending, Keyword null 체크
 

@@ -44,6 +44,10 @@ public class BlendingUser extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private JoinStatus joinStatus;
 
+
+    /**
+     * 블렌딩 유저 생성자
+     */
     @Builder(access = AccessLevel.PRIVATE)
     private BlendingUser(User user, Blending blending, Grade grade, String message, JoinStatus joinStatus) {
         this.user = user;
@@ -53,6 +57,10 @@ public class BlendingUser extends BaseTimeEntity {
         this.joinStatus = joinStatus;
     }
 
+
+    /**
+     * 블렌딩 유저 생성
+     */
     public static BlendingUser create(User user, Blending blending, Grade grade, String message, JoinStatus joinStatus) {
         // Todo: null 체크
 

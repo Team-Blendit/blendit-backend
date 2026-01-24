@@ -18,6 +18,7 @@ import kr.blendit.api.user.repository.UserRepository;
 import kr.blendit.common.exception.BaseErrorCode;
 import kr.blendit.common.exception.BaseException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +27,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class BlendingService {
 
     private final BlendingRepository blendingRepository;
@@ -34,6 +36,11 @@ public class BlendingService {
     private final KeywordRepository keywordRepository;
     private final BlendingBookmarkRepository blendingBookmarkRepository;
 
+    /**
+     * 블렌딩 생성
+     *
+     * @apiNote 모임장은 참여인원에 HOST로 추가됩니다.
+     */
     @Transactional
     public void create(String userUuid, BlendingCreateRequest blendingCreateRequest) {
 
@@ -73,6 +80,9 @@ public class BlendingService {
     }
 
 
+    /**
+     * 블렌딩 논리 삭제
+     */
     @Transactional
     public void delete(String userUuid, String blendingUuid) {
 
@@ -85,6 +95,9 @@ public class BlendingService {
     }
 
 
+    /**
+     * 블렌딩 정보 수정
+     */
     @Transactional
     public void update(String userUuid, String blendingUuid, BlendingUpdateRequest blendingUpdateRequest) {
 
@@ -96,14 +109,9 @@ public class BlendingService {
         if(blending.getParticipants().size() > blendingUpdateRequest.getCapacity()) {
             throw new BaseException(BaseErrorCode.BLENDING_INVALID_CAPACITY);
         }
-
-        LocalDateTime schedule = blendingUpdateRequest.getSchedule();
-        if(schedule != null) {
-            if(schedule.isBefore(LocalDateTime.now())) {
-                throw new BaseException(BaseErrorCode.BLENDING_INVALID_SCHEDULE_TIME);
-            }
+        if(blendingUpdateRequest.getSchedule().isBefore(LocalDateTime.now())) {
+            throw new BaseException(BaseErrorCode.BLENDING_INVALID_SCHEDULE_TIME);
         }
-
 
         List<Keyword> newKeywords = keywordRepository.findAllByNameIn(blendingUpdateRequest.getKeywords());
         blending.updateKeyword(newKeywords);
@@ -119,6 +127,14 @@ public class BlendingService {
         );
     }
 
+
+    /**
+     * 블렌딩 상태 변경
+     *
+     * @apiNote 아직 피그마 디자인에 상태 변경 기능이 나오지 않았습니다.
+     *          보통 상태 변경은 수정 창에서 함께 하는 것보다는
+     *          블렌딩 목록 화면에서 토글로 수정할 수 있게 하는게 좋지 않을까해서 정보 수정과 API 분리했습니다.
+     */
     @Transactional
     public void updateStatus(String userUuid, String blendingUuid, BlendingStatus blendingStatus) {
 
@@ -130,6 +146,12 @@ public class BlendingService {
         blending.updateStatus(blendingStatus);
     }
 
+
+    /**
+     * 블렌딩 상세 정보 조회
+     *
+     * @return BlendingResponse 참여자를 포함한 블렌딩 관련 모든 데이터
+     */
     @Transactional(readOnly = true)
     public BlendingResponse find(String blendingUuid) {
 
@@ -142,6 +164,9 @@ public class BlendingService {
     }
 
 
+    /**
+     * 블렌딩 Host 검증 내부 메서드
+     */
     private void validateHostPermission(String userUuid, Blending blending) {
         BlendingUser blendingHost = blendingUserRepository.findByBlendingAndGrade(blending, Grade.HOST)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.USER_NOT_FOUND));

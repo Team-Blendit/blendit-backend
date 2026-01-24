@@ -18,6 +18,9 @@ public class Keyword {
     @Column(nullable = false, length = 50, unique = true)
     private String name;
 
+    /**
+     * 키워드 생성자
+     */
     public Keyword(String name) {
         this.name = name;
     }

@@ -10,6 +10,9 @@ public interface BlendingRepository extends JpaRepository<Blending, Long> {
 
     Optional<Blending> findByUuid(String uuid);
 
+    /**
+     * 참여자까지 함께 조회
+     */
     @Query("""
             SELECT DISTINCT b
             FROM Blending b
