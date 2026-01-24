@@ -34,8 +34,6 @@ security:
   public-paths:
     - /api/blendit/auth/**
     - /api/blendit/public/**
-    - /api/blendit/blending
-    - /api/blendit/blending/**
 
 oidc:
   kakao:

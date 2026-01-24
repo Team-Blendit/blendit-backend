@@ -129,11 +129,20 @@ public class Blending extends BaseEntity {
      *
      * @apiNote addKeyword() 호출
      */
-    public void updateKeyword(List<Keyword> keywords) {
-        this.keywords.clear();
+    public void updateKeyword(List<Keyword> newKeywords) {
+        // 기존 리스트에서 새 리스트에 없는 것 삭제
+        this.keywords.removeIf(existing ->
+                !newKeywords.contains(existing.getKeyword())
+        );
 
-        for(Keyword keyword : keywords) {
-            addKeyword(keyword);
+        // 새 리스트에서 기존 리스트에 없는 것만 추가
+        for (Keyword newKeyword : newKeywords) {
+            boolean exists = this.keywords.stream()
+                    .anyMatch(existing -> existing.getKeyword().equals(newKeyword));
+
+            if (!exists) {
+                addKeyword(newKeyword);
+            }
         }
     }
 
