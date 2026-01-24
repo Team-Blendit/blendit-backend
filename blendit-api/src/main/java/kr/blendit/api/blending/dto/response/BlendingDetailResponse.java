@@ -19,6 +19,7 @@ public class BlendingDetailResponse {
     private List<BlendingParticipantResponse> blendingParticipant;
     private String title;
     private String content;
+    private String position;
     private List<String> keywords;
     private Integer capacity;
     private String region;
@@ -40,6 +41,7 @@ public class BlendingDetailResponse {
                 .blendingParticipant(BlendingParticipantResponse.from(blending.getParticipants(), isHost))
                 .title(blending.getTitle())
                 .content(blending.getContent())
+                .position(blending.getPosition().getDescription())
                 .keywords(extractKeywords(blending.getKeywords()))
                 .capacity(blending.getCapacity())
                 .region(blending.getRegion())

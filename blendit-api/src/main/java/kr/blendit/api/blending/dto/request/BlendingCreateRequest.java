@@ -1,5 +1,6 @@
 package kr.blendit.api.blending.dto.request;
 
+import kr.blendit.api.common.constant.Position;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -14,6 +15,7 @@ public class BlendingCreateRequest {
 
     private String title;
     private String content;
+    private Position position;
     private List<String> keywords;
     private Integer capacity;
     private String region;

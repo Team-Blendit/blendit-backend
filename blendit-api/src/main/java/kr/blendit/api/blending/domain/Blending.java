@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import kr.blendit.api.blending.constant.BlendingGrade;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.constant.JoinStatus;
+import kr.blendit.api.common.constant.Position;
 import kr.blendit.api.user.domain.User;
 import kr.blendit.api.common.domain.Keyword;
 import kr.blendit.common.entity.BaseEntity;
@@ -30,6 +31,10 @@ public class Blending extends BaseEntity {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Position position;
+
     @OneToMany(mappedBy = "blending", orphanRemoval = true, cascade = CascadeType.PERSIST)
     private List<BlendingKeyword> keywords = new ArrayList<>();
 
@@ -52,15 +57,15 @@ public class Blending extends BaseEntity {
     @Column(nullable = false)
     private Boolean autoApproval;
 
-    // Todo: 직군 필드 필요 (User와 함께 사용해야한다. keyword 처럼 테이블로 분리하고 중간 테이블 연결 필요)
 
     /**
      * 블렌딩 생성자
      */
     @Builder(access = AccessLevel.PRIVATE)
-    public Blending(String title, String content, int capacity, String region, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
+    public Blending(String title, String content, Position position, int capacity, String region, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
         this.title = title;
         this.content = content;
+        this.position = position;
         this.capacity = capacity;
         this.region = region;
         this.status = BlendingStatus.RECRUITING;
@@ -75,7 +80,7 @@ public class Blending extends BaseEntity {
      *
      * @apiNote 최소 인원 2명 / 일정은 과거 불가
      */
-    public static Blending create(String title, String content, Integer capacity, String region, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
+    public static Blending create(String title, String content, Position position, Integer capacity, String region, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
 
         if(capacity < 2) {
             throw new BaseException(BaseErrorCode.BLENDING_CAPACITY_BELOW_MIN);
@@ -87,6 +92,7 @@ public class Blending extends BaseEntity {
         return Blending.builder()
                 .title(title)
                 .content(content)
+                .position(position)
                 .capacity(capacity)
                 .region(region)
                 .openChattingUrl(openChattingUrl)
@@ -153,9 +159,10 @@ public class Blending extends BaseEntity {
     /**
      * 블렌딩 정보 수정
      */
-    public void update(String title, String content, Integer capacity, String region, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
+    public void update(String title, String content, Position position, Integer capacity, String region, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
         if(title != null) this.title = title;
         if(content != null) this.content = content;
+        if(position != null) this.position = position;
         if(capacity != null) this.capacity = capacity;
         if(region != null) this.region = region;
         this.openChattingUrl = openChattingUrl;

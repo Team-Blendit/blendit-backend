@@ -48,6 +48,7 @@ public class BlendingService {
         Blending blending = Blending.create(
                 blendingCreateRequest.getTitle(),
                 blendingCreateRequest.getContent(),
+                blendingCreateRequest.getPosition(),
                 blendingCreateRequest.getCapacity(),
                 blendingCreateRequest.getRegion(),
                 blendingCreateRequest.getOpenChattingUrl(),
@@ -117,6 +118,7 @@ public class BlendingService {
         blending.update(
                 blendingUpdateRequest.getTitle(),
                 blendingUpdateRequest.getContent(),
+                blendingUpdateRequest.getPosition(),
                 blendingUpdateRequest.getCapacity(),
                 blendingUpdateRequest.getRegion(),
                 blendingUpdateRequest.getOpenChattingUrl(),
