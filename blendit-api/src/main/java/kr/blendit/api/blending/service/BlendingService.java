@@ -133,12 +133,12 @@ public class BlendingService {
      */
     public void updateStatus(String userUuid, String blendingUuid, BlendingStatus blendingStatus) {
 
-        Blending blending = blendingRepository.findByUuid(blendingUuid)
+        Blending blending = blendingRepository.findByUuidWithParticipants(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
         validateHostPermission(userUuid, blending);
 
-        blending.updateStatus(blendingStatus);
+        blending.updateStatus(blending, blendingStatus);
     }
 
 
@@ -149,7 +149,7 @@ public class BlendingService {
      */
     public BlendingDetailResponse find(String blendingUuid) {
 
-        Blending blending = blendingRepository.findByUuidWithParticipants(blendingUuid)
+        Blending blending = blendingRepository.findByUuidWithUsers(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
         long bookmarkCount = blendingBookmarkRepository.countByBlending(blending);

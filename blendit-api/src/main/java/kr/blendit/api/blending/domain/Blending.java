@@ -160,13 +160,24 @@ public class Blending extends BaseEntity {
     /**
      * 블렌딩 상태 변경
      *
+     * @param blendingStatus 변경하려는 상태
      * @apiNote 인원이 가득찬 경우엔 모집 중으로 변경 불가
      */
-    public void updateStatus(BlendingStatus blendingStatus) {
+    public void updateStatus(Blending blending, BlendingStatus blendingStatus) {
 
-        // Todo: 호스트 + 승인된 사람이 정원 이상일 경우에만 예외 발생 (현재는 대기, 거절도 포함됨)
-        if(blendingStatus == BlendingStatus.RECRUITING && this.participants.size() >= this.capacity) {
-            throw new BaseException(BaseErrorCode.BLENDING_CANNOT_RECRUIT_FULL);
+        int participantCount = 0;
+
+        if(blendingStatus == BlendingStatus.RECRUITING) {
+            for(BlendingUser blendingUser : blending.getParticipants()) {
+                JoinStatus joinStatus = blendingUser.getJoinStatus();
+
+                if(joinStatus.equals(JoinStatus.HOST) || joinStatus.equals(JoinStatus.APPROVED)) participantCount++;
+            }
+
+            // 호스트 + 승인된 사람이 정원 이상이라면 예외 발생
+            if(participantCount >= this.capacity) {
+                throw new BaseException(BaseErrorCode.BLENDING_CANNOT_RECRUIT_FULL);
+            }
         }
 
         this.status = blendingStatus;
