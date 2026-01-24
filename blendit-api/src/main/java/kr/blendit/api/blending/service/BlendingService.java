@@ -50,7 +50,6 @@ public class BlendingService {
                 blendingCreateRequest.getContent(),
                 blendingCreateRequest.getCapacity(),
                 blendingCreateRequest.getRegion(),
-                blendingCreateRequest.getPlace(),
                 blendingCreateRequest.getOpenChattingUrl(),
                 blendingCreateRequest.getSchedule(),
                 blendingCreateRequest.getAutoApproval()
@@ -120,7 +119,6 @@ public class BlendingService {
                 blendingUpdateRequest.getContent(),
                 blendingUpdateRequest.getCapacity(),
                 blendingUpdateRequest.getRegion(),
-                blendingUpdateRequest.getPlace(),
                 blendingUpdateRequest.getOpenChattingUrl(),
                 blendingUpdateRequest.getSchedule(),
                 blendingUpdateRequest.getAutoApproval()

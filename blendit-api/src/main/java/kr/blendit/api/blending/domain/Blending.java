@@ -40,9 +40,6 @@ public class Blending extends BaseEntity {
     private String region;
 
     @Column(nullable = false)
-    private String place; // Todo: 구체적인 장소는 제외된 것인지 확인 필요
-
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private BlendingStatus status;
 
@@ -61,12 +58,11 @@ public class Blending extends BaseEntity {
      * 블렌딩 생성자
      */
     @Builder(access = AccessLevel.PRIVATE)
-    public Blending(String title, String content, int capacity, String region, String place, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
+    public Blending(String title, String content, int capacity, String region, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
         this.title = title;
         this.content = content;
         this.capacity = capacity;
         this.region = region;
-        this.place = place;
         this.status = BlendingStatus.RECRUITING;
         this.openChattingUrl = openChattingUrl;
         this.schedule = schedule;
@@ -79,7 +75,7 @@ public class Blending extends BaseEntity {
      *
      * @apiNote 최소 인원 2명 / 일정은 과거 불가
      */
-    public static Blending create(String title, String content, Integer capacity, String region, String place, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
+    public static Blending create(String title, String content, Integer capacity, String region, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
 
         if(capacity < 2) {
             throw new BaseException(BaseErrorCode.BLENDING_CAPACITY_BELOW_MIN);
@@ -93,7 +89,6 @@ public class Blending extends BaseEntity {
                 .content(content)
                 .capacity(capacity)
                 .region(region)
-                .place(place)
                 .openChattingUrl(openChattingUrl)
                 .schedule(schedule)
                 .autoApproval(autoApproval)
@@ -158,12 +153,11 @@ public class Blending extends BaseEntity {
     /**
      * 블렌딩 정보 수정
      */
-    public void update(String title, String content, Integer capacity, String region, String place, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
+    public void update(String title, String content, Integer capacity, String region, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
         if(title != null) this.title = title;
         if(content != null) this.content = content;
         if(capacity != null) this.capacity = capacity;
         if(region != null) this.region = region;
-        if(place != null) this.place = place;
         this.openChattingUrl = openChattingUrl;
         if(schedule != null) this.schedule = schedule;
         if(autoApproval != null) this.autoApproval = autoApproval;

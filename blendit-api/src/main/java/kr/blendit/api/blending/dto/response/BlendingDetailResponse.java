@@ -22,7 +22,6 @@ public class BlendingDetailResponse {
     private List<String> keywords;
     private Integer capacity;
     private String region;
-    private String place;
     private BlendingStatus status;
     private String openChattingUrl;
     private LocalDateTime schedule;
@@ -44,7 +43,6 @@ public class BlendingDetailResponse {
                 .keywords(extractKeywords(blending.getKeywords()))
                 .capacity(blending.getCapacity())
                 .region(blending.getRegion())
-                .place(blending.getPlace())
                 .status(blending.getStatus())
                 .openChattingUrl(blending.getOpenChattingUrl())
                 .schedule(blending.getSchedule())
