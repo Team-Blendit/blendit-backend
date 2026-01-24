@@ -6,7 +6,7 @@ import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
-import kr.blendit.api.blending.dto.response.BlendingResponse;
+import kr.blendit.api.blending.dto.response.BlendingDetailResponse;
 import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
 import kr.blendit.api.blending.repository.BlendingBookmarkRepository;
 import kr.blendit.api.blending.repository.BlendingRepository;
@@ -150,17 +150,17 @@ public class BlendingService {
     /**
      * 블렌딩 상세 정보 조회
      *
-     * @return BlendingResponse 참여자를 포함한 블렌딩 관련 모든 데이터
+     * @return BlendingDetailResponse 참여자를 포함한 블렌딩 관련 모든 데이터
      */
     @Transactional(readOnly = true)
-    public BlendingResponse find(String blendingUuid) {
+    public BlendingDetailResponse find(String blendingUuid) {
 
         Blending blending = blendingRepository.findByUuidWithParticipants(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
         long bookmarkCount = blendingBookmarkRepository.countByBlending(blending);
 
-        return BlendingResponse.from(blending, bookmarkCount);
+        return BlendingDetailResponse.from(blending, bookmarkCount);
     }
 
 

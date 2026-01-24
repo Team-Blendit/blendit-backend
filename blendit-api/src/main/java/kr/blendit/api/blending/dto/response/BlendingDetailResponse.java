@@ -3,8 +3,6 @@ package kr.blendit.api.blending.dto.response;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingKeyword;
-import kr.blendit.api.blending.domain.BlendingUser;
-import kr.blendit.api.blending.dto.UserTmp;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -14,11 +12,11 @@ import java.util.List;
 @Getter
 @Builder(access = AccessLevel.PRIVATE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class BlendingResponse {
+public class BlendingDetailResponse {
 
     private Long id;
     private String uuid;
-    private List<UserTmp> participants; // Todo: UserTmp에 BlendingGrade 추가
+    private List<BlendingParticipantResponse> blendingParticipant;
     private String title;
     private String content;
     private List<String> keywords;
@@ -30,11 +28,11 @@ public class BlendingResponse {
     private LocalDateTime schedule;
     private Long bookmarkCount;
 
-    public static BlendingResponse from(Blending blending, long bookmarkCount) {
-        return BlendingResponse.builder()
+    public static BlendingDetailResponse from(Blending blending, long bookmarkCount) {
+        return BlendingDetailResponse.builder()
                 .id(blending.getId())
                 .uuid(blending.getUuid())
-                .participants(extractParticipants(blending.getParticipants()))
+                .blendingParticipant(BlendingParticipantResponse.from(blending.getParticipants()))
                 .title(blending.getTitle())
                 .content(blending.getContent())
                 .keywords(extractKeywords(blending.getKeywords()))
@@ -57,14 +55,4 @@ public class BlendingResponse {
         return strKeywords;
     }
 
-    private static List<UserTmp> extractParticipants(List<BlendingUser> blendingUsers) {
-        List<UserTmp> participants = new ArrayList<>();
-
-        for(BlendingUser blendingUser : blendingUsers) {
-            UserTmp userTmp = new UserTmp();
-            userTmp.setUuid(blendingUser.getUser().getUuid());
-            participants.add(userTmp);
-        }
-        return participants;
-    }
 }

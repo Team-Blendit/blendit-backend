@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
-import kr.blendit.api.blending.dto.response.BlendingResponse;
+import kr.blendit.api.blending.dto.response.BlendingDetailResponse;
 import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
 import kr.blendit.api.blending.facade.BlendingFacade;
 import kr.blendit.api.blending.service.BlendingService;
@@ -50,9 +50,9 @@ public class BlendingController {
         blendingService.updateStatus(userUuid, blendingUuid, blendingStatus);
     }
 
-    @Operation(summary = "블렌딩 상세 조회 API")
+    @Operation(summary = "블렌딩 상세 조회 API", description = "대기, 승인, 거절, 참여 중 상태의 모든 유저를 joinStatus 값으로 구분합니다.")
     @GetMapping("/{blendingUuid}")
-    public BlendingResponse find(@PathVariable String blendingUuid) {
+    public BlendingDetailResponse find(@PathVariable String blendingUuid) {
 
         return blendingService.find(blendingUuid);
     }
