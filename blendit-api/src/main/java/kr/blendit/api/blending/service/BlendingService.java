@@ -151,14 +151,19 @@ public class BlendingService {
      *
      * @return BlendingDetailResponse 참여자를 포함한 블렌딩 관련 모든 데이터
      */
-    public BlendingDetailResponse find(String blendingUuid) {
+    public BlendingDetailResponse find(String userUuid, String blendingUuid) {
 
         Blending blending = blendingRepository.findByUuidWithUsers(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
         long bookmarkCount = blendingBookmarkRepository.countByBlending(blending);
+        boolean isBookmarked = false;
 
-        return BlendingDetailResponse.from(blending, bookmarkCount);
+        if (userUuid != null && !userUuid.equals("anonymousUser")) {
+            isBookmarked = blendingBookmarkRepository.existsByBlendingAndUser_Uuid(blending, userUuid);
+        }
+
+        return BlendingDetailResponse.from(blending, bookmarkCount, isBookmarked);
     }
 
 

@@ -50,8 +50,8 @@ public class BlendingController {
 
     @Operation(summary = "블렌딩 상세 조회 API", description = "대기, 승인, 거절, 참여 중 상태의 모든 유저를 joinStatus 값으로 구분합니다. \n 현재는 조회 중인 유저의 HOST, MEMBER 값을 구분하지 않고 모든 유저를 응답합니다.(구현예정)")
     @GetMapping("/{blendingUuid}")
-    public BlendingDetailResponse getBlendingDetail(@PathVariable String blendingUuid) {
+    public BlendingDetailResponse getBlendingDetail(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid) {
 
-        return blendingFacade.getBlendingDetail(blendingUuid);
+        return blendingFacade.getBlendingDetail(userUuid, blendingUuid);
     }
 }

@@ -28,8 +28,12 @@ public class BlendingDetailResponse {
     private LocalDateTime schedule;
     private Boolean autoApproval;
     private Long bookmarkCount;
+    private LocalDateTime createdDate;
+    private LocalDateTime lastModifiedDate;
+    private Boolean isBookmarked;
 
-    public static BlendingDetailResponse from(Blending blending, long bookmarkCount) {
+
+    public static BlendingDetailResponse from(Blending blending, long bookmarkCount, boolean isBookmarked) {
         return BlendingDetailResponse.builder()
                 .id(blending.getId())
                 .uuid(blending.getUuid())
@@ -45,6 +49,9 @@ public class BlendingDetailResponse {
                 .schedule(blending.getSchedule())
                 .bookmarkCount(bookmarkCount)
                 .autoApproval(blending.getAutoApproval())
+                .createdDate(blending.getCreatedDate())
+                .lastModifiedDate(blending.getLastModifiedDate())
+                .isBookmarked(isBookmarked)
                 .build();
     }
 

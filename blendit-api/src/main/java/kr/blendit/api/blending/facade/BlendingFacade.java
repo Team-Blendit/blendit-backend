@@ -61,7 +61,7 @@ public class BlendingFacade {
      * 블렌딩 상세 조회
      */
     @Transactional(readOnly = true)
-    public BlendingDetailResponse getBlendingDetail(String blendingUuid) {
-        return blendingService.find(blendingUuid);
+    public BlendingDetailResponse getBlendingDetail(String userUuid, String blendingUuid) {
+        return blendingService.find(userUuid, blendingUuid);
     }
 }
