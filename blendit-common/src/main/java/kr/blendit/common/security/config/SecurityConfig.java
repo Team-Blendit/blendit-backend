@@ -70,7 +70,6 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(publicPaths.toArray(String[]::new)).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/blendit/blending/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))

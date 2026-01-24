@@ -33,11 +33,12 @@ public class BlendingDetailResponse {
     private Boolean isBookmarked;
 
 
-    public static BlendingDetailResponse from(Blending blending, long bookmarkCount, boolean isBookmarked) {
+    public static BlendingDetailResponse from(Blending blending, long bookmarkCount, boolean isBookmarked, boolean isHost) {
+
         return BlendingDetailResponse.builder()
                 .id(blending.getId())
                 .uuid(blending.getUuid())
-                .blendingParticipant(BlendingParticipantResponse.from(blending.getParticipants()))
+                .blendingParticipant(BlendingParticipantResponse.from(blending.getParticipants(), isHost))
                 .title(blending.getTitle())
                 .content(blending.getContent())
                 .keywords(extractKeywords(blending.getKeywords()))

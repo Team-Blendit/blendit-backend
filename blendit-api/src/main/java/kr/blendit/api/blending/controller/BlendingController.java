@@ -20,7 +20,7 @@ public class BlendingController {
 
     private final BlendingFacade blendingFacade;
 
-    @Operation(summary = "블렌딩 생성 API", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "블렌딩 생성 API", security = @SecurityRequirement(name = "bearerAuth"), description = "openChattingUrl은 생략할 수 있습니다.")
     @PostMapping
     public void createBlending(@AuthenticationPrincipal String userUuid, @RequestBody BlendingCreateRequest blendingCreateRequest) {
 
@@ -34,7 +34,7 @@ public class BlendingController {
         blendingFacade.deleteBlending(userUuid, blendingUuid);
     }
 
-    @Operation(summary = "블렌딩 정보 수정 API", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "블렌딩 정보 수정 API", security = @SecurityRequirement(name = "bearerAuth"), description = "openChattingUrl은 생략할 수 있습니다.")
     @PatchMapping("/{blendingUuid}")
     public void updateBlending(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid, @RequestBody BlendingUpdateRequest blendingUpdateRequest) {
 
@@ -48,7 +48,7 @@ public class BlendingController {
         blendingFacade.updateBlendingStatus(userUuid, blendingUuid, blendingStatus);
     }
 
-    @Operation(summary = "블렌딩 상세 조회 API", description = "대기, 승인, 거절, 참여 중 상태의 모든 유저를 joinStatus 값으로 구분합니다. \n 현재는 조회 중인 유저의 HOST, MEMBER 값을 구분하지 않고 모든 유저를 응답합니다.(구현예정)")
+    @Operation(summary = "블렌딩 상세 조회 API", security = @SecurityRequirement(name = "bearerAuth"), description = "대기, 승인, 거절, 참여 중 상태의 모든 유저를 joinStatus 값으로 구분합니다.")
     @GetMapping("/{blendingUuid}")
     public BlendingDetailResponse getBlendingDetail(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid) {
 

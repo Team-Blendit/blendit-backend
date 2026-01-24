@@ -23,19 +23,41 @@ public class BlendingParticipantResponse {
     private JoinStatus joinStatus;
 
 
-    public static List<BlendingParticipantResponse> from(List<BlendingUser> blendingUsers) {
+    public static List<BlendingParticipantResponse> from(List<BlendingUser> blendingUsers, Boolean isHost) {
         List<BlendingParticipantResponse> blendingParticipantResponses = new ArrayList<>();
 
         for(BlendingUser blendingUser : blendingUsers) {
-            BlendingParticipantResponse blendingUserResponse = BlendingParticipantResponse.builder()
-                    .uuid(blendingUser.getUser().getUuid())
-                    .blendingGrade(blendingUser.getBlendingGrade())
-                    .joinStatus(blendingUser.getJoinStatus())
-                    .build();
-            blendingParticipantResponses.add(blendingUserResponse);
+
+            if(canShow(blendingUser.getJoinStatus(), isHost)) {
+                BlendingParticipantResponse blendingUserResponse = BlendingParticipantResponse.builder()
+                        .uuid(blendingUser.getUser().getUuid())
+                        .blendingGrade(blendingUser.getBlendingGrade())
+                        .joinStatus(blendingUser.getJoinStatus())
+                        .build();
+                blendingParticipantResponses.add(blendingUserResponse);
+            }
         }
         return blendingParticipantResponses;
     }
 
 
+    /**
+     * 블렌딩 권한에 따라 상태별로 유저를 보여줄지 결정하는 내부 메서드
+     * @param isHost 현재 접속한 유저가 Host 인지 여부
+     */
+    private static boolean canShow(JoinStatus joinStatus, boolean isHost) {
+
+        // 공통적으로 볼 수 있는 유저
+        if(joinStatus == JoinStatus.HOST || joinStatus == JoinStatus.APPROVED) {
+            return true;
+        }
+
+        // Host만 볼 수 있는 유저
+        if(isHost && joinStatus == JoinStatus.PENDING) {
+            return true;
+        }
+
+        // REJECTED 상태는 모두 볼 수 없다.
+        return false;
+    }
 }

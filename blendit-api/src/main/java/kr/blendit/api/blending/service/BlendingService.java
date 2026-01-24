@@ -42,6 +42,9 @@ public class BlendingService {
      */
     public void create(String userUuid, BlendingCreateRequest blendingCreateRequest) {
 
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.USER_NOT_FOUND));
+
         Blending blending = Blending.create(
                 blendingCreateRequest.getTitle(),
                 blendingCreateRequest.getContent(),
@@ -63,9 +66,6 @@ public class BlendingService {
         if(blending.getKeywords().size() >= 4) {
             throw new BaseException(BaseErrorCode.KEYWORD_LIMIT_EXCEEDED);
         }
-
-        User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new BaseException(BaseErrorCode.USER_NOT_FOUND));
 
         BlendingUser blendingUser = blending.addParticipant(
                 user,
@@ -163,7 +163,16 @@ public class BlendingService {
             isBookmarked = blendingBookmarkRepository.existsByBlendingAndUser_Uuid(blending, userUuid);
         }
 
-        return BlendingDetailResponse.from(blending, bookmarkCount, isBookmarked);
+        // 접근한 유저가 해당 블렌딩의 호스트인지 검증
+        boolean isHost = false;
+        for(BlendingUser blendingUser : blending.getParticipants()) {
+            if(blendingUser.getBlendingGrade() == BlendingGrade.HOST && blendingUser.getUser().getUuid().equals(userUuid)) {
+                isHost = true;
+                break;
+            }
+        }
+
+        return BlendingDetailResponse.from(blending, bookmarkCount, isBookmarked, isHost);
     }
 
 
