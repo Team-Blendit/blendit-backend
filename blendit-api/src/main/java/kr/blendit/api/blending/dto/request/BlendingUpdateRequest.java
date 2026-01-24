@@ -20,4 +20,5 @@ public class BlendingUpdateRequest {
     private String place;
     private String openChattingUrl;
     private LocalDateTime schedule;
+    private Boolean autoApproval;
 }

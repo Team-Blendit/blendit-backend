@@ -49,7 +49,8 @@ public class BlendingService {
                 blendingCreateRequest.getRegion(),
                 blendingCreateRequest.getPlace(),
                 blendingCreateRequest.getOpenChattingUrl(),
-                blendingCreateRequest.getSchedule()
+                blendingCreateRequest.getSchedule(),
+                blendingCreateRequest.getAutoApproval()
         );
 
         List<Keyword> keywords = keywordRepository.findAllByNameIn(blendingCreateRequest.getKeywords());
@@ -97,12 +98,14 @@ public class BlendingService {
      */
     public void update(String userUuid, String blendingUuid, BlendingUpdateRequest blendingUpdateRequest) {
 
-        Blending blending = blendingRepository.findByUuid(blendingUuid)
+        Blending blending = blendingRepository.findByUuidWithParticipants(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
         validateHostPermission(userUuid, blending);
 
-        if(blending.getParticipants().size() > blendingUpdateRequest.getCapacity()) {
+        int participantCount = blending.getCurrentParticipantCount();
+
+        if(participantCount >= blendingUpdateRequest.getCapacity()) {
             throw new BaseException(BaseErrorCode.BLENDING_INVALID_CAPACITY);
         }
         if(blendingUpdateRequest.getSchedule().isBefore(LocalDateTime.now())) {
@@ -119,7 +122,8 @@ public class BlendingService {
                 blendingUpdateRequest.getRegion(),
                 blendingUpdateRequest.getPlace(),
                 blendingUpdateRequest.getOpenChattingUrl(),
-                blendingUpdateRequest.getSchedule()
+                blendingUpdateRequest.getSchedule(),
+                blendingUpdateRequest.getAutoApproval()
         );
     }
 
@@ -138,7 +142,7 @@ public class BlendingService {
 
         validateHostPermission(userUuid, blending);
 
-        blending.updateStatus(blending, blendingStatus);
+        blending.updateStatus(blendingStatus);
     }
 
 

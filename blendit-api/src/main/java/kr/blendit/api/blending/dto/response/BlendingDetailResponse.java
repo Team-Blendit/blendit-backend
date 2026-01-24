@@ -26,6 +26,7 @@ public class BlendingDetailResponse {
     private BlendingStatus status;
     private String openChattingUrl;
     private LocalDateTime schedule;
+    private Boolean autoApproval;
     private Long bookmarkCount;
 
     public static BlendingDetailResponse from(Blending blending, long bookmarkCount) {
@@ -43,6 +44,7 @@ public class BlendingDetailResponse {
                 .openChattingUrl(blending.getOpenChattingUrl())
                 .schedule(blending.getSchedule())
                 .bookmarkCount(bookmarkCount)
+                .autoApproval(blending.getAutoApproval())
                 .build();
     }
 

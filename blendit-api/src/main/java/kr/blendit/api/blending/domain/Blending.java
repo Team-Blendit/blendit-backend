@@ -52,7 +52,8 @@ public class Blending extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime schedule;
 
-    // Todo: 자동 승인 여부 필드 필요
+    @Column(nullable = false)
+    private Boolean autoApproval;
 
     // Todo: 직군 필드 필요 (User와 함께 사용해야한다. keyword 처럼 테이블로 분리하고 중간 테이블 연결 필요)
 
@@ -60,7 +61,7 @@ public class Blending extends BaseEntity {
      * 블렌딩 생성자
      */
     @Builder(access = AccessLevel.PRIVATE)
-    public Blending(String title, String content, int capacity, String region, String place, String openChattingUrl, LocalDateTime schedule) {
+    public Blending(String title, String content, int capacity, String region, String place, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
         this.title = title;
         this.content = content;
         this.capacity = capacity;
@@ -69,6 +70,7 @@ public class Blending extends BaseEntity {
         this.status = BlendingStatus.RECRUITING;
         this.openChattingUrl = openChattingUrl;
         this.schedule = schedule;
+        this.autoApproval = autoApproval;
     }
 
 
@@ -77,7 +79,7 @@ public class Blending extends BaseEntity {
      *
      * @apiNote 최소 인원 2명 / 일정은 과거 불가
      */
-    public static Blending create(String title, String content, Integer capacity, String region, String place, String openChattingUrl, LocalDateTime schedule) {
+    public static Blending create(String title, String content, Integer capacity, String region, String place, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
 
         if(capacity < 2) {
             throw new BaseException(BaseErrorCode.BLENDING_CAPACITY_BELOW_MIN);
@@ -94,6 +96,7 @@ public class Blending extends BaseEntity {
                 .place(place)
                 .openChattingUrl(openChattingUrl)
                 .schedule(schedule)
+                .autoApproval(autoApproval)
                 .build();
     }
 
@@ -146,7 +149,7 @@ public class Blending extends BaseEntity {
     /**
      * 블렌딩 정보 수정
      */
-    public void update(String title, String content, Integer capacity, String region, String place, String openChattingUrl, LocalDateTime schedule) {
+    public void update(String title, String content, Integer capacity, String region, String place, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
         if(title != null) this.title = title;
         if(content != null) this.content = content;
         if(capacity != null) this.capacity = capacity;
@@ -154,6 +157,7 @@ public class Blending extends BaseEntity {
         if(place != null) this.place = place;
         this.openChattingUrl = openChattingUrl;
         if(schedule != null) this.schedule = schedule;
+        if(autoApproval != null) this.autoApproval = autoApproval;
     }
 
 
@@ -163,16 +167,10 @@ public class Blending extends BaseEntity {
      * @param blendingStatus 변경하려는 상태
      * @apiNote 인원이 가득찬 경우엔 모집 중으로 변경 불가
      */
-    public void updateStatus(Blending blending, BlendingStatus blendingStatus) {
-
-        int participantCount = 0;
+    public void updateStatus(BlendingStatus blendingStatus) {
 
         if(blendingStatus == BlendingStatus.RECRUITING) {
-            for(BlendingUser blendingUser : blending.getParticipants()) {
-                JoinStatus joinStatus = blendingUser.getJoinStatus();
-
-                if(joinStatus.equals(JoinStatus.HOST) || joinStatus.equals(JoinStatus.APPROVED)) participantCount++;
-            }
+            int participantCount = this.getCurrentParticipantCount();
 
             // 호스트 + 승인된 사람이 정원 이상이라면 예외 발생
             if(participantCount >= this.capacity) {
@@ -181,6 +179,22 @@ public class Blending extends BaseEntity {
         }
 
         this.status = blendingStatus;
+    }
+
+
+    /**
+     * 호스트 + 승인된 유저 수 추출 메서드
+     */
+    public int getCurrentParticipantCount() {
+        int participantCount = 0;
+
+        for(BlendingUser blendingUser : this.getParticipants()) {
+            JoinStatus joinStatus = blendingUser.getJoinStatus();
+
+            if(joinStatus.equals(JoinStatus.HOST) || joinStatus.equals(JoinStatus.APPROVED)) participantCount++;
+        }
+
+        return participantCount;
     }
 
 
