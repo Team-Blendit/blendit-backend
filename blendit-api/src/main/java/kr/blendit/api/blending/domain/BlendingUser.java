@@ -51,7 +51,8 @@ public class BlendingUser extends BaseTimeEntity {
      * 블렌딩 유저 생성자
      */
     @Builder(access = AccessLevel.PRIVATE)
-    private BlendingUser(User user, Blending blending, BlendingGrade blendingGrade, String message, JoinStatus joinStatus) {
+    private BlendingUser(User user, Blending blending, BlendingGrade blendingGrade,
+                         String message, JoinStatus joinStatus) {
         this.user = user;
         this.blending = blending;
         this.blendingGrade = blendingGrade;
@@ -63,7 +64,8 @@ public class BlendingUser extends BaseTimeEntity {
     /**
      * 블렌딩 유저 생성
      */
-    public static BlendingUser create(User user, Blending blending, BlendingGrade blendingGrade, String message, JoinStatus joinStatus) {
+    public static BlendingUser create(User user, Blending blending, BlendingGrade blendingGrade,
+                                      String message, JoinStatus joinStatus) {
 
         if (user == null || blending == null || blendingGrade == null || joinStatus == null) {
             throw new BaseException(BaseErrorCode.INVALID_PARAMETER);

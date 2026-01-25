@@ -15,13 +15,14 @@ public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long
 
 
     /**
-     * 이 블렌딩에서 해당 유저가 HOST 등급인지 확인
+     * 이 블렌딩에서 특정 권한의 유저 여부(주로 해당 유저가 HOST 등급인지 확인)
      *
      * @apiNote Blending만 조회하여 participants 내부는 프록시 객체일 경우 사용하기 적합합니다.
      */
     boolean existsByBlendingAndUser_UuidAndBlendingGrade(Blending blending, String userUuid, BlendingGrade grade);
+
     /**
-     * 참여 승인 및 Host 상태의 블렌딩 유저 수 조회
+     * 특정 상태의 블렌딩 유저 수 조회(참여 승인 및 Host 상태 추출 가능)
      *
      * @apiNote Blending만 조회하여 participants 내부는 프록시 객체일 경우 사용하기 적합합니다.
      */

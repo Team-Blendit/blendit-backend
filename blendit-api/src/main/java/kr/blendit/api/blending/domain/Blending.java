@@ -64,7 +64,8 @@ public class Blending extends BaseEntity {
      * 블렌딩 생성자
      */
     @Builder(access = AccessLevel.PRIVATE)
-    public Blending(String title, String content, Position position, int capacity, String region, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
+    public Blending(String title, String content, Position position, int capacity, String region,
+                    String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
         this.title = title;
         this.content = content;
         this.position = position;
@@ -202,7 +203,7 @@ public class Blending extends BaseEntity {
     public int getCurrentParticipantCount() {
         int participantCount = 0;
 
-        for(BlendingUser blendingUser : this.getParticipants()) {
+        for(BlendingUser blendingUser : this.participants) {
             JoinStatus joinStatus = blendingUser.getJoinStatus();
 
             if(joinStatus.equals(JoinStatus.HOST) || joinStatus.equals(JoinStatus.APPROVED)) participantCount++;

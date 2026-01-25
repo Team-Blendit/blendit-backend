@@ -86,22 +86,23 @@ public class BlendingService {
      */
     public void update(String userUuid, String blendingUuid, BlendingUpdateRequest blendingUpdateRequest) {
 
-        Blending blending = blendingRepository.findByUuidWithParticipants(blendingUuid)
+        Blending blending = blendingRepository.findByUuid(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
-        // Host 인지 검증
-        if(!blending.isHost(userUuid)) {
+        if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingGrade(blending, userUuid, BlendingGrade.HOST)) {
             throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
         }
 
         if(blendingUpdateRequest.getCapacity() != null) {
-            int participantCount = blending.getCurrentParticipantCount();
+            long participantCount = blendingUserRepository.countByBlendingAndJoinStatusIn(
+                    blending, List.of(JoinStatus.HOST, JoinStatus.APPROVED));
             if(participantCount > blendingUpdateRequest.getCapacity()) {
                 throw new BaseException(BaseErrorCode.BLENDING_INVALID_CAPACITY);
             }
         }
 
-        if(blendingUpdateRequest.getSchedule() != null && blendingUpdateRequest.getSchedule().isBefore(LocalDateTime.now())) {
+        if(blendingUpdateRequest.getSchedule() != null
+                && blendingUpdateRequest.getSchedule().isBefore(LocalDateTime.now())) {
             throw new BaseException(BaseErrorCode.BLENDING_INVALID_SCHEDULE_TIME);
         }
 
@@ -123,11 +124,11 @@ public class BlendingService {
      */
     public void updateStatus(String userUuid, String blendingUuid, BlendingStatus blendingStatus) {
 
-        Blending blending = blendingRepository.findByUuidWithParticipants(blendingUuid)
+        Blending blending = blendingRepository.findByUuid(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
         // Host 인지 검증
-        if(!blending.isHost(userUuid)) {
+        if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingGrade(blending, userUuid, BlendingGrade.HOST)) {
             throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
         }
 
