@@ -1,9 +1,11 @@
 package kr.blendit.api.blending.facade;
 
 import kr.blendit.api.blending.constant.BlendingStatus;
+import kr.blendit.api.blending.dto.request.BlendingApplyRequest;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
 import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
 import kr.blendit.api.blending.dto.response.BlendingDetailResponse;
+import kr.blendit.api.blending.service.BlendingParticipationService;
 import kr.blendit.api.blending.service.BlendingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BlendingFacade {
 
     private final BlendingService blendingService;
+    private final BlendingParticipationService blendingParticipationService;
 
     /**
      * 블렌딩 생성 흐름
@@ -63,5 +66,13 @@ public class BlendingFacade {
     @Transactional(readOnly = true)
     public BlendingDetailResponse getBlendingDetail(String userUuid, String blendingUuid) {
         return blendingService.find(userUuid, blendingUuid);
+    }
+
+    /**
+     * 블렌딩 참여 신청
+     */
+    @Transactional
+    public void applyBlending(String userUuid, String blendingUuid, BlendingApplyRequest blendingApplyRequest) {
+        blendingParticipationService.apply(userUuid, blendingUuid, blendingApplyRequest);
     }
 }

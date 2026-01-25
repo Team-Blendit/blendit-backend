@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.blendit.api.blending.constant.BlendingStatus;
+import kr.blendit.api.blending.dto.request.BlendingApplyRequest;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
 import kr.blendit.api.blending.dto.response.BlendingDetailResponse;
 import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
@@ -54,4 +55,13 @@ public class BlendingController {
 
         return blendingFacade.getBlendingDetail(userUuid, blendingUuid);
     }
+
+    @Operation(summary = "블렌딩 참여 신청 API", security = @SecurityRequirement(name = "bearerAuth"))
+    @PostMapping("/{blendingUuid}/participation")
+    public void applyBlending(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid, @RequestBody BlendingApplyRequest blendingApplyRequest) {
+
+        blendingFacade.applyBlending(userUuid, blendingUuid, blendingApplyRequest);
+    }
+
+
 }

@@ -193,7 +193,9 @@ public class Blending extends BaseEntity {
 
 
     /**
-     * 호스트 + 승인된 유저 수 추출 메서드
+     * 참여 승인 및 Host 상태의 블렌딩 유저 수 조회
+     *
+     * @apiNote Blending과 BlendingUser 까지 프록시 객체가 아닌 실제 엔티티를 들고 있는 경우 사용하기 적합합니다.
      */
     public int getCurrentParticipantCount() {
         int participantCount = 0;
