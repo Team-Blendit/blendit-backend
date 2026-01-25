@@ -83,4 +83,12 @@ public class BlendingFacade {
     public void cancelParticipation(String userUuid, String blendingUuid) {
         blendingParticipationService.cancel(userUuid,blendingUuid);
     }
+
+    /**
+     * 블렌딩 참여 승인
+     */
+    @Transactional
+    public void approveParticipation(String userUuid, String blendingUuid, String participantUuid) {
+        blendingParticipationService.approve(userUuid, blendingUuid, participantUuid);
+    }
 }

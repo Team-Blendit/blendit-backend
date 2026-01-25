@@ -77,4 +77,8 @@ public class BlendingUser extends BaseTimeEntity {
                 .joinStatus(joinStatus)
                 .build();
     }
+
+    public void updateJoinStatus(JoinStatus joinStatus) {
+        this.joinStatus = joinStatus;
+    }
 }

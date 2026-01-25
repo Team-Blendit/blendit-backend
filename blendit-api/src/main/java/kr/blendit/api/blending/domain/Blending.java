@@ -218,7 +218,9 @@ public class Blending extends BaseEntity {
 
 
     /**
-     * 접속한 유저가 해당 블렌딩의 Host 인지 검증
+     * 이 블렌딩에서 해당 유저가 HOST 등급인지 확인
+     *
+     * @apiNote Blending과 BlendingUser 까지 프록시 객체가 아닌 실제 엔티티를 들고 있는 경우 사용하기 적합합니다.
      */
     public boolean isHost(String userUuid) {
         boolean isHost = false;

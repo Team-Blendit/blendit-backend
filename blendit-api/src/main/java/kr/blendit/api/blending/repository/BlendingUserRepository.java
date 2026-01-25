@@ -6,7 +6,6 @@ import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,13 +13,13 @@ import java.util.Optional;
 
 public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long> {
 
-    /**
-     * 특정 권한의 블렌딩 유저 조회
-     *
-     * @apiNote BlendingService.validateHostPermission() 권한 검증 용도
-     */
-    Optional<BlendingUser> findByBlendingAndBlendingGrade(Blending blending, BlendingGrade blendingGrade);
 
+    /**
+     * 이 블렌딩에서 해당 유저가 HOST 등급인지 확인
+     *
+     * @apiNote Blending만 조회하여 participants 내부는 프록시 객체일 경우 사용하기 적합합니다.
+     */
+    boolean existsByBlendingAndUser_UuidAndBlendingGrade(Blending blending, String userUuid, BlendingGrade grade);
     /**
      * 참여 승인 및 Host 상태의 블렌딩 유저 수 조회
      *
@@ -36,5 +35,5 @@ public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long
     /**
      * 참여중인 특정 BlendingUser 조회
      */
-    Optional<BlendingUser> findByBlendingAndUser(Blending blending, User user);
+    Optional<BlendingUser> findByBlendingAndUser_Uuid(Blending blending, String userUuid);
 }

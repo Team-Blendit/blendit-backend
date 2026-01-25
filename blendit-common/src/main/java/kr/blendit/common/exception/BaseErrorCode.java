@@ -49,13 +49,14 @@ public enum BaseErrorCode implements ErrorCode {
     BLENDING_NOT_FOUND("블렌딩을 찾을 수 없습니다."),
     BLENDING_PERMISSION_DENIED("해당 블렌딩에 대한 접근 권한이 없습니다"),
     BLENDING_INVALID_CAPACITY("현재 참여 인원보다 적은 수로 정원을 변경할 수 없습니다."),
-    BLENDING_CAPACITY_BELOW_MIN("모임 정원은 최소 2명 이상이어야 합니다."),
+    BLENDING_CAPACITY_BELOW_MIN("블렌딩 정원은 최소 2명 이상이어야 합니다."),
     BLENDING_INVALID_SCHEDULE_TIME("유효하지 않은 블렌딩 일정입니다."),
     BLENDING_CANNOT_RECRUIT_FULL("모집 인원이 가득 차서 모집 중 상태로 변경할 수 없습니다."),
-    BLENDING_FULL("모임 정원이 가득 차서 참여할 수 없습니다."),
-    BLENDING_ALREADY_APPLIED("이미 해당 모임에 신청하거나 참여한 이력이 존재합니다."),
-    BLENDING_NOT_APPLIED("신청하지 않은 모임입니다."),
-    BLENDING_NOT_RECRUITING("신청할 수 없는 모임입니다.");
+    BLENDING_FULL("블렌딩 정원이 가득 찼습니다."),
+    BLENDING_ALREADY_APPLIED("이미 해당 블렌딩에 신청하거나 참여한 이력이 존재합니다."),
+    BLENDING_NOT_APPLIED("신청하지 않은 블렌딩입니다."),
+    BLENDING_NOT_RECRUITING("모집 중인 블렌딩이 아닙니다."),
+    BLENDING_ALREADY_PROCESSED("이미 처리된 신청 내역입니다.");
 
     private final String message;
 }

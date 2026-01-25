@@ -88,7 +88,7 @@ public class BlendingService {
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
         // Host 인지 검증
-        if(!blending.isHost(userUuid)) {
+        if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingGrade(blending, userUuid, BlendingGrade.HOST)) {
             throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
         }
 

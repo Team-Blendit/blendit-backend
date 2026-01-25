@@ -94,14 +94,10 @@ public class BlendingParticipationService {
      */
     public void cancel(String userUuid, String blendingUuid) {
 
-        User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new BaseException(BaseErrorCode.USER_NOT_FOUND));
-
         Blending blending = blendingRepository.findByUuid(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
-
-        BlendingUser blendingUser = blendingUserRepository.findByBlendingAndUser(blending, user)
+        BlendingUser blendingUser = blendingUserRepository.findByBlendingAndUser_Uuid(blending, userUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_APPLIED));
 
         JoinStatus joinStatus = blendingUser.getJoinStatus();
@@ -116,6 +112,48 @@ public class BlendingParticipationService {
             }
         }
 
+    }
+
+
+    /**
+     * 블렌딩 참여 승인
+     */
+    public void approve(String userUuid, String blendingUuid, String participantUuid) {
+
+        Blending blending = blendingRepository.findByUuid(blendingUuid)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+
+        // Host 검증
+        if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingGrade(blending, userUuid, BlendingGrade.HOST)) {
+            throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
+        }
+
+        // 모집중인 블렌딩인지 검증
+        if(!blending.getStatus().equals(BlendingStatus.RECRUITING)) {
+            throw new BaseException(BaseErrorCode.BLENDING_NOT_RECRUITING);
+        }
+
+        // 요청한 사용자가 해당 블렌딩에 신청했는지 검증
+        BlendingUser participantUser = blendingUserRepository.findByBlendingAndUser_Uuid(blending, participantUuid)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_APPLIED));
+
+        // 승인 대기 상태인지 검증
+        if(!participantUser.getJoinStatus().equals(JoinStatus.PENDING)) {
+            throw new BaseException(BaseErrorCode.BLENDING_ALREADY_PROCESSED);
+        }
+
+        // 블렌딩 정원이 남아있는지 검증
+        long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatusIn(blending, List.of(JoinStatus.HOST, JoinStatus.APPROVED));
+        if(blending.getCapacity() <= currentUserCount) {
+            throw new BaseException(BaseErrorCode.BLENDING_FULL);
+        }
+
+        participantUser.updateJoinStatus(JoinStatus.APPROVED);
+
+        // 정원이 다 찼다면 마감 상태로 변경
+        if (currentUserCount + 1 >= blending.getCapacity()) {
+            blending.updateStatus(BlendingStatus.RECRUITMENT_CLOSED);
+        }
     }
 
 
