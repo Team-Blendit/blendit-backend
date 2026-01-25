@@ -31,9 +31,13 @@ springdoc:
     path: /docs/swagger
 
 security:
-  public-paths:
-    - /api/blendit/auth/**
-    - /api/blendit/public/**
+  public-endpoints:
+    - path: /api/blendit/auth/**
+      methods: ["*"]
+    - path: /api/blendit/public/**
+      methods: ["*"]
+    - path: /api/blendit/blending/**
+      methods: ["GET"]
 
 oidc:
   kakao:
