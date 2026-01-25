@@ -31,6 +31,7 @@ public class BlendingParticipationService {
      * 블렌딩 참여 신청
      *
      * @apiNote MEMBER 권한으로 저장되며 JoinStatus 값은 autoApproval에 따라 결정됩니다.
+     * @apiNote 신청이 거절되면 다시 신청할 수 없습니다.
      */
     public void apply(String userUuid, String blendingUuid, BlendingApplyRequest blendingApplyRequest) {
 
@@ -100,6 +101,11 @@ public class BlendingParticipationService {
         BlendingUser blendingUser = blendingUserRepository.findByBlendingAndUser_Uuid(blending, userUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_APPLIED));
 
+        // 이미 거절된 신청의 경우 취소 불가
+        if(blendingUser.getJoinStatus().equals(JoinStatus.REJECTED)) {
+            throw new BaseException(BaseErrorCode.BLENDING_ALREADY_PROCESSED);
+        }
+
         JoinStatus joinStatus = blendingUser.getJoinStatus();
         blending.deleteParticipant(blendingUser);
 
@@ -111,7 +117,6 @@ public class BlendingParticipationService {
                 blending.updateStatus(BlendingStatus.RECRUITING);
             }
         }
-
     }
 
 
@@ -154,6 +159,32 @@ public class BlendingParticipationService {
         if (currentUserCount + 1 >= blending.getCapacity()) {
             blending.updateStatus(BlendingStatus.RECRUITMENT_CLOSED);
         }
+    }
+
+
+    /**
+     * 블렌딩 참여 거부
+     */
+    public void reject(String userUuid, String blendingUuid, String participantUuid) {
+
+        Blending blending = blendingRepository.findByUuid(blendingUuid)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+
+        // Host 검증
+        if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingGrade(blending, userUuid, BlendingGrade.HOST)) {
+            throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
+        }
+
+        // 요청한 사용자가 해당 블렌딩에 신청했는지 검증
+        BlendingUser participantUser = blendingUserRepository.findByBlendingAndUser_Uuid(blending, participantUuid)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_APPLIED));
+
+        // 승인 대기 상태인지 검증
+        if(!participantUser.getJoinStatus().equals(JoinStatus.PENDING)) {
+            throw new BaseException(BaseErrorCode.BLENDING_ALREADY_PROCESSED);
+        }
+
+        participantUser.updateJoinStatus(JoinStatus.REJECTED);
     }
 
 

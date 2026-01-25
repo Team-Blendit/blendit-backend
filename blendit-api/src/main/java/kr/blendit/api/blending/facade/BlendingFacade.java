@@ -91,4 +91,12 @@ public class BlendingFacade {
     public void approveParticipation(String userUuid, String blendingUuid, String participantUuid) {
         blendingParticipationService.approve(userUuid, blendingUuid, participantUuid);
     }
+
+    /**
+     * 블렌딩 참여 거부
+     */
+    @Transactional
+    public void rejectParticipation(String userUuid, String blendingUuid, String participantUuid) {
+        blendingParticipationService.reject(userUuid, blendingUuid, participantUuid);
+    }
 }

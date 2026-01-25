@@ -77,4 +77,11 @@ public class BlendingController {
         blendingFacade.approveParticipation(userUuid, blendingUuid, participantUuid);
     }
 
+    @Operation(summary = "블렌딩 참여 거부 API", security = @SecurityRequirement(name = "bearerAuth"))
+    @PatchMapping("/{blendingUuid}/participation/{participantUuid}/reject")
+    public void rejectParticipation(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid, @PathVariable String participantUuid) {
+
+        blendingFacade.rejectParticipation(userUuid, blendingUuid, participantUuid);
+    }
+
 }
