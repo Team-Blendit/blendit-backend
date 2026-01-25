@@ -32,4 +32,9 @@ public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long
      * 유저의 블렌딩 참여 여부 추출(모든 JoinStatus 포함)
      */
     boolean existsByBlendingAndUser(Blending blending, User user);
+
+    /**
+     * 참여중인 특정 BlendingUser 조회
+     */
+    Optional<BlendingUser> findByBlendingAndUser(Blending blending, User user);
 }

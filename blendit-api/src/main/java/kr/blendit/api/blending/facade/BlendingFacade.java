@@ -72,7 +72,15 @@ public class BlendingFacade {
      * 블렌딩 참여 신청
      */
     @Transactional
-    public void applyBlending(String userUuid, String blendingUuid, BlendingApplyRequest blendingApplyRequest) {
+    public void applyParticipation(String userUuid, String blendingUuid, BlendingApplyRequest blendingApplyRequest) {
         blendingParticipationService.apply(userUuid, blendingUuid, blendingApplyRequest);
+    }
+
+    /**
+     * 블렌딩 참여 신청 취소
+     */
+    @Transactional
+    public void cancelParticipation(String userUuid, String blendingUuid) {
+        blendingParticipationService.cancel(userUuid,blendingUuid);
     }
 }

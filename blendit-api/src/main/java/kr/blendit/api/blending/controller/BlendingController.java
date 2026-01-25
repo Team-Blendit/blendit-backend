@@ -58,9 +58,16 @@ public class BlendingController {
 
     @Operation(summary = "블렌딩 참여 신청 API", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("/{blendingUuid}/participation")
-    public void applyBlending(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid, @RequestBody BlendingApplyRequest blendingApplyRequest) {
+    public void applyParticipation(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid, @RequestBody BlendingApplyRequest blendingApplyRequest) {
 
-        blendingFacade.applyBlending(userUuid, blendingUuid, blendingApplyRequest);
+        blendingFacade.applyParticipation(userUuid, blendingUuid, blendingApplyRequest);
+    }
+
+    @Operation(summary = "블렌딩 참여 신청 API", security = @SecurityRequirement(name = "bearerAuth"))
+    @DeleteMapping("/{blendingUuid}/participation")
+    public void cancelParticipation(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid) {
+
+        blendingFacade.cancelParticipation(userUuid, blendingUuid);
     }
 
 

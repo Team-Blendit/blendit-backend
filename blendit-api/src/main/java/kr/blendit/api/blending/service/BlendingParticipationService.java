@@ -1,6 +1,7 @@
 package kr.blendit.api.blending.service;
 
 import kr.blendit.api.blending.constant.BlendingGrade;
+import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingUser;
@@ -39,6 +40,11 @@ public class BlendingParticipationService {
         Blending blending = blendingRepository.findByUuid(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
+        // 모집중이 아닐 경우 예외
+        if(!blending.getStatus().equals(BlendingStatus.RECRUITING)) {
+            throw new BaseException(BaseErrorCode.BLENDING_NOT_RECRUITING);
+        }
+
         // 참여 이력 검증 (중복 신청 방지)
         if(blendingUserRepository.existsByBlendingAndUser(blending, user)) {
             throw new BaseException(BaseErrorCode.BLENDING_ALREADY_APPLIED);
@@ -64,6 +70,52 @@ public class BlendingParticipationService {
                 joinStatus);
 
         blendingUserRepository.save(blendingUser);
+
+        if(joinStatus.equals(JoinStatus.APPROVED)) {
+            long finalUserCount = blendingUserRepository.countByBlendingAndJoinStatusIn(blending, List.of(JoinStatus.HOST, JoinStatus.APPROVED));
+
+            // 저장 후 정원이 초과된 경우 예외 -> 롤백
+            if (finalUserCount > blending.getCapacity()) {
+                throw new BaseException(BaseErrorCode.BLENDING_FULL);
+            }
+
+            // 저장 후 정원이 가득찬 경우 마감으로 변경
+            if (finalUserCount == blending.getCapacity()) {
+                blending.updateStatus(BlendingStatus.RECRUITMENT_CLOSED);
+            }
+        }
+    }
+
+
+    /**
+     * 블렌딩 참여 신청 취소
+     *
+     * @apiNote 현재는 신청 취소 후 참여인원이 정원보다 적을 시 무조건 모집중으로 변경됩니다.
+     */
+    public void cancel(String userUuid, String blendingUuid) {
+
+        User user = userRepository.findByUuid(userUuid)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.USER_NOT_FOUND));
+
+        Blending blending = blendingRepository.findByUuid(blendingUuid)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+
+
+        BlendingUser blendingUser = blendingUserRepository.findByBlendingAndUser(blending, user)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_APPLIED));
+
+        JoinStatus joinStatus = blendingUser.getJoinStatus();
+        blending.deleteParticipant(blendingUser);
+
+        // 승인된 유저가 탈퇴 시, 현재 참여 인원이 정원보다 적으면서, 마감된 상태라면 모집 중으로 자동 상태 변경
+        if(joinStatus.equals(JoinStatus.APPROVED) && blending.getStatus().equals(BlendingStatus.RECRUITMENT_CLOSED)) {
+
+            long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatusIn(blending, List.of(JoinStatus.HOST, JoinStatus.APPROVED));
+            if(blending.getCapacity() > currentUserCount) {
+                blending.updateStatus(BlendingStatus.RECRUITING);
+            }
+        }
+
     }
 
 

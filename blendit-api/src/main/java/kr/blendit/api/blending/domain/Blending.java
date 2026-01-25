@@ -114,6 +114,13 @@ public class Blending extends BaseEntity {
         return blendingUser;
     }
 
+    /**
+     * 참여자 제거
+     */
+    public void deleteParticipant(BlendingUser blendingUser) {
+        this.getParticipants().remove(blendingUser);
+    }
+
 
     /**
      * 키워드 추가
