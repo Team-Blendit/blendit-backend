@@ -87,7 +87,10 @@ public class BlendingService {
         Blending blending = blendingRepository.findByUuid(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
-        validateHostPermission(userUuid, blending);
+        // Host 인지 검증
+        if(!blending.isHost(userUuid)) {
+            throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
+        }
 
         blending.delete();
     }
@@ -101,7 +104,10 @@ public class BlendingService {
         Blending blending = blendingRepository.findByUuidWithParticipants(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
-        validateHostPermission(userUuid, blending);
+        // Host 인지 검증
+        if(!blending.isHost(userUuid)) {
+            throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
+        }
 
         int participantCount = blending.getCurrentParticipantCount();
 
@@ -140,7 +146,10 @@ public class BlendingService {
         Blending blending = blendingRepository.findByUuidWithParticipants(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
-        validateHostPermission(userUuid, blending);
+        // Host 인지 검증
+        if(!blending.isHost(userUuid)) {
+            throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
+        }
 
         blending.updateStatus(blendingStatus);
     }
@@ -164,27 +173,8 @@ public class BlendingService {
         }
 
         // 접근한 유저가 해당 블렌딩의 호스트인지 검증
-        boolean isHost = false;
-        for(BlendingUser blendingUser : blending.getParticipants()) {
-            if(blendingUser.getBlendingGrade() == BlendingGrade.HOST && blendingUser.getUser().getUuid().equals(userUuid)) {
-                isHost = true;
-                break;
-            }
-        }
+        boolean isHost = blending.isHost(userUuid);
 
         return BlendingDetailResponse.from(blending, bookmarkCount, isBookmarked, isHost);
-    }
-
-
-    /**
-     * 블렌딩 Host 검증 내부 메서드
-     */
-    private void validateHostPermission(String userUuid, Blending blending) {
-        BlendingUser blendingHost = blendingUserRepository.findByBlendingAndBlendingGrade(blending, BlendingGrade.HOST)
-                .orElseThrow(() -> new BaseException(BaseErrorCode.USER_NOT_FOUND));
-
-        if(!userUuid.equals(blendingHost.getUser().getUuid())) {
-            throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
-        }
     }
 }

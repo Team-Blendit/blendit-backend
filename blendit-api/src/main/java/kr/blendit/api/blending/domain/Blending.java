@@ -208,6 +208,21 @@ public class Blending extends BaseEntity {
     }
 
 
+    /**
+     * 접속한 유저가 해당 블렌딩의 Host 인지 검증
+     */
+    public boolean isHost(String userUuid) {
+        boolean isHost = false;
+        for(BlendingUser blendingUser : this.getParticipants()) {
+            if(blendingUser.getBlendingGrade() == BlendingGrade.HOST) {
+                if(blendingUser.getUser().getUuid().equals(userUuid)) isHost = true;
+                break;
+            }
+        }
+        return isHost;
+    }
+
+
 }
 
 
