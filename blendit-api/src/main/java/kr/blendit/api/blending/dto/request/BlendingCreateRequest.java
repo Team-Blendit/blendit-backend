@@ -4,7 +4,6 @@ import jakarta.validation.constraints.*;
 import kr.blendit.api.common.constant.Position;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;

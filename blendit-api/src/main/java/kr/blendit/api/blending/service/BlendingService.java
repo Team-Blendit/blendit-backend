@@ -1,6 +1,6 @@
 package kr.blendit.api.blending.service;
 
-import kr.blendit.api.blending.constant.BlendingGrade;
+import kr.blendit.api.blending.constant.BlendingUserGrade;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;
@@ -37,8 +37,6 @@ public class BlendingService {
 
     /**
      * 블렌딩 생성
-     *
-     * @apiNote 모임장은 참여인원에 HOST로 추가됩니다.
      */
     public void create(String userUuid, BlendingCreateRequest blendingCreateRequest) {
 
@@ -54,9 +52,9 @@ public class BlendingService {
 
         BlendingUser blendingUser = blending.addParticipant(
                 user,
-                BlendingGrade.HOST,
+                BlendingUserGrade.HOST,
                 null,
-                JoinStatus.HOST
+                JoinStatus.APPROVED
         );
 
         blendingRepository.save(blending);
@@ -73,7 +71,7 @@ public class BlendingService {
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
         // Host 인지 검증
-        if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingGrade(blending, userUuid, BlendingGrade.HOST)) {
+        if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingUserGrade(blending, userUuid, BlendingUserGrade.HOST)) {
             throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
         }
 
@@ -89,13 +87,12 @@ public class BlendingService {
         Blending blending = blendingRepository.findByUuid(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
-        if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingGrade(blending, userUuid, BlendingGrade.HOST)) {
+        if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingUserGrade(blending, userUuid, BlendingUserGrade.HOST)) {
             throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
         }
 
         if(blendingUpdateRequest.getCapacity() != null) {
-            long participantCount = blendingUserRepository.countByBlendingAndJoinStatusIn(
-                    blending, List.of(JoinStatus.HOST, JoinStatus.APPROVED));
+            long participantCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
             if(participantCount > blendingUpdateRequest.getCapacity()) {
                 throw new BaseException(BaseErrorCode.BLENDING_INVALID_CAPACITY);
             }
@@ -128,7 +125,7 @@ public class BlendingService {
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
         // Host 인지 검증
-        if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingGrade(blending, userUuid, BlendingGrade.HOST)) {
+        if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingUserGrade(blending, userUuid, BlendingUserGrade.HOST)) {
             throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
         }
 

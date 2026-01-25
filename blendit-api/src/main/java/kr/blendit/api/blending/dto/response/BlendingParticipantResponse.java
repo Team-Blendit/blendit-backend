@@ -1,6 +1,6 @@
 package kr.blendit.api.blending.dto.response;
 
-import kr.blendit.api.blending.constant.BlendingGrade;
+import kr.blendit.api.blending.constant.BlendingUserGrade;
 import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.BlendingUser;
 import lombok.AccessLevel;
@@ -19,7 +19,7 @@ public class BlendingParticipantResponse {
     // Todo: 지수, 프로필사진, 직군, 연차, 지역, 키워드, 북마크 여부
 
     private String uuid;
-    private BlendingGrade blendingGrade;
+    private BlendingUserGrade blendingUserGrade;
     private JoinStatus joinStatus;
 
 
@@ -31,7 +31,7 @@ public class BlendingParticipantResponse {
             if(canShow(blendingUser.getJoinStatus(), isHost)) {
                 BlendingParticipantResponse blendingUserResponse = BlendingParticipantResponse.builder()
                         .uuid(blendingUser.getUser().getUuid())
-                        .blendingGrade(blendingUser.getBlendingGrade())
+                        .blendingUserGrade(blendingUser.getBlendingUserGrade())
                         .joinStatus(blendingUser.getJoinStatus())
                         .build();
                 blendingParticipantResponses.add(blendingUserResponse);
@@ -48,7 +48,7 @@ public class BlendingParticipantResponse {
     private static boolean canShow(JoinStatus joinStatus, boolean isHost) {
 
         // 공통적으로 볼 수 있는 유저
-        if(joinStatus == JoinStatus.HOST || joinStatus == JoinStatus.APPROVED) {
+        if(joinStatus == JoinStatus.APPROVED) {
             return true;
         }
 

@@ -1,6 +1,6 @@
 package kr.blendit.api.blending.service;
 
-import kr.blendit.api.blending.constant.BlendingGrade;
+import kr.blendit.api.blending.constant.BlendingUserGrade;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;
@@ -53,7 +53,7 @@ public class BlendingParticipationService {
 
         // todo: 동시성 문제 고려
         // 인원 수 검증
-        long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatusIn(blending, List.of(JoinStatus.HOST, JoinStatus.APPROVED));
+        long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
         if(blending.getCapacity() <= currentUserCount) {
             throw new BaseException(BaseErrorCode.BLENDING_FULL);
         }
@@ -66,14 +66,14 @@ public class BlendingParticipationService {
 
         BlendingUser blendingUser = blending.addParticipant(
                 user,
-                BlendingGrade.MEMBER,
+                BlendingUserGrade.MEMBER,
                 blendingApplyRequest.getMessage(),
                 joinStatus);
 
         blendingUserRepository.save(blendingUser);
 
         if(joinStatus.equals(JoinStatus.APPROVED)) {
-            long finalUserCount = blendingUserRepository.countByBlendingAndJoinStatusIn(blending, List.of(JoinStatus.HOST, JoinStatus.APPROVED));
+            long finalUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
 
             // 저장 후 정원이 초과된 경우 예외 -> 롤백
             if (finalUserCount > blending.getCapacity()) {
@@ -112,7 +112,7 @@ public class BlendingParticipationService {
         // 승인된 유저가 탈퇴 시, 현재 참여 인원이 정원보다 적으면서, 마감된 상태라면 모집 중으로 자동 상태 변경
         if(joinStatus.equals(JoinStatus.APPROVED) && blending.getStatus().equals(BlendingStatus.RECRUITMENT_CLOSED)) {
 
-            long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatusIn(blending, List.of(JoinStatus.HOST, JoinStatus.APPROVED));
+            long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
             if(blending.getCapacity() > currentUserCount) {
                 blending.updateStatus(BlendingStatus.RECRUITING);
             }
@@ -129,7 +129,7 @@ public class BlendingParticipationService {
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
         // Host 검증
-        if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingGrade(blending, userUuid, BlendingGrade.HOST)) {
+        if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingUserGrade(blending, userUuid, BlendingUserGrade.HOST)) {
             throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
         }
 
@@ -148,7 +148,7 @@ public class BlendingParticipationService {
         }
 
         // 블렌딩 정원이 남아있는지 검증
-        long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatusIn(blending, List.of(JoinStatus.HOST, JoinStatus.APPROVED));
+        long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
         if(blending.getCapacity() <= currentUserCount) {
             throw new BaseException(BaseErrorCode.BLENDING_FULL);
         }
@@ -171,7 +171,7 @@ public class BlendingParticipationService {
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
         // Host 검증
-        if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingGrade(blending, userUuid, BlendingGrade.HOST)) {
+        if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingUserGrade(blending, userUuid, BlendingUserGrade.HOST)) {
             throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
         }
 

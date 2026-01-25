@@ -1,7 +1,7 @@
 package kr.blendit.api.blending.domain;
 
 import jakarta.persistence.*;
-import kr.blendit.api.blending.constant.BlendingGrade;
+import kr.blendit.api.blending.constant.BlendingUserGrade;
 import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.user.domain.User;
 import kr.blendit.common.entity.BaseTimeEntity;
@@ -35,9 +35,9 @@ public class BlendingUser extends BaseTimeEntity {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     private Blending blending;
 
-    @Column(name = "blending_grade", length = 20, nullable = false)
+    @Column(name = "blending_user_grade", length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
-    private BlendingGrade blendingGrade;
+    private BlendingUserGrade blendingUserGrade;
 
     @Column(name = "message")
     private String message;
@@ -51,11 +51,11 @@ public class BlendingUser extends BaseTimeEntity {
      * 블렌딩 유저 생성자
      */
     @Builder(access = AccessLevel.PRIVATE)
-    private BlendingUser(User user, Blending blending, BlendingGrade blendingGrade,
+    private BlendingUser(User user, Blending blending, BlendingUserGrade blendingUserGrade,
                          String message, JoinStatus joinStatus) {
         this.user = user;
         this.blending = blending;
-        this.blendingGrade = blendingGrade;
+        this.blendingUserGrade = blendingUserGrade;
         this.message = message;
         this.joinStatus = joinStatus;
     }
@@ -64,17 +64,17 @@ public class BlendingUser extends BaseTimeEntity {
     /**
      * 블렌딩 유저 생성
      */
-    public static BlendingUser create(User user, Blending blending, BlendingGrade blendingGrade,
+    public static BlendingUser create(User user, Blending blending, BlendingUserGrade blendingUserGrade,
                                       String message, JoinStatus joinStatus) {
 
-        if (user == null || blending == null || blendingGrade == null || joinStatus == null) {
+        if (user == null || blending == null || blendingUserGrade == null || joinStatus == null) {
             throw new BaseException(BaseErrorCode.INVALID_PARAMETER);
         }
 
         return BlendingUser.builder()
                 .user(user)
                 .blending(blending)
-                .blendingGrade(blendingGrade)
+                .blendingUserGrade(blendingUserGrade)
                 .message(message)
                 .joinStatus(joinStatus)
                 .build();

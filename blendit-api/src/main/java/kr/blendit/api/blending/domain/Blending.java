@@ -1,7 +1,7 @@
 package kr.blendit.api.blending.domain;
 
 import jakarta.persistence.*;
-import kr.blendit.api.blending.constant.BlendingGrade;
+import kr.blendit.api.blending.constant.BlendingUserGrade;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
@@ -101,11 +101,11 @@ public class Blending extends BaseEntity {
     /**
      * 참여자 추가
      *
-     * @param blendingGrade 참여자 권한
+     * @param blendingUserGrade 참여자 권한
      * @param joinStatus 참여 상태(승인, 거절 등)
      */
-    public BlendingUser addParticipant(User user, BlendingGrade blendingGrade, String message, JoinStatus joinStatus) {
-        BlendingUser blendingUser = BlendingUser.create(user, this, blendingGrade, message, joinStatus);
+    public BlendingUser addParticipant(User user, BlendingUserGrade blendingUserGrade, String message, JoinStatus joinStatus) {
+        BlendingUser blendingUser = BlendingUser.create(user, this, blendingUserGrade, message, joinStatus);
         this.participants.add(blendingUser);
         return blendingUser;
     }
@@ -206,7 +206,7 @@ public class Blending extends BaseEntity {
         for(BlendingUser blendingUser : this.participants) {
             JoinStatus joinStatus = blendingUser.getJoinStatus();
 
-            if(joinStatus.equals(JoinStatus.HOST) || joinStatus.equals(JoinStatus.APPROVED)) participantCount++;
+            if(joinStatus.equals(JoinStatus.APPROVED)) participantCount++;
         }
 
         return participantCount;
@@ -221,7 +221,7 @@ public class Blending extends BaseEntity {
     public boolean isHost(String userUuid) {
         boolean isHost = false;
         for(BlendingUser blendingUser : this.getParticipants()) {
-            if(blendingUser.getBlendingGrade() == BlendingGrade.HOST) {
+            if(blendingUser.getBlendingUserGrade() == BlendingUserGrade.HOST) {
                 if(blendingUser.getUser().getUuid().equals(userUuid)) isHost = true;
                 break;
             }
