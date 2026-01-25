@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import kr.blendit.api.blending.constant.BlendingGrade;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.constant.JoinStatus;
+import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
+import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
 import kr.blendit.api.common.constant.Position;
 import kr.blendit.api.user.domain.User;
 import kr.blendit.api.common.domain.Keyword;
@@ -80,24 +82,17 @@ public class Blending extends BaseEntity {
      *
      * @apiNote 최소 인원 2명 / 일정은 과거 불가
      */
-    public static Blending create(String title, String content, Position position, Integer capacity, String region, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
-
-        if(capacity < 2) {
-            throw new BaseException(BaseErrorCode.BLENDING_CAPACITY_BELOW_MIN);
-        }
-        if(schedule.isBefore(LocalDateTime.now())) {
-            throw new BaseException(BaseErrorCode.BLENDING_INVALID_SCHEDULE_TIME);
-        }
+    public static Blending create(BlendingCreateRequest request) {
 
         return Blending.builder()
-                .title(title)
-                .content(content)
-                .position(position)
-                .capacity(capacity)
-                .region(region)
-                .openChattingUrl(openChattingUrl)
-                .schedule(schedule)
-                .autoApproval(autoApproval)
+                .title(request.getTitle())
+                .content(request.getContent())
+                .position(request.getPosition())
+                .capacity(request.getCapacity())
+                .region(request.getRegion())
+                .openChattingUrl(request.getOpenChattingUrl())
+                .schedule(request.getSchedule())
+                .autoApproval(request.getAutoApproval())
                 .build();
     }
 
@@ -166,15 +161,15 @@ public class Blending extends BaseEntity {
     /**
      * 블렌딩 정보 수정
      */
-    public void update(String title, String content, Position position, Integer capacity, String region, String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
-        if(title != null) this.title = title;
-        if(content != null) this.content = content;
-        if(position != null) this.position = position;
-        if(capacity != null) this.capacity = capacity;
-        if(region != null) this.region = region;
-        this.openChattingUrl = openChattingUrl;
-        if(schedule != null) this.schedule = schedule;
-        if(autoApproval != null) this.autoApproval = autoApproval;
+    public void update(BlendingUpdateRequest request) {
+        if (request.getTitle() != null) this.title = request.getTitle();
+        if (request.getContent() != null) this.content = request.getContent();
+        if (request.getPosition() != null) this.position = request.getPosition();
+        if (request.getCapacity() != null) this.capacity = request.getCapacity();
+        if (request.getRegion() != null) this.region = request.getRegion();
+        if (request.getOpenChattingUrl() != null) this.openChattingUrl = request.getOpenChattingUrl();
+        if (request.getSchedule() != null) this.schedule = request.getSchedule();
+        if (request.getAutoApproval() != null) this.autoApproval = request.getAutoApproval();
     }
 
 

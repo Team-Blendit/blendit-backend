@@ -45,26 +45,11 @@ public class BlendingService {
         User user = userRepository.findByUuid(userUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.USER_NOT_FOUND));
 
-        Blending blending = Blending.create(
-                blendingCreateRequest.getTitle(),
-                blendingCreateRequest.getContent(),
-                blendingCreateRequest.getPosition(),
-                blendingCreateRequest.getCapacity(),
-                blendingCreateRequest.getRegion(),
-                blendingCreateRequest.getOpenChattingUrl(),
-                blendingCreateRequest.getSchedule(),
-                blendingCreateRequest.getAutoApproval()
-        );
+        Blending blending = Blending.create(blendingCreateRequest);
 
         List<Keyword> keywords = keywordRepository.findAllByNameIn(blendingCreateRequest.getKeywords());
         for(Keyword keyword : keywords) {
             blending.addKeyword(keyword);
-        }
-        if(blending.getKeywords().isEmpty()) {
-            throw new BaseException(BaseErrorCode.KEYWORD_IS_EMPTY);
-        }
-        if(blending.getKeywords().size() >= 4) {
-            throw new BaseException(BaseErrorCode.KEYWORD_LIMIT_EXCEEDED);
         }
 
         BlendingUser blendingUser = blending.addParticipant(
@@ -109,28 +94,23 @@ public class BlendingService {
             throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
         }
 
-        int participantCount = blending.getCurrentParticipantCount();
-
-        if(participantCount >= blendingUpdateRequest.getCapacity()) {
-            throw new BaseException(BaseErrorCode.BLENDING_INVALID_CAPACITY);
+        if(blendingUpdateRequest.getCapacity() != null) {
+            int participantCount = blending.getCurrentParticipantCount();
+            if(participantCount > blendingUpdateRequest.getCapacity()) {
+                throw new BaseException(BaseErrorCode.BLENDING_INVALID_CAPACITY);
+            }
         }
-        if(blendingUpdateRequest.getSchedule().isBefore(LocalDateTime.now())) {
+
+        if(blendingUpdateRequest.getSchedule() != null && blendingUpdateRequest.getSchedule().isBefore(LocalDateTime.now())) {
             throw new BaseException(BaseErrorCode.BLENDING_INVALID_SCHEDULE_TIME);
         }
 
-        List<Keyword> newKeywords = keywordRepository.findAllByNameIn(blendingUpdateRequest.getKeywords());
-        blending.updateKeyword(newKeywords);
+        if (blendingUpdateRequest.getKeywords() != null) {
+            List<Keyword> newKeywords = keywordRepository.findAllByNameIn(blendingUpdateRequest.getKeywords());
+            blending.updateKeyword(newKeywords);
+        }
 
-        blending.update(
-                blendingUpdateRequest.getTitle(),
-                blendingUpdateRequest.getContent(),
-                blendingUpdateRequest.getPosition(),
-                blendingUpdateRequest.getCapacity(),
-                blendingUpdateRequest.getRegion(),
-                blendingUpdateRequest.getOpenChattingUrl(),
-                blendingUpdateRequest.getSchedule(),
-                blendingUpdateRequest.getAutoApproval()
-        );
+        blending.update(blendingUpdateRequest);
     }
 
 

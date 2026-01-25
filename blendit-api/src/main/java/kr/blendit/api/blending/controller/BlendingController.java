@@ -3,14 +3,15 @@ package kr.blendit.api.blending.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.dto.request.BlendingApplyRequest;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
 import kr.blendit.api.blending.dto.response.BlendingDetailResponse;
 import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
 import kr.blendit.api.blending.facade.BlendingFacade;
+import kr.blendit.common.security.jwt.CurrentUser;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Blending API")
@@ -23,65 +24,65 @@ public class BlendingController {
 
     @Operation(summary = "블렌딩 생성 API", security = @SecurityRequirement(name = "bearerAuth"), description = "openChattingUrl은 생략할 수 있습니다.")
     @PostMapping
-    public void createBlending(@AuthenticationPrincipal String userUuid, @RequestBody BlendingCreateRequest blendingCreateRequest) {
+    public void createBlending(CurrentUser currentUser, @RequestBody @Valid BlendingCreateRequest blendingCreateRequest) {
 
-        blendingFacade.createBlending(userUuid, blendingCreateRequest);
+        blendingFacade.createBlending(currentUser.getUserUuid(), blendingCreateRequest);
     }
 
     @Operation(summary = "블렌딩 논리 삭제 API", security = @SecurityRequirement(name = "bearerAuth"))
     @DeleteMapping("/{blendingUuid}")
-    public void deleteBlending(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid) {
+    public void deleteBlending(CurrentUser currentUser, @PathVariable String blendingUuid) {
 
-        blendingFacade.deleteBlending(userUuid, blendingUuid);
+        blendingFacade.deleteBlending(currentUser.getUserUuid(), blendingUuid);
     }
 
     @Operation(summary = "블렌딩 정보 수정 API", security = @SecurityRequirement(name = "bearerAuth"), description = "openChattingUrl은 생략할 수 있습니다.")
     @PatchMapping("/{blendingUuid}")
-    public void updateBlending(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid, @RequestBody BlendingUpdateRequest blendingUpdateRequest) {
+    public void updateBlending(CurrentUser currentUser, @PathVariable String blendingUuid, @RequestBody BlendingUpdateRequest blendingUpdateRequest) {
 
-        blendingFacade.updateBlending(userUuid, blendingUuid, blendingUpdateRequest);
+        blendingFacade.updateBlending(currentUser.getUserUuid(), blendingUuid, blendingUpdateRequest);
     }
 
     @Operation(summary = "블렌딩 상태 변경 API", security = @SecurityRequirement(name = "bearerAuth"))
     @PatchMapping("/{blendingUuid}/status")
-    public void updateBlendingStatus(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid, @RequestParam BlendingStatus blendingStatus) {
+    public void updateBlendingStatus(CurrentUser currentUser, @PathVariable String blendingUuid, @RequestParam BlendingStatus blendingStatus) {
 
-        blendingFacade.updateBlendingStatus(userUuid, blendingUuid, blendingStatus);
+        blendingFacade.updateBlendingStatus(currentUser.getUserUuid(), blendingUuid, blendingStatus);
     }
 
     @Operation(summary = "블렌딩 상세 조회 API", security = @SecurityRequirement(name = "bearerAuth"), description = "대기, 승인, 거절, 참여 중 상태의 모든 유저를 joinStatus 값으로 구분합니다.")
     @GetMapping("/{blendingUuid}")
-    public BlendingDetailResponse getBlendingDetail(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid) {
+    public BlendingDetailResponse getBlendingDetail(CurrentUser currentUser, @PathVariable String blendingUuid) {
 
-        return blendingFacade.getBlendingDetail(userUuid, blendingUuid);
+        return blendingFacade.getBlendingDetail(currentUser.getUserUuid(), blendingUuid);
     }
 
     @Operation(summary = "블렌딩 참여 신청 API", security = @SecurityRequirement(name = "bearerAuth"))
     @PostMapping("/{blendingUuid}/participation")
-    public void applyParticipation(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid, @RequestBody BlendingApplyRequest blendingApplyRequest) {
+    public void applyParticipation(CurrentUser currentUser, @PathVariable String blendingUuid, @RequestBody BlendingApplyRequest blendingApplyRequest) {
 
-        blendingFacade.applyParticipation(userUuid, blendingUuid, blendingApplyRequest);
+        blendingFacade.applyParticipation(currentUser.getUserUuid(), blendingUuid, blendingApplyRequest);
     }
 
     @Operation(summary = "블렌딩 참여 신청 API", security = @SecurityRequirement(name = "bearerAuth"))
     @DeleteMapping("/{blendingUuid}/participation")
-    public void cancelParticipation(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid) {
+    public void cancelParticipation(CurrentUser currentUser, @PathVariable String blendingUuid) {
 
-        blendingFacade.cancelParticipation(userUuid, blendingUuid);
+        blendingFacade.cancelParticipation(currentUser.getUserUuid(), blendingUuid);
     }
 
     @Operation(summary = "블렌딩 참여 승인 API", security = @SecurityRequirement(name = "bearerAuth"))
     @PatchMapping("/{blendingUuid}/participation/{participantUuid}/approve")
-    public void approveParticipation(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid, @PathVariable String participantUuid) {
+    public void approveParticipation(CurrentUser currentUser, @PathVariable String blendingUuid, @PathVariable String participantUuid) {
 
-        blendingFacade.approveParticipation(userUuid, blendingUuid, participantUuid);
+        blendingFacade.approveParticipation(currentUser.getUserUuid(), blendingUuid, participantUuid);
     }
 
     @Operation(summary = "블렌딩 참여 거부 API", security = @SecurityRequirement(name = "bearerAuth"))
     @PatchMapping("/{blendingUuid}/participation/{participantUuid}/reject")
-    public void rejectParticipation(@AuthenticationPrincipal String userUuid, @PathVariable String blendingUuid, @PathVariable String participantUuid) {
+    public void rejectParticipation(CurrentUser currentUser, @PathVariable String blendingUuid, @PathVariable String participantUuid) {
 
-        blendingFacade.rejectParticipation(userUuid, blendingUuid, participantUuid);
+        blendingFacade.rejectParticipation(currentUser.getUserUuid(), blendingUuid, participantUuid);
     }
 
 }
