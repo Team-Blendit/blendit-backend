@@ -32,4 +32,10 @@ public class UserOnboardingController {
   public void emailDuplicateCheck(String email) {
     userFacade.emailDuplicateCheck(email);
   }
+
+  @Operation(summary = "온보딩 닉네임 중복 체크")
+  @GetMapping("/nickname-duplicate-check")
+  public void nicknameDuplicateCheck(String nickname) {
+    userFacade.nicknameDuplicateCheck(nickname);
+  }
 }

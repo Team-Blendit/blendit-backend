@@ -27,4 +27,9 @@ public class UserFacade {
   public void emailDuplicateCheck(String email) {
     userService.emailDuplicateCheck(email);
   }
+
+  @Transactional(readOnly = true)
+  public void nicknameDuplicateCheck(String nickname) {
+    userService.nicknameDuplicateCheck(nickname);
+  }
 }
