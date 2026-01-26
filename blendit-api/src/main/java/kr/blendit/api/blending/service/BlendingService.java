@@ -46,9 +46,7 @@ public class BlendingService {
         Blending blending = Blending.create(blendingCreateRequest);
 
         List<Keyword> keywords = keywordRepository.findAllByNameIn(blendingCreateRequest.getKeywords());
-        for(Keyword keyword : keywords) {
-            blending.addKeyword(keyword);
-        }
+        blending.addKeywords(keywords);
 
         BlendingUser blendingUser = blending.addParticipant(
                 user,

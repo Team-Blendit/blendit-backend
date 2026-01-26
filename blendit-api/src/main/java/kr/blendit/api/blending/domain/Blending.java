@@ -121,17 +121,18 @@ public class Blending extends BaseEntity {
     /**
      * 키워드 추가
      */
-    public void addKeyword(Keyword keyword) {
-        BlendingKeyword blendingKeyword = BlendingKeyword.create(this, keyword);
-
-        this.keywords.add(blendingKeyword);
+    public void addKeywords(List<Keyword> keywords) {
+        for(Keyword keyword : keywords) {
+            BlendingKeyword blendingKeyword = BlendingKeyword.create(this, keyword);
+            this.keywords.add(blendingKeyword);
+        }
     }
 
 
     /**
      * 키워드 변경
      *
-     * @apiNote addKeyword() 호출
+     * @apiNote addKeywords() 호출
      */
     public void updateKeyword(List<Keyword> newKeywords) {
         // 기존 리스트에서 새 리스트에 없는 것 삭제
@@ -139,15 +140,19 @@ public class Blending extends BaseEntity {
                 !newKeywords.contains(existing.getKeyword())
         );
 
+        List<Keyword> saveKeywords = new ArrayList<>();
+
         // 새 리스트에서 기존 리스트에 없는 것만 추가
         for (Keyword newKeyword : newKeywords) {
             boolean exists = this.keywords.stream()
                     .anyMatch(existing -> existing.getKeyword().equals(newKeyword));
 
             if (!exists) {
-                addKeyword(newKeyword);
+                saveKeywords.add(newKeyword);
             }
         }
+
+        if(!saveKeywords.isEmpty()) addKeywords(saveKeywords);
     }
 
 
