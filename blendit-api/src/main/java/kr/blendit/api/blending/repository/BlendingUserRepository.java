@@ -6,6 +6,7 @@ import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,4 +38,12 @@ public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long
      * 참여중인 특정 BlendingUser 조회
      */
     Optional<BlendingUser> findByBlendingAndUser_Uuid(Blending blending, String userUuid);
+
+    @Query("""
+            SELECT bu
+            FROM BlendingUser bu
+                JOIN FETCH bu.user
+            WHERE bu.blending = :blending AND bu.joinStatus IN :joinStatuses
+            """)
+    List<BlendingUser> findByBlendingAndJoinStatusInWithUser(Blending blending, List<JoinStatus> joinStatuses);
 }

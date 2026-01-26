@@ -10,6 +10,15 @@ public interface BlendingRepository extends JpaRepository<Blending, Long> {
 
     Optional<Blending> findByUuid(String uuid);
 
+    @Query("""
+            SELECT b
+            FROM Blending b
+                LEFT JOIN FETCH b.keywords bk
+                LEFT JOIN FETCH bk.keyword
+            WHERE b.uuid = :blendingUuid
+            """)
+    Optional<Blending> findByUuidWithKeywords(String blendingUuid);
+
     /**
      * BlendingUser 까지만 조회
      */

@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -137,20 +138,30 @@ public class BlendingService {
      * @return BlendingDetailResponse 참여자를 포함한 블렌딩 관련 모든 데이터
      */
     public BlendingDetailResponse find(String userUuid, String blendingUuid) {
+        // todo: User 엔티티 완성되면 keyword, bookmark 여부도 필요
 
-        Blending blending = blendingRepository.findByUuidWithUsers(blendingUuid)
+        Blending blending = blendingRepository.findByUuidWithKeywords(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
+        boolean isBookmark = false;
+        boolean isHost = false;
         long bookmarkCount = blendingBookmarkRepository.countByBlending(blending);
-        boolean isBookmarked = false;
 
         if (userUuid != null && !userUuid.equals("anonymousUser")) {
-            isBookmarked = blendingBookmarkRepository.existsByBlendingAndUser_Uuid(blending, userUuid);
+            isBookmark = blendingBookmarkRepository.existsByBlendingAndUser_Uuid(blending, userUuid);
+            isHost = blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingUserGrade(
+                    blending, userUuid, BlendingUserGrade.HOST);
         }
 
-        // 접근한 유저가 해당 블렌딩의 호스트인지 검증
-        boolean isHost = blending.isHost(userUuid);
+        List<JoinStatus> joinStatuses = new ArrayList<>(List.of(JoinStatus.APPROVED));
+        if(isHost) {
+            joinStatuses.add(JoinStatus.PENDING);
+        }
 
-        return BlendingDetailResponse.from(blending, bookmarkCount, isBookmarked, isHost);
+        List<BlendingUser> blendingUsers = blendingUserRepository.findByBlendingAndJoinStatusInWithUser(
+                blending, joinStatuses);
+
+        return BlendingDetailResponse.from(blending, blendingUsers, bookmarkCount, isBookmark, isHost);
     }
+
 }

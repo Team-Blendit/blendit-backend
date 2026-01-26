@@ -23,19 +23,17 @@ public class BlendingParticipantResponse {
     private JoinStatus joinStatus;
 
 
-    public static List<BlendingParticipantResponse> from(List<BlendingUser> blendingUsers, Boolean isHost) {
+    public static List<BlendingParticipantResponse> from(List<BlendingUser> blendingUsers) {
         List<BlendingParticipantResponse> blendingParticipantResponses = new ArrayList<>();
 
         for(BlendingUser blendingUser : blendingUsers) {
 
-            if(canShow(blendingUser.getJoinStatus(), isHost)) {
-                BlendingParticipantResponse blendingUserResponse = BlendingParticipantResponse.builder()
-                        .uuid(blendingUser.getUser().getUuid())
-                        .blendingUserGrade(blendingUser.getBlendingUserGrade())
-                        .joinStatus(blendingUser.getJoinStatus())
-                        .build();
-                blendingParticipantResponses.add(blendingUserResponse);
-            }
+            BlendingParticipantResponse blendingUserResponse = BlendingParticipantResponse.builder()
+                    .uuid(blendingUser.getUser().getUuid())
+                    .blendingUserGrade(blendingUser.getBlendingUserGrade())
+                    .joinStatus(blendingUser.getJoinStatus())
+                    .build();
+            blendingParticipantResponses.add(blendingUserResponse);
         }
         return blendingParticipantResponses;
     }

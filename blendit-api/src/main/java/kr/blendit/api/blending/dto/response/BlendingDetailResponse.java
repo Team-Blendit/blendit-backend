@@ -3,6 +3,7 @@ package kr.blendit.api.blending.dto.response;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingKeyword;
+import kr.blendit.api.blending.domain.BlendingUser;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -31,14 +32,16 @@ public class BlendingDetailResponse {
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
     private Boolean isBookmarked;
+    private Boolean isHost;
 
 
-    public static BlendingDetailResponse from(Blending blending, long bookmarkCount, boolean isBookmarked, boolean isHost) {
+    public static BlendingDetailResponse from(
+            Blending blending, List<BlendingUser> blendingUsers, long bookmarkCount, boolean isBookmarked, boolean isHost) {
 
         return BlendingDetailResponse.builder()
                 .id(blending.getId())
                 .uuid(blending.getUuid())
-                .blendingParticipant(BlendingParticipantResponse.from(blending.getParticipants(), isHost))
+                .blendingParticipant(BlendingParticipantResponse.from(blendingUsers))
                 .title(blending.getTitle())
                 .content(blending.getContent())
                 .position(blending.getPosition().getDescription())
@@ -53,6 +56,7 @@ public class BlendingDetailResponse {
                 .createdDate(blending.getCreatedDate())
                 .lastModifiedDate(blending.getLastModifiedDate())
                 .isBookmarked(isBookmarked)
+                .isHost(isHost)
                 .build();
     }
 
