@@ -22,4 +22,9 @@ public class UserFacade {
     List<Keyword> keywordList = keywordService.getKeywordList(request.keywordUuidList());
     userService.onboarding(currentUser.getUserUuid(), request, keywordList);
   }
+
+  @Transactional(readOnly = true)
+  public void emailDuplicateCheck(String email) {
+    userService.emailDuplicateCheck(email);
+  }
 }
