@@ -33,11 +33,13 @@ springdoc:
 security:
   public-endpoints:
     - path: /api/blendit/auth/**
-      methods: ["*"]
+      methods: [ "*" ]
     - path: /api/blendit/public/**
-      methods: ["*"]
+      methods: [ "*" ]
     - path: /api/blendit/blending/**
-      methods: ["GET"]
+      methods: [ "GET" ]
+    - path: /api/blendit/keyword/**
+      methods: [ "GET" ]
 
 oidc:
   kakao:
