@@ -136,7 +136,7 @@ public class User extends BaseEntity {
   }
 
   public void onboarding(UserOnboardingRequest request, List<Keyword> keywordList) {
-    if (!this.userKeywords.isEmpty()) {
+    if (isOnboardingComplete()) {
       throw new BaseException(BaseErrorCode.ALREADY_ONBOARDED);
     }
     this.position = request.position();
@@ -148,5 +148,9 @@ public class User extends BaseEntity {
     this.userKeywords = keywordList.stream()
         .map(keyword -> UserKeyword.create(this, keyword))
         .toList();
+  }
+
+  public boolean isOnboardingComplete() {
+    return !this.userKeywords.isEmpty();
   }
 }
