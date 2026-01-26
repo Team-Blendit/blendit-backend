@@ -1,6 +1,6 @@
 package kr.blendit.api.auth.dto;
 
-import kr.blendit.api.user.domain.LoginType;
+import kr.blendit.api.user.constant.LoginType;
 import kr.blendit.api.user.domain.User;
 
 public record OidcLoginResponse(

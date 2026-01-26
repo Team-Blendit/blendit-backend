@@ -1,7 +1,13 @@
 package kr.blendit.api.user.domain;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import kr.blendit.api.auth.dto.oidc.OidcUserInfo;
+import kr.blendit.api.user.constant.LoginType;
+import kr.blendit.api.user.domain.converter.UserLinkListConverter;
+import kr.blendit.api.user.domain.converter.StringListConverter;
+import kr.blendit.api.common.constant.Position;
 import kr.blendit.common.constant.UserRole;
 import kr.blendit.common.entity.BaseEntity;
 import lombok.AccessLevel;
@@ -21,12 +27,30 @@ public class User extends BaseEntity {
     private String email;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserRole role;
+    private Position position;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private Integer tokenVersion = 0;
+    private String experienceYears;
+
+    private String nickname;
+
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String description;
+
+    private String province;
+
+    private String district;
+
+    private String affiliation;
+
+    @Convert(converter = StringListConverter.class)
+    @Column(columnDefinition = "TEXT")
+    private List<String> skills = new ArrayList<>();
+
+    @Convert(converter = UserLinkListConverter.class)
+    @Column(columnDefinition = "TEXT")
+    private List<UserLink> links = new ArrayList<>();
+
+    private String profileImage;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -34,9 +58,16 @@ public class User extends BaseEntity {
 
     private String socialCompanyUserId;
 
-    private String nickname;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role;
 
-    private String profileImage;
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer tokenVersion = 0;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<UserKeyword> userKeywords = new ArrayList<>();
 
     /**
      * 소셜 로그인 사용자 생성

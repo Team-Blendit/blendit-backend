@@ -1,7 +1,7 @@
 package kr.blendit.api.user.service;
 
 import kr.blendit.api.auth.dto.oidc.OidcUserInfo;
-import kr.blendit.api.user.domain.LoginType;
+import kr.blendit.api.user.constant.LoginType;
 import kr.blendit.api.user.domain.User;
 import kr.blendit.api.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package kr.blendit.api.user.domain;
+package kr.blendit.api.user.constant;
 
 public enum LoginType {
     LOCAL,

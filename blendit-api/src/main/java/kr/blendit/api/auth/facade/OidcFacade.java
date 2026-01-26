@@ -6,7 +6,7 @@ import kr.blendit.api.auth.dto.oidc.OidcUserInfo;
 import kr.blendit.api.auth.service.GoogleOidcService;
 import kr.blendit.api.auth.service.KakaoOidcService;
 import kr.blendit.api.auth.service.TokenService;
-import kr.blendit.api.user.domain.LoginType;
+import kr.blendit.api.user.constant.LoginType;
 import kr.blendit.api.user.domain.User;
 import kr.blendit.api.user.service.UserService;
 import lombok.RequiredArgsConstructor;
