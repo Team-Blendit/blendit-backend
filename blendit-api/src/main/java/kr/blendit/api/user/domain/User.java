@@ -52,7 +52,7 @@ public class User extends BaseEntity {
   private String nickname;
 
   @Comment("소개")
-  @Column(columnDefinition = "TEXT", nullable = false)
+  @Column(columnDefinition = "TEXT")
   private String description;
 
   @Comment("도/광역시")
@@ -92,6 +92,7 @@ public class User extends BaseEntity {
   private Integer tokenVersion = 0;
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+  @Builder.Default
   private List<UserKeyword> userKeywords = new ArrayList<>();
 
   /**
