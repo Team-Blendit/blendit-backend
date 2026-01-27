@@ -101,6 +101,11 @@ public class BlendingParticipationService {
         BlendingUser blendingUser = blendingUserRepository.findByBlendingAndUser_Uuid(blending, userUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_APPLIED));
 
+        // 호스트는 탈퇴 불가
+        if(blendingUser.getBlendingUserGrade().equals(BlendingUserGrade.HOST)) {
+            throw new BaseException(BaseErrorCode.BLENDING_HOST_CANNOT_LEAVE);
+        }
+
         // 이미 거절된 신청의 경우 취소 불가
         if(blendingUser.getJoinStatus().equals(JoinStatus.REJECTED)) {
             throw new BaseException(BaseErrorCode.BLENDING_ALREADY_PROCESSED);
@@ -109,14 +114,15 @@ public class BlendingParticipationService {
         JoinStatus joinStatus = blendingUser.getJoinStatus();
         blending.deleteParticipant(blendingUser);
 
-        // 승인된 유저가 탈퇴 시, 현재 참여 인원이 정원보다 적으면서, 마감된 상태라면 모집 중으로 자동 상태 변경
-        if(joinStatus.equals(JoinStatus.APPROVED) && blending.getStatus().equals(BlendingStatus.RECRUITMENT_CLOSED)) {
-
-            long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
-            if(blending.getCapacity() > currentUserCount) {
-                blending.updateStatus(BlendingStatus.RECRUITING);
-            }
-        }
+//        // 승인된 유저가 탈퇴 시, 현재 참여 인원이 정원보다 적으면서, 마감된 상태라면 모집 중으로 자동 상태 변경
+//        // 기획에 따라 자동 변경 x
+//        if(joinStatus.equals(JoinStatus.APPROVED) && blending.getStatus().equals(BlendingStatus.RECRUITMENT_CLOSED)) {
+//
+//            long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
+//            if(blending.getCapacity() > currentUserCount) {
+//                blending.updateStatus(BlendingStatus.RECRUITING);
+//            }
+//        }
     }
 
 

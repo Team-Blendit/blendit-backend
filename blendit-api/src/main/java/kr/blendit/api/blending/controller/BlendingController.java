@@ -64,7 +64,7 @@ public class BlendingController {
         blendingFacade.applyParticipation(currentUser.getUserUuid(), blendingUuid, blendingApplyRequest);
     }
 
-    @Operation(summary = "블렌딩 참여 신청 API", security = @SecurityRequirement(name = "bearerAuth"))
+    @Operation(summary = "블렌딩 참여 신청 취소 API", security = @SecurityRequirement(name = "bearerAuth"))
     @DeleteMapping("/{blendingUuid}/participation")
     public void cancelParticipation(CurrentUser currentUser, @PathVariable String blendingUuid) {
 
