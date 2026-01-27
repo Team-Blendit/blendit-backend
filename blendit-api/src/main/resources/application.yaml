@@ -34,9 +34,19 @@ springdoc:
     path: /docs/swagger
 
 security:
-  public-paths:
-    - /api/blendit/auth/**
-    - /api/blendit/public/**
+  public-endpoints:
+    - path: /api/blendit/auth/**
+      methods: [ "*" ]
+    - path: /api/blendit/public/**
+      methods: [ "*" ]
+    - path: /api/blendit/blending/**
+      methods: [ "GET" ]
+    - path: /api/blendit/keyword/**
+      methods: [ "GET" ]
+    - path: /api/blendit/user/onboarding/email-duplicate-check
+      methods: [ "GET" ]
+    - path: /api/blendit/user/onboarding/nickname-duplicate-check
+      methods: [ "GET" ]
 
 oidc:
   kakao:
