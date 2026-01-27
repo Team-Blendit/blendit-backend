@@ -40,6 +40,10 @@ security:
       methods: [ "GET" ]
     - path: /api/blendit/keyword/**
       methods: [ "GET" ]
+    - path: /api/blendit/user/onboarding/email-duplicate-check
+      methods: [ "GET" ]
+    - path: /api/blendit/user/onboarding/nickname-duplicate-check
+      methods: [ "GET" ]
 
 oidc:
   kakao:
