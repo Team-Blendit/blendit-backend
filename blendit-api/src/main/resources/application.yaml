@@ -17,6 +17,9 @@ spring:
         max-page-size: 200
         page-parameter: page
 
+server:
+  forward-headers-strategy: framework
+
 jwt:
   token:
     secret-key: ${JWT_SECRET_KEY:e6c02391cc71b0518fa50e01a454401f23f117d74fc591091564a898613b893f}
