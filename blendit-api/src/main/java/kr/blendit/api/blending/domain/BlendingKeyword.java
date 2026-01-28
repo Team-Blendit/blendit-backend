@@ -24,11 +24,11 @@ public class BlendingKeyword {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "blending_id", nullable = false)
+    @JoinColumn(name = "blending_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Blending blending;
 
-    @JoinColumn(name = "keyword_id", nullable = false)
+    @JoinColumn(name = "keyword_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Keyword keyword;
 

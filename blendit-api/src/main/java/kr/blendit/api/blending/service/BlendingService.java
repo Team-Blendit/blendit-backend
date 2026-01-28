@@ -20,6 +20,7 @@ import kr.blendit.common.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class BlendingService {
 
     private final BlendingRepository blendingRepository;
@@ -46,6 +48,7 @@ public class BlendingService {
 
         Blending blending = Blending.create(blendingCreateRequest);
 
+        // todo: keyword uuid로 리팩토링 필요
         List<Keyword> keywords = keywordRepository.findAllByNameIn(blendingCreateRequest.getKeywords());
         blending.addKeywords(keywords);
 
