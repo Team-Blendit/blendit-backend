@@ -40,11 +40,11 @@ public class UserService {
   @Transactional
   public void onboarding(String userUuid, UserOnboardingRequest request, List<Keyword> keywordList) {
     User user = getUser(userUuid);
-    if (!user.getEmail().equals(request.email())) {
+    if (!request.email().equals(user.getEmail())) {
       emailDuplicateCheck(request.email());
     }
 
-    if (!user.getNickname().equals(request.nickname())) {
+    if (!request.nickname().equals(user.getNickname())) {
       nicknameDuplicateCheck(request.nickname());
     }
 
