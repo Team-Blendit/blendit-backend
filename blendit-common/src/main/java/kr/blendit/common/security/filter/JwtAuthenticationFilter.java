@@ -2,11 +2,15 @@ package kr.blendit.common.security.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import kr.blendit.common.security.config.SecurityProperties.PublicEndpoint;
 import kr.blendit.common.security.exception.JwtTokenErrorCode;
 import kr.blendit.common.security.exception.JwtTokenException;
 import kr.blendit.common.security.jwt.JwtAuthenticationToken;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.core.Authentication;
@@ -21,16 +25,58 @@ import java.util.List;
 
 import static java.util.Objects.isNull;
 
+@Slf4j
 public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     private final AuthenticationProvider provider;
+    private final SkipPathRequestMatcher skipPathRequestMatcher;
 
-    public JwtAuthenticationFilter(List<String> pathsToSkip, List<String> processingPaths,
+    public JwtAuthenticationFilter(List<PublicEndpoint> publicEndpoints, List<String> processingPaths,
                                    AuthenticationFailureHandler failureHandler,
                                    AuthenticationProvider provider) {
-        super(new SkipPathRequestMatcher(pathsToSkip, processingPaths));
+        super(new SkipPathRequestMatcher(publicEndpoints, processingPaths));
+        this.skipPathRequestMatcher = new SkipPathRequestMatcher(publicEndpoints, processingPaths);
         this.provider = provider;
         this.setAuthenticationFailureHandler(failureHandler);
+    }
+
+    @Override
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
+            throws IOException, ServletException {
+        HttpServletRequest request = (HttpServletRequest) req;
+        HttpServletResponse response = (HttpServletResponse) res;
+
+        // Public 엔드포인트인 경우 Optional Auth 처리
+        if (skipPathRequestMatcher.isPublicEndpoint(request)) {
+            tryOptionalAuthentication(request);
+            chain.doFilter(request, response);
+            return;
+        }
+
+        // 기본 필터 로직 수행
+        super.doFilter(request, response, chain);
+    }
+
+    /**
+     * Public 엔드포인트에서 토큰이 있으면 인증 시도 (실패해도 계속 진행)
+     */
+    private void tryOptionalAuthentication(HttpServletRequest request) {
+        String tokenPayload = request.getHeader(HttpHeaders.AUTHORIZATION);
+
+        if (isNull(tokenPayload) || !tokenPayload.startsWith("Bearer ")) {
+            return;
+        }
+
+        try {
+            String token = tokenPayload.replace("Bearer ", "");
+            Authentication auth = provider.authenticate(new JwtAuthenticationToken(token));
+            SecurityContext context = SecurityContextHolder.getContext();
+            context.setAuthentication(auth);
+            SecurityContextHolder.setContext(context);
+        } catch (Exception e) {
+            log.debug("Optional auth failed for public endpoint: {}", e.getMessage());
+            // Public 엔드포인트이므로 실패해도 무시하고 진행
+        }
     }
 
     @Override

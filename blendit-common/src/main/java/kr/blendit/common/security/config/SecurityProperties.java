@@ -6,11 +6,26 @@ import java.util.List;
 
 @ConfigurationProperties(prefix = "security")
 public record SecurityProperties(
-    List<String> publicPaths
+    List<PublicEndpoint> publicEndpoints
 ) {
     public SecurityProperties {
-        if (publicPaths == null) {
-            publicPaths = List.of();
+        if (publicEndpoints == null) {
+            publicEndpoints = List.of();
+        }
+    }
+
+    public record PublicEndpoint(
+        String path,
+        List<String> methods
+    ) {
+        public PublicEndpoint {
+            if (methods == null || methods.isEmpty()) {
+                methods = List.of("*");
+            }
+        }
+
+        public boolean matchesMethod(String method) {
+            return methods.contains("*") || methods.contains(method.toUpperCase());
         }
     }
 }

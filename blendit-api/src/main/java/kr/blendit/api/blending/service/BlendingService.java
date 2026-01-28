@@ -12,7 +12,7 @@ import kr.blendit.api.blending.repository.BlendingBookmarkRepository;
 import kr.blendit.api.blending.repository.BlendingRepository;
 import kr.blendit.api.blending.repository.BlendingUserRepository;
 import kr.blendit.api.blending.repository.KeywordRepository;
-import kr.blendit.api.common.domain.Keyword;
+import kr.blendit.api.keyword.domain.Keyword;
 import kr.blendit.api.user.domain.User;
 import kr.blendit.api.user.repository.UserRepository;
 import kr.blendit.common.exception.BaseErrorCode;
