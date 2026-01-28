@@ -1,10 +1,7 @@
 package kr.blendit.api.user.service;
 
-import java.util.List;
 import kr.blendit.api.auth.dto.oidc.OidcUserInfo;
-import kr.blendit.api.keyword.domain.Keyword;
 import kr.blendit.api.user.constant.LoginType;
-import kr.blendit.api.user.controller.dto.UserOnboardingRequest;
 import kr.blendit.api.user.domain.User;
 import kr.blendit.api.user.repository.UserKeywordRepository;
 import kr.blendit.api.user.repository.UserRepository;
@@ -35,33 +32,6 @@ public class UserService {
           return existingUser;
         })
         .orElseGet(() -> userRepository.save(User.createSocialUser(loginType, userInfo)));
-  }
-
-  @Transactional
-  public void onboarding(String userUuid, UserOnboardingRequest request, List<Keyword> keywordList) {
-    User user = getUser(userUuid);
-    if (!request.email().equals(user.getEmail())) {
-      emailDuplicateCheck(request.email());
-    }
-
-    if (!request.nickname().equals(user.getNickname())) {
-      nicknameDuplicateCheck(request.nickname());
-    }
-
-    user.onboarding(request, keywordList);
-    userKeywordRepository.saveAll(user.getUserKeywords());
-  }
-
-  public void nicknameDuplicateCheck(String nickname) {
-    if (userRepository.existsByNickname(nickname)) {
-      throw new BaseException(BaseErrorCode.DUPLICATE_NICKNAME);
-    }
-  }
-
-  public void emailDuplicateCheck(String email) {
-    if (userRepository.existsByEmail(email)) {
-      throw new BaseException(BaseErrorCode.DUPLICATE_EMAIL);
-    }
   }
 
   public User getUser(String userUuid) {
