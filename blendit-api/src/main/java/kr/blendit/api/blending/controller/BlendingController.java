@@ -7,11 +7,17 @@ import jakarta.validation.Valid;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.dto.request.BlendingApplyRequest;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
+import kr.blendit.api.blending.dto.request.BlendingListRequest;
 import kr.blendit.api.blending.dto.response.BlendingDetailResponse;
 import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
+import kr.blendit.api.blending.dto.response.BlendingListResponse;
 import kr.blendit.api.blending.facade.BlendingFacade;
 import kr.blendit.common.security.jwt.CurrentUser;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Blending API")
@@ -85,4 +91,15 @@ public class BlendingController {
         blendingFacade.rejectParticipation(currentUser.getUserUuid(), blendingUuid, participantUuid);
     }
 
+    @Operation(summary = "블렌딩 전체 목록 조회 API", security = @SecurityRequirement(name = "bearerAuth"))
+    @GetMapping
+    public Page<BlendingListResponse> getBlendingList(
+            CurrentUser currentUser,
+            @ParameterObject @ModelAttribute BlendingListRequest blendingListRequest,
+            @ParameterObject @PageableDefault(size = 20) Pageable pageable) {
+
+        String userUuid = (currentUser != null) ? currentUser.getUserUuid() : null;
+
+        return blendingFacade.getBlendingList(userUuid, blendingListRequest, pageable);
+    }
 }

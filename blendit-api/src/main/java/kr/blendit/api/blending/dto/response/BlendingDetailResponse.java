@@ -45,7 +45,7 @@ public class BlendingDetailResponse {
                 .title(blending.getTitle())
                 .content(blending.getContent())
                 .position(blending.getPosition().getDescription())
-                .keywords(extractKeywords(blending.getKeywords()))
+                .keywords(BlendingKeyword.extractKeywords(blending.getKeywords()))
                 .capacity(blending.getCapacity())
                 .region(blending.getRegion())
                 .status(blending.getStatus())
@@ -58,15 +58,6 @@ public class BlendingDetailResponse {
                 .isBookmarked(isBookmarked)
                 .isHost(isHost)
                 .build();
-    }
-
-    private static List<String> extractKeywords(List<BlendingKeyword> blendingKeywords) {
-        List<String> strKeywords = new ArrayList<>();
-
-        for(BlendingKeyword blendingKeyword : blendingKeywords) {
-            strKeywords.add(blendingKeyword.getKeyword().getName());
-        }
-        return strKeywords;
     }
 
 }

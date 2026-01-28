@@ -10,5 +10,5 @@ public interface KeywordRepository extends JpaRepository<Keyword, Long> {
     /**
      * 키워드 조회
      */
-    public List<Keyword> findAllByNameIn(List<String> names);
+    List<Keyword> findAllByNameIn(List<String> names);
 }

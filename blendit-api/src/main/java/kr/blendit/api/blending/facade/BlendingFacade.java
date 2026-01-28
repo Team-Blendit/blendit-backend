@@ -3,12 +3,17 @@ package kr.blendit.api.blending.facade;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.dto.request.BlendingApplyRequest;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
+import kr.blendit.api.blending.dto.request.BlendingListRequest;
 import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
 import kr.blendit.api.blending.dto.response.BlendingDetailResponse;
+import kr.blendit.api.blending.dto.response.BlendingListResponse;
 import kr.blendit.api.blending.service.BlendingParticipationService;
+import kr.blendit.api.blending.service.BlendingQueryService;
 import kr.blendit.api.blending.service.BlendingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +24,7 @@ public class BlendingFacade {
 
     private final BlendingService blendingService;
     private final BlendingParticipationService blendingParticipationService;
+    private final BlendingQueryService blendingQueryService;
 
     /**
      * 블렌딩 생성 흐름
@@ -98,5 +104,14 @@ public class BlendingFacade {
     @Transactional
     public void rejectParticipation(String userUuid, String blendingUuid, String participantUuid) {
         blendingParticipationService.reject(userUuid, blendingUuid, participantUuid);
+    }
+
+    /**
+     * 블렌딩 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public Page<BlendingListResponse> getBlendingList(
+            String userUuid, BlendingListRequest blendingListRequest, Pageable pageable) {
+        return blendingQueryService.getList(userUuid, blendingListRequest, pageable);
     }
 }

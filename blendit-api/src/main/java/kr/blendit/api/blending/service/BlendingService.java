@@ -81,6 +81,7 @@ public class BlendingService {
     /**
      * 블렌딩 정보 수정
      */
+    // Todo: 기획에 따라 해당 메서드에서 상태 변경까지 통합
     public void update(String userUuid, String blendingUuid, BlendingUpdateRequest blendingUpdateRequest) {
 
         Blending blending = blendingRepository.findByUuid(blendingUuid)

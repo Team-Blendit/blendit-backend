@@ -110,6 +110,7 @@ public class BlendingParticipationService {
         blending.deleteParticipant(blendingUser);
 
         // 승인된 유저가 탈퇴 시, 현재 참여 인원이 정원보다 적으면서, 마감된 상태라면 모집 중으로 자동 상태 변경
+        // Todo: 기획에 따라 마감된 상태라면 마감으로 유지
         if(joinStatus.equals(JoinStatus.APPROVED) && blending.getStatus().equals(BlendingStatus.RECRUITMENT_CLOSED)) {
 
             long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
