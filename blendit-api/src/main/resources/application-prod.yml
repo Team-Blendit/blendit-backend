@@ -12,3 +12,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+# P6Spy 비활성화 (운영 환경)
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: false

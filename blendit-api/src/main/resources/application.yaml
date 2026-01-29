@@ -52,7 +52,8 @@ security:
       methods: [ "GET" ]
     - path: /api/blendit/user/profile/{userId}
       methods: [ "GET" ]
-
+    - path: /api/blendit/user/search
+      methods: [ "GET" ]
 oidc:
   kakao:
     client-id: ${KAKAO_CLIENT_ID:your-kakao-client-id}
