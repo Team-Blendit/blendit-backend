@@ -112,7 +112,7 @@ public class BlendingFacade {
      */
     @Transactional(readOnly = true)
     public Page<BlendingListResponse> getBlendingList(
-            String userUuid, BlendingListRequest blendingListRequest, Pageable pageable) {
-        return blendingQueryService.getList(userUuid, blendingListRequest, pageable);
+            CurrentUser currentUser, BlendingListRequest blendingListRequest, Pageable pageable) {
+        return blendingQueryService.getList(currentUser, blendingListRequest, pageable);
     }
 }

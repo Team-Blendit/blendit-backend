@@ -5,6 +5,10 @@ import kr.blendit.api.blending.dto.request.BlendingListRequest;
 import kr.blendit.api.blending.dto.response.BlendingListResponse;
 import kr.blendit.api.blending.repository.BlendingBookmarkRepository;
 import kr.blendit.api.blending.repository.BlendingRepository;
+import kr.blendit.api.keyword.domain.Keyword;
+import kr.blendit.api.user.domain.UserKeyword;
+import kr.blendit.api.user.repository.UserKeywordRepository;
+import kr.blendit.common.security.jwt.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -22,12 +26,15 @@ public class BlendingQueryService {
 
     private final BlendingRepository blendingRepository;
     private final BlendingBookmarkRepository blendingBookmarkRepository;
+    private final UserKeywordRepository userKeywordRepository;
 
     /**
      * 블렌딩 목록 조회
      */
     public Page<BlendingListResponse> getList(
-            String userUuid, BlendingListRequest blendingListRequest, Pageable pageable) {
+            CurrentUser currentUser, BlendingListRequest blendingListRequest, Pageable pageable) {
+
+        String userUuid = (currentUser != null) ? currentUser.getUserUuid() : null;
 
         List<BlendingListResponse> finalBlendingList = new ArrayList<>();
         int pageSize = pageable.getPageSize();
@@ -37,10 +44,10 @@ public class BlendingQueryService {
 
         // 추천 블렌딩 조회
         if (isLogin && pageNumber == 0) {
-            // Todo: user keyword가 있어야 호출 가능
-//            int recommendationCount = 8;
-//            List<String> keywords = keywordRepository.findUserKeyword(userUuid);
-//            finalBlendingList.addAll(getRecommendationList(userUuid, keywords, recommendationCount));
+            int recommendationCount = 12;
+            List<UserKeyword> keywords = userKeywordRepository.findUserKeywordNamesByUserUuid(userUuid);
+            finalBlendingList.addAll(getRecommendationList(userUuid, keywords, recommendationCount));
+            // todo: 추천 개수가 12개가 되지 않는다면 모자란 개수는 최근 블렌딩을 보여줘야한다.
         }
 
         int layoutDeduction = 4; // 한 줄에 표시할 블렌딩
@@ -55,9 +62,6 @@ public class BlendingQueryService {
 
         // 전체 개수 조회 및 계산
         long generalTotalCount = blendingRepository.countByCondition(userUuid, blendingListRequest);
-        // Todo: 조회한 추천 블렌딩이 0개라면? getRecommendationList를 호출할 때
-        //  List<Blending>을 즉시 가공하지 않고 size()로 recommendationCount를 최신화해야한다.
-        //  우선 0개일 경우 어떻게 할지 상의해야한다.
 
         return new PageImpl<>(finalBlendingList, pageable, generalTotalCount);
     }
@@ -67,7 +71,9 @@ public class BlendingQueryService {
      * 추천 블렌딩 추출
      */
     private List<BlendingListResponse> getRecommendationList(
-            String userUuid, List<String> keywords, Integer recommendationCount) {
+            String userUuid, List<UserKeyword> userKeywords, Integer recommendationCount) {
+
+        List<String> keywords = UserKeyword.toNames(userKeywords);
 
         List<Blending> blendingList = blendingRepository.findRecommendation(keywords, recommendationCount);
         Set<Long> myBookmarkedIds = checkBookmark(userUuid, true, blendingList);

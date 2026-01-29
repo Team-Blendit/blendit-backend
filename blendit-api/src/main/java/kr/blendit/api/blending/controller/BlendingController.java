@@ -98,8 +98,6 @@ public class BlendingController {
             @ParameterObject @ModelAttribute BlendingListRequest blendingListRequest,
             @ParameterObject @PageableDefault(size = 20) Pageable pageable) {
 
-        String userUuid = (currentUser != null) ? currentUser.getUserUuid() : null;
-
-        return blendingFacade.getBlendingList(userUuid, blendingListRequest, pageable);
+        return blendingFacade.getBlendingList(currentUser, blendingListRequest, pageable);
     }
 }

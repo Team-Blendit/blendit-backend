@@ -16,6 +16,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(
     name = "user_keyword",
@@ -45,5 +48,14 @@ public class UserKeyword extends BaseEntity {
         .user(user)
         .keyword(keyword)
         .build();
+  }
+
+  public static List<String> toNames(List<UserKeyword> userKeywords) {
+    if (userKeywords == null || userKeywords.isEmpty()) {
+      return new ArrayList<>();
+    }
+    return userKeywords.stream()
+            .map(uk -> uk.getKeyword().getName())
+            .toList();
   }
 }

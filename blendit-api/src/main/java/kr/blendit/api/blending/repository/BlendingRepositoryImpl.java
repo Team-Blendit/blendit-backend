@@ -15,7 +15,7 @@ import java.util.List;
 import static kr.blendit.api.blending.domain.QBlending.blending;
 import static kr.blendit.api.blending.domain.QBlendingKeyword.blendingKeyword;
 import static kr.blendit.api.blending.domain.QBlendingBookmark.blendingBookmark;
-import static kr.blendit.api.common.domain.QKeyword.keyword;
+import static kr.blendit.api.keyword.domain.QKeyword.keyword;
 import static kr.blendit.api.user.domain.QUser.user;
 
 @RequiredArgsConstructor
