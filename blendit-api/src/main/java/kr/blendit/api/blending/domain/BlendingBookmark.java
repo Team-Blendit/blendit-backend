@@ -24,11 +24,11 @@ public class BlendingBookmark {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private User user;
 
-    @JoinColumn(name = "blending_id")
+    @JoinColumn(name = "blending_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Blending blending;
 

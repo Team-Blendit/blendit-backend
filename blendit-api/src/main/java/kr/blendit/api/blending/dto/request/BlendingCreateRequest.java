@@ -39,5 +39,5 @@ public class BlendingCreateRequest {
 
     @NotEmpty(message = "키워드는 최소 1개 이상이어야 합니다.")
     @Size(max = 3, message = "키워드는 최대 3개까지만 등록 가능합니다.")
-    private List<String> keywords;
+    private List<String> keywordUuidList;
 }

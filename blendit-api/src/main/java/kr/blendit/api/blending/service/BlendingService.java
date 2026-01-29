@@ -11,15 +11,17 @@ import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
 import kr.blendit.api.blending.repository.BlendingBookmarkRepository;
 import kr.blendit.api.blending.repository.BlendingRepository;
 import kr.blendit.api.blending.repository.BlendingUserRepository;
-import kr.blendit.api.blending.repository.KeywordRepository;
-import kr.blendit.api.common.domain.Keyword;
+import kr.blendit.api.keyword.domain.Keyword;
+import kr.blendit.api.keyword.repository.KeywordRepository;
 import kr.blendit.api.user.domain.User;
 import kr.blendit.api.user.repository.UserRepository;
 import kr.blendit.common.exception.BaseErrorCode;
 import kr.blendit.common.exception.BaseException;
+import kr.blendit.common.security.jwt.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class BlendingService {
 
     private final BlendingRepository blendingRepository;
@@ -46,7 +49,7 @@ public class BlendingService {
 
         Blending blending = Blending.create(blendingCreateRequest);
 
-        List<Keyword> keywords = keywordRepository.findAllByNameIn(blendingCreateRequest.getKeywords());
+        List<Keyword> keywords = keywordRepository.findAllByUuidIn(blendingCreateRequest.getKeywordUuidList());
         blending.addKeywords(keywords);
 
         BlendingUser blendingUser = blending.addParticipant(
@@ -103,8 +106,8 @@ public class BlendingService {
             throw new BaseException(BaseErrorCode.BLENDING_INVALID_SCHEDULE_TIME);
         }
 
-        if (blendingUpdateRequest.getKeywords() != null) {
-            List<Keyword> newKeywords = keywordRepository.findAllByNameIn(blendingUpdateRequest.getKeywords());
+        if (blendingUpdateRequest.getKeywordUuidList() != null) {
+            List<Keyword> newKeywords = keywordRepository.findAllByUuidIn(blendingUpdateRequest.getKeywordUuidList());
             blending.updateKeyword(newKeywords);
         }
 
@@ -138,8 +141,10 @@ public class BlendingService {
      *
      * @return BlendingDetailResponse 참여자를 포함한 블렌딩 관련 모든 데이터
      */
-    public BlendingDetailResponse find(String userUuid, String blendingUuid) {
-        // todo: User 엔티티 완성되면 keyword, bookmark 여부도 필요
+    public BlendingDetailResponse find(CurrentUser currentUser, String blendingUuid) {
+        String userUuid = currentUser != null ? currentUser.getUserUuid() : null;
+
+        // todo: 추후 currentUser가 해당 블렌딩의 참여자가 아니라면 BlendingStatus가 COMPLETED, CANCELED는 볼 수 없도록 수정 필요
 
         Blending blending = blendingRepository.findByUuidWithKeywords(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));

@@ -1,8 +1,6 @@
 package kr.blendit.common.config;
 
 import kr.blendit.common.constant.UserRole;
-import kr.blendit.common.security.exception.JwtTokenErrorCode;
-import kr.blendit.common.security.exception.JwtTokenException;
 import kr.blendit.common.security.jwt.CurrentUser;
 import kr.blendit.common.security.jwt.JwtAuthenticationToken;
 import org.springframework.core.MethodParameter;
@@ -22,7 +20,7 @@ public class UserHandlerArgumentResolver implements HandlerMethodArgumentResolve
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.getParameterType().equals(CurrentUser.class);
+        return CurrentUser.class.isAssignableFrom(parameter.getParameterType());
     }
 
     @Override
@@ -30,12 +28,9 @@ public class UserHandlerArgumentResolver implements HandlerMethodArgumentResolve
                                        NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new JwtTokenException(JwtTokenErrorCode.TOKEN_NOT_FOUND);
-        }
-
+        // 인증 정보가 없거나 JwtAuthenticationToken이 아니면 null 반환
         if (!(authentication instanceof JwtAuthenticationToken jwtAuth)) {
-            throw new JwtTokenException(JwtTokenErrorCode.INVALID_TOKEN);
+            return null;
         }
 
         String userUuid = jwtAuth.getPrincipal();

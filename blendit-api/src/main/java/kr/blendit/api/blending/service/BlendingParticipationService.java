@@ -15,12 +15,12 @@ import kr.blendit.common.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@Transactional(readOnly = true)
 public class BlendingParticipationService {
 
     private final BlendingRepository blendingRepository;
@@ -91,7 +91,7 @@ public class BlendingParticipationService {
     /**
      * 블렌딩 참여 신청 취소
      *
-     * @apiNote 현재는 신청 취소 후 참여인원이 정원보다 적을 시 무조건 모집중으로 변경됩니다.
+     * @apiNote 신청 취소 후 참여인원이 정원보다 적더라도 마감 상태가 유지됩니다.
      */
     public void cancel(String userUuid, String blendingUuid) {
 
@@ -101,6 +101,11 @@ public class BlendingParticipationService {
         BlendingUser blendingUser = blendingUserRepository.findByBlendingAndUser_Uuid(blending, userUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_APPLIED));
 
+        // 호스트는 탈퇴 불가
+        if(blendingUser.getBlendingUserGrade().equals(BlendingUserGrade.HOST)) {
+            throw new BaseException(BaseErrorCode.BLENDING_HOST_CANNOT_LEAVE);
+        }
+
         // 이미 거절된 신청의 경우 취소 불가
         if(blendingUser.getJoinStatus().equals(JoinStatus.REJECTED)) {
             throw new BaseException(BaseErrorCode.BLENDING_ALREADY_PROCESSED);
@@ -109,15 +114,15 @@ public class BlendingParticipationService {
         JoinStatus joinStatus = blendingUser.getJoinStatus();
         blending.deleteParticipant(blendingUser);
 
-        // 승인된 유저가 탈퇴 시, 현재 참여 인원이 정원보다 적으면서, 마감된 상태라면 모집 중으로 자동 상태 변경
-        // Todo: 기획에 따라 마감된 상태라면 마감으로 유지
-        if(joinStatus.equals(JoinStatus.APPROVED) && blending.getStatus().equals(BlendingStatus.RECRUITMENT_CLOSED)) {
-
-            long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
-            if(blending.getCapacity() > currentUserCount) {
-                blending.updateStatus(BlendingStatus.RECRUITING);
-            }
-        }
+//        // 승인된 유저가 탈퇴 시, 현재 참여 인원이 정원보다 적으면서, 마감된 상태라면 모집 중으로 자동 상태 변경
+//        // 기획에 따라 자동 변경 x
+//        if(joinStatus.equals(JoinStatus.APPROVED) && blending.getStatus().equals(BlendingStatus.RECRUITMENT_CLOSED)) {
+//
+//            long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
+//            if(blending.getCapacity() > currentUserCount) {
+//                blending.updateStatus(BlendingStatus.RECRUITING);
+//            }
+//        }
     }
 
 

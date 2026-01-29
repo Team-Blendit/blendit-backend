@@ -42,7 +42,9 @@ public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long
     @Query("""
             SELECT bu
             FROM BlendingUser bu
-                JOIN FETCH bu.user
+                JOIN FETCH bu.user u
+                LEFT JOIN FETCH u.userKeywords uk
+                LEFT JOIN FETCH uk.keyword
             WHERE bu.blending = :blending AND bu.joinStatus IN :joinStatuses
             """)
     List<BlendingUser> findByBlendingAndJoinStatusInWithUser(Blending blending, List<JoinStatus> joinStatuses);

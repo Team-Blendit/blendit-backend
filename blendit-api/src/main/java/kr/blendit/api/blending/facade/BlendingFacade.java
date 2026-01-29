@@ -10,6 +10,7 @@ import kr.blendit.api.blending.dto.response.BlendingListResponse;
 import kr.blendit.api.blending.service.BlendingParticipationService;
 import kr.blendit.api.blending.service.BlendingQueryService;
 import kr.blendit.api.blending.service.BlendingService;
+import kr.blendit.common.security.jwt.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -70,8 +71,8 @@ public class BlendingFacade {
      * 블렌딩 상세 조회
      */
     @Transactional(readOnly = true)
-    public BlendingDetailResponse getBlendingDetail(String userUuid, String blendingUuid) {
-        return blendingService.find(userUuid, blendingUuid);
+    public BlendingDetailResponse getBlendingDetail(CurrentUser currentUser, String blendingUuid) {
+        return blendingService.find(currentUser, blendingUuid);
     }
 
     /**
