@@ -2,6 +2,7 @@ package kr.blendit.api.user.service;
 
 import java.util.List;
 import kr.blendit.api.keyword.domain.Keyword;
+import kr.blendit.api.user.controller.dto.GetUserProfileResponse;
 import kr.blendit.api.user.controller.dto.UpdateUserProfileRequest;
 import kr.blendit.api.user.domain.User;
 import kr.blendit.api.user.repository.UserKeywordRepository;
@@ -32,5 +33,10 @@ public class UserProfileService {
 
     user.updateProfile(request, keywordList);
     userKeywordRepository.saveAll(user.getUserKeywords());
+  }
+
+  public GetUserProfileResponse getUserProfile(String userUuid) {
+    User user = userService.getUser(userUuid);
+    return GetUserProfileResponse.create(user);
   }
 }

@@ -47,6 +47,8 @@ security:
       methods: [ "GET" ]
     - path: /api/blendit/user/onboarding/nickname-duplicate-check
       methods: [ "GET" ]
+    - path: /api/blendit/user/profile/{userId}
+      methods: [ "GET" ]
 
 oidc:
   kakao:

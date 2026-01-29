@@ -3,6 +3,7 @@ package kr.blendit.api.user.facade;
 import java.util.List;
 import kr.blendit.api.keyword.domain.Keyword;
 import kr.blendit.api.keyword.service.KeywordService;
+import kr.blendit.api.user.controller.dto.GetUserProfileResponse;
 import kr.blendit.api.user.controller.dto.UpdateUserProfileRequest;
 import kr.blendit.api.user.service.UserProfileService;
 import kr.blendit.common.security.jwt.CurrentUser;
@@ -21,5 +22,10 @@ public class UserProfileFacade {
   public void updateUserProfile(CurrentUser currentUser, UpdateUserProfileRequest request) {
     List<Keyword> keywordList = keywordService.getKeywordList(request.keywordUuidList());
     userProfileService.updateUserProfile(currentUser, request, keywordList);
+  }
+
+  @Transactional(readOnly = true)
+  public GetUserProfileResponse getUserProfile(String userUuid) {
+    return userProfileService.getUserProfile(userUuid);
   }
 }
