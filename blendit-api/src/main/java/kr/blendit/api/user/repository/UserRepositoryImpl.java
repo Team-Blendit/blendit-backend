@@ -18,7 +18,6 @@ import kr.blendit.api.common.constant.Position;
 import kr.blendit.api.user.controller.dto.GetUserSearchRequest;
 import kr.blendit.api.user.controller.dto.GetUserSearchResponse;
 import kr.blendit.api.user.domain.QUser;
-import kr.blendit.api.user.domain.QUserBookmark;
 import kr.blendit.api.user.repository.dto.UserSearchProjection;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -36,7 +35,6 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
 
   @Override
   public Page<GetUserSearchResponse> searchUsers(GetUserSearchRequest request, String currentUserUuid, Pageable pageable) {
-    QUserBookmark bookmarkSubQuery = new QUserBookmark("bookmarkSubQuery");
     QUser bookmarkerUser = new QUser("bookmarkerUser");
     QUser myUser = new QUser("myUser");
 
