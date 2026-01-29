@@ -1,17 +1,22 @@
 package kr.blendit.api.blending.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import kr.blendit.api.blending.constant.BlendingStatus;
+import kr.blendit.api.blending.constant.BlendingUserGrade;
+import kr.blendit.api.blending.constant.JoinStatus;
+import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
+import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
+import kr.blendit.api.common.constant.Position;
+import kr.blendit.api.keyword.domain.Keyword;
+import kr.blendit.api.user.domain.User;
+import kr.blendit.common.entity.BaseEntity;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import kr.blendit.api.blending.constant.BlendingStatus;
-import kr.blendit.api.keyword.domain.Keyword;
-import kr.blendit.common.entity.BaseEntity;
+
+import kr.blendit.common.exception.BaseErrorCode;
+import kr.blendit.common.exception.BaseException;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,7 +37,11 @@ public class Blending extends BaseEntity {
   @Column(columnDefinition = "TEXT", nullable = false)
   private String content;
 
-  @OneToMany(mappedBy = "blending", orphanRemoval = true)
+  @Column(nullable = false)
+  @Enumerated(EnumType.STRING)
+  private Position position;
+
+  @OneToMany(mappedBy = "blending", orphanRemoval = true, cascade = CascadeType.PERSIST)
   private List<BlendingKeyword> keywords = new ArrayList<>();
 
   @Column(nullable = false)
@@ -41,8 +50,8 @@ public class Blending extends BaseEntity {
   @Column(nullable = false)
   private String region;
 
-  @Column(nullable = false)
-  private String place;
+//  @Column(nullable = false)
+//  private String place;
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
@@ -51,41 +60,188 @@ public class Blending extends BaseEntity {
   @Column
   private String openChattingUrl;
 
-  @Column
+  @Column(nullable = false)
   private LocalDateTime schedule;
 
+  @Column(nullable = false)
+  private Boolean autoApproval;
+
+
+  /**
+   * 블렌딩 생성자
+   */
   @Builder(access = AccessLevel.PRIVATE)
-  public Blending(String title, String content, int capacity, String region, String place, String openChattingUrl,
-      LocalDateTime schedule) {
+  public Blending(String title, String content, Position position, int capacity, String region,
+                  String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
     this.title = title;
     this.content = content;
+    this.position = position;
     this.capacity = capacity;
     this.region = region;
-    this.place = place;
     this.status = BlendingStatus.RECRUITING;
     this.openChattingUrl = openChattingUrl;
     this.schedule = schedule;
+    this.autoApproval = autoApproval;
   }
 
-  public static Blending create(String title, String content, int capacity, String region, String place, String openChattingUrl,
-      LocalDateTime schedule) {
-    // TODO: capacity, schedule 유효성 검사
+
+  /**
+   * 블렌딩 생성
+   *
+   * @apiNote 최소 인원 2명 / 일정은 과거 불가
+   */
+  public static Blending create(BlendingCreateRequest request) {
+
     return Blending.builder()
-        .title(title)
-        .content(content)
-        .capacity(capacity)
-        .region(region)
-        .place(place)
-        .openChattingUrl(openChattingUrl)
-        .schedule(schedule)
-        .build();
+            .title(request.getTitle())
+            .content(request.getContent())
+            .position(request.getPosition())
+            .capacity(request.getCapacity())
+            .region(request.getRegion())
+            .openChattingUrl(request.getOpenChattingUrl())
+            .schedule(request.getSchedule())
+            .autoApproval(request.getAutoApproval())
+            .build();
   }
 
-  public void addKeyword(Keyword keyword) {
-    BlendingKeyword blendingKeyword = BlendingKeyword.create(this, keyword);
 
-    this.keywords.add(blendingKeyword);
+  /**
+   * 참여자 추가
+   *
+   * @param blendingUserGrade 참여자 권한
+   * @param joinStatus        참여 상태(승인, 거절 등)
+   */
+  public BlendingUser addParticipant(User user, BlendingUserGrade blendingUserGrade, String message, JoinStatus joinStatus) {
+    BlendingUser blendingUser = BlendingUser.create(user, this, blendingUserGrade, message, joinStatus);
+    this.participants.add(blendingUser);
+    return blendingUser;
   }
+
+  /**
+   * 참여자 제거
+   */
+  public void deleteParticipant(BlendingUser blendingUser) {
+    this.getParticipants().remove(blendingUser);
+  }
+
+
+  /**
+   * 키워드 추가
+   */
+  public void addKeywords(List<Keyword> keywords) {
+    for (Keyword keyword : keywords) {
+      BlendingKeyword blendingKeyword = BlendingKeyword.create(this, keyword);
+      this.keywords.add(blendingKeyword);
+    }
+  }
+
+
+  /**
+   * 키워드 변경
+   *
+   * @apiNote addKeywords() 호출
+   */
+  public void updateKeyword(List<Keyword> newKeywords) {
+    // 기존 리스트에서 새 리스트에 없는 것 삭제
+    this.keywords.removeIf(existing ->
+            !newKeywords.contains(existing.getKeyword())
+    );
+
+    List<Keyword> saveKeywords = new ArrayList<>();
+
+    // 새 리스트에서 기존 리스트에 없는 것만 추가
+    for (Keyword newKeyword : newKeywords) {
+      boolean exists = this.keywords.stream()
+              .anyMatch(existing -> existing.getKeyword().equals(newKeyword));
+
+      if (!exists) {
+        saveKeywords.add(newKeyword);
+      }
+    }
+
+    if (!saveKeywords.isEmpty()) addKeywords(saveKeywords);
+  }
+
+
+  /**
+   * 블렌딩 논리 삭제
+   */
+  public void delete() {
+    this.setUseFlag(false);
+  }
+
+
+  /**
+   * 블렌딩 정보 수정
+   */
+  public void update(BlendingUpdateRequest request) {
+    if (request.getTitle() != null) this.title = request.getTitle();
+    if (request.getContent() != null) this.content = request.getContent();
+    if (request.getPosition() != null) this.position = request.getPosition();
+    if (request.getCapacity() != null) this.capacity = request.getCapacity();
+    if (request.getRegion() != null) this.region = request.getRegion();
+    if (request.getOpenChattingUrl() != null) this.openChattingUrl = request.getOpenChattingUrl();
+    if (request.getSchedule() != null) this.schedule = request.getSchedule();
+    if (request.getAutoApproval() != null) this.autoApproval = request.getAutoApproval();
+  }
+
+
+  /**
+   * 블렌딩 상태 변경
+   *
+   * @param blendingStatus 변경하려는 상태
+   * @apiNote 인원이 가득찬 경우엔 모집 중으로 변경 불가
+   */
+  public void updateStatus(BlendingStatus blendingStatus) {
+
+    if (blendingStatus == BlendingStatus.RECRUITING) {
+      int participantCount = this.getCurrentParticipantCount();
+
+      // 호스트 + 승인된 사람이 정원 이상이라면 예외 발생
+      if (participantCount >= this.capacity) {
+        throw new BaseException(BaseErrorCode.BLENDING_CANNOT_RECRUIT_FULL);
+      }
+    }
+
+    this.status = blendingStatus;
+  }
+
+
+  /**
+   * 참여 승인 및 Host 상태의 블렌딩 유저 수 조회
+   *
+   * @apiNote Blending과 BlendingUser 까지 프록시 객체가 아닌 실제 엔티티를 들고 있는 경우 사용하기 적합합니다.
+   */
+  public int getCurrentParticipantCount() {
+    int participantCount = 0;
+
+    for (BlendingUser blendingUser : this.participants) {
+      JoinStatus joinStatus = blendingUser.getJoinStatus();
+
+      if (joinStatus.equals(JoinStatus.APPROVED)) participantCount++;
+    }
+
+    return participantCount;
+  }
+
+
+  /**
+   * 이 블렌딩에서 해당 유저가 HOST 등급인지 확인
+   *
+   * @apiNote Blending과 BlendingUser 까지 프록시 객체가 아닌 실제 엔티티를 들고 있는 경우 사용하기 적합합니다.
+   */
+  // Todo: 메서드 사용 x -> BlendingUserRepository.existsByBlendingAndUser_UuidAndBlendingUserGrade() 사용할 것
+  public boolean isHost(String userUuid) {
+    boolean isHost = false;
+    for (BlendingUser blendingUser : this.getParticipants()) {
+      if (blendingUser.getBlendingUserGrade() == BlendingUserGrade.HOST) {
+        if (blendingUser.getUser().getUuid().equals(userUuid)) isHost = true;
+        break;
+      }
+    }
+    return isHost;
+  }
+
 
 }
 

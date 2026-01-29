@@ -43,10 +43,24 @@ public enum BaseErrorCode implements ErrorCode {
   OAUTH_INVALID_AUDIENCE("ID 토큰 대상이 일치하지 않습니다."),
   OAUTH_JWKS_FETCH_FAILED("JWKS 공개키 조회에 실패했습니다."),
 
-  // 키워드,
+  // 키워드
   KEYWORD_NOT_FOUND("키워드를 찾을 수 없습니다."),
-  ;
+  KEYWORD_IS_EMPTY("키워드 입력이 필요합니다."),
+  KEYWORD_LIMIT_EXCEEDED("키워드는 최대 3개까지 입력 가능합니다."),
 
+  // 블렌딩
+  BLENDING_NOT_FOUND("블렌딩을 찾을 수 없습니다."),
+  BLENDING_PERMISSION_DENIED("해당 블렌딩에 대한 접근 권한이 없습니다"),
+  BLENDING_INVALID_CAPACITY("현재 참여 인원보다 적은 수로 정원을 변경할 수 없습니다."),
+  BLENDING_CAPACITY_BELOW_MIN("블렌딩 정원은 최소 2명 이상이어야 합니다."),
+  BLENDING_INVALID_SCHEDULE_TIME("유효하지 않은 블렌딩 일정입니다."),
+  BLENDING_CANNOT_RECRUIT_FULL("모집 인원이 가득 차서 모집 중 상태로 변경할 수 없습니다."),
+  BLENDING_FULL("블렌딩 정원이 가득 찼습니다."),
+  BLENDING_ALREADY_APPLIED("이미 해당 블렌딩에 신청하거나 참여한 이력이 존재합니다."),
+  BLENDING_NOT_APPLIED("신청하지 않은 블렌딩입니다."),
+  BLENDING_NOT_RECRUITING("모집 중인 블렌딩이 아닙니다."),
+  BLENDING_ALREADY_PROCESSED("이미 처리된 신청 내역입니다."),
+  BLENDING_HOST_CANNOT_LEAVE("호스트는 블렌딩을 탈퇴할 없습니다.");
 
   private final String message;
 }
