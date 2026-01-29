@@ -6,7 +6,7 @@ import kr.blendit.api.user.constant.Experience;
 
 public record GetUserSearchResponse(
     String userUuid,
-    String nickName,
+    String nickname,
     Position position,
     Experience experience,
     String province,

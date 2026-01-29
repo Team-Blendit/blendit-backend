@@ -50,7 +50,7 @@ security:
       methods: [ "GET" ]
     - path: /api/blendit/user/onboarding/nickname-duplicate-check
       methods: [ "GET" ]
-    - path: /api/blendit/user/profile/{userId}
+    - path: /api/blendit/user/profile/{userUuid}
       methods: [ "GET" ]
     - path: /api/blendit/user/search
       methods: [ "GET" ]

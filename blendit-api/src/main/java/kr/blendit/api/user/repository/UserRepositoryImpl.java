@@ -65,6 +65,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
         .from(user)
         .where(
             user.useFlag.isTrue(),
+            isOnboardingComplete(),
             positionEq(request.position()),
             districtIn(request.districtList()),
             keywordUuidIn(request.keywordUuidList()),
@@ -118,6 +119,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
         .from(user)
         .where(
             user.useFlag.isTrue(),
+            isOnboardingComplete(),
             positionEq(request.position()),
             districtIn(request.districtList()),
             keywordUuidIn(request.keywordUuidList()),
@@ -125,6 +127,13 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
         );
 
     return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);
+  }
+
+  private BooleanExpression isOnboardingComplete() {
+    return JPAExpressions.selectOne()
+        .from(userKeyword)
+        .where(userKeyword.user.eq(user))
+        .exists();
   }
 
   private BooleanExpression positionEq(Position position) {

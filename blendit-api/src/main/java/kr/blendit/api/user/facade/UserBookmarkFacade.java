@@ -25,6 +25,7 @@ public class UserBookmarkFacade {
     userBookmarkService.deleteUserBookMark(currentUser, userUuid);
   }
 
+  @Transactional(readOnly = true)
   public Page<UserBookmarkListResponse> getUserBookMarkList(CurrentUser currentUser, Pageable pageable) {
     return userBookmarkService.getUserBookMarkList(currentUser, pageable);
   }
