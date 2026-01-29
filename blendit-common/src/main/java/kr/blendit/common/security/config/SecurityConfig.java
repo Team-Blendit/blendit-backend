@@ -1,5 +1,6 @@
 package kr.blendit.common.security.config;
 
+import kr.blendit.common.security.config.SecurityProperties.ProtectedEndpoint;
 import kr.blendit.common.security.config.SecurityProperties.PublicEndpoint;
 import kr.blendit.common.security.filter.JwtAuthenticationFilter;
 import kr.blendit.common.security.provider.JwtAuthenticationProvider;
@@ -61,9 +62,18 @@ public class SecurityConfig {
         return Collections.unmodifiableList(endpoints);
     }
 
+    /**
+     * 반드시 인증이 필요한 보호된 엔드포인트 목록
+     * (public 패턴에 매칭되더라도 인증 필요)
+     */
+    public List<ProtectedEndpoint> getProtectedEndpoints() {
+        return securityProperties.protectedEndpoints();
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         List<PublicEndpoint> publicEndpoints = getPublicEndpoints();
+        List<ProtectedEndpoint> protectedEndpoints = getProtectedEndpoints();
 
         return http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -84,14 +94,16 @@ public class SecurityConfig {
                 })
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthenticationFilter(publicEndpoints), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter(publicEndpoints, protectedEndpoints), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
-    private JwtAuthenticationFilter jwtAuthenticationFilter(List<PublicEndpoint> publicEndpoints) {
+    private JwtAuthenticationFilter jwtAuthenticationFilter(List<PublicEndpoint> publicEndpoints,
+                                                             List<ProtectedEndpoint> protectedEndpoints) {
         List<String> processingPaths = List.of("/api/" + serviceName + "/**");
         return new JwtAuthenticationFilter(
                 publicEndpoints,
+                protectedEndpoints,
                 processingPaths,
                 failureHandler,
                 jwtAuthenticationProvider

@@ -34,4 +34,10 @@ public class UserProfileController {
   public GetUserProfileResponse getUserProfile(@PathVariable String userUuid) {
     return userProfileFacade.getUserProfile(userUuid);
   }
+
+  @Operation(summary = "내 프로필 조회")
+  @GetMapping("/me")
+  public GetUserProfileResponse getMyProfile(CurrentUser currentUser) {
+    return userProfileFacade.getUserProfile(currentUser.getUserUuid());
+  }
 }

@@ -34,6 +34,9 @@ springdoc:
     path: /docs/swagger
 
 security:
+  protected-endpoints:
+    - path: /api/blendit/user/profile/me
+      methods: [ "GET" ]
   public-endpoints:
     - path: /api/blendit/auth/**
       methods: [ "*" ]
