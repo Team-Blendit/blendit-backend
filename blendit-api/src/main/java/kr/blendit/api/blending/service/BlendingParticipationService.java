@@ -91,7 +91,7 @@ public class BlendingParticipationService {
     /**
      * 블렌딩 참여 신청 취소
      *
-     * @apiNote 현재는 신청 취소 후 참여인원이 정원보다 적을 시 무조건 모집중으로 변경됩니다.
+     * @apiNote 신청 취소 후 참여인원이 정원보다 적더라도 마감 상태가 유지됩니다.
      */
     public void cancel(String userUuid, String blendingUuid) {
 

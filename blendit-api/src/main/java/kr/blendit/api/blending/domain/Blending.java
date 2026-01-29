@@ -7,7 +7,7 @@ import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
 import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
 import kr.blendit.api.common.constant.Position;
-import kr.blendit.api.common.domain.Keyword;
+import kr.blendit.api.keyword.domain.Keyword;
 import kr.blendit.api.user.domain.User;
 import kr.blendit.common.entity.BaseEntity;
 
@@ -50,8 +50,8 @@ public class Blending extends BaseEntity {
   @Column(nullable = false)
   private String region;
 
-  @Column(nullable = false)
-  private String place;
+//  @Column(nullable = false)
+//  private String place;
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
@@ -230,6 +230,7 @@ public class Blending extends BaseEntity {
    *
    * @apiNote Blending과 BlendingUser 까지 프록시 객체가 아닌 실제 엔티티를 들고 있는 경우 사용하기 적합합니다.
    */
+  // Todo: 메서드 사용 x -> BlendingUserRepository.existsByBlendingAndUser_UuidAndBlendingUserGrade() 사용할 것
   public boolean isHost(String userUuid) {
     boolean isHost = false;
     for (BlendingUser blendingUser : this.getParticipants()) {

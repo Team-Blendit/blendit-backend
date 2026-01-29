@@ -24,7 +24,7 @@ public class BlendingUpdateRequest {
     private Position position;
 
     @Size(max = 3, message = "키워드는 최대 3개까지만 등록 가능합니다.")
-    private List<String> keywords;
+    private List<String> keywordUuidList;
 
     @Min(value = 2, message = "모집 인원은 최소 2명 이상이어야 합니다.")
     private Integer capacity;

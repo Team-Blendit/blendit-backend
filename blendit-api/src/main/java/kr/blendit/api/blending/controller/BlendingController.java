@@ -54,7 +54,7 @@ public class BlendingController {
     @GetMapping("/{blendingUuid}")
     public BlendingDetailResponse getBlendingDetail(CurrentUser currentUser, @PathVariable String blendingUuid) {
 
-        return blendingFacade.getBlendingDetail(currentUser.getUserUuid(), blendingUuid);
+        return blendingFacade.getBlendingDetail(currentUser, blendingUuid);
     }
 
     @Operation(summary = "블렌딩 참여 신청 API", security = @SecurityRequirement(name = "bearerAuth"))
