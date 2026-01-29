@@ -15,5 +15,5 @@ public interface UserBookmarkRepository extends JpaRepository<UserBookmark, Long
 
   Optional<UserBookmark> findByUserAndBookmarkUser(User user, User bookmarkUser);
 
-  Page<UserBookmark> findAllByUser(User user, Pageable pageable);
+  Page<UserBookmark> findAllByUserOrderByCreatedDateDesc(User user, Pageable pageable);
 }

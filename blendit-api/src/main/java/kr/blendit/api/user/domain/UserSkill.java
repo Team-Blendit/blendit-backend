@@ -8,9 +8,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class UserLink {
+public class UserSkill {
 
   private String title;
-  private String url;
   private int orderNum;
 }

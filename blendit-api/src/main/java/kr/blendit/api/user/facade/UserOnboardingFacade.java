@@ -5,6 +5,7 @@ import kr.blendit.api.keyword.domain.Keyword;
 import kr.blendit.api.keyword.service.KeywordService;
 import kr.blendit.api.user.controller.dto.UserOnboardingRequest;
 import kr.blendit.api.user.service.UserOnboardingService;
+import kr.blendit.api.user.service.UserService;
 import kr.blendit.common.security.jwt.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ public class UserOnboardingFacade {
 
   private final UserOnboardingService userOnboardingService;
   private final KeywordService keywordService;
+  private final UserService userService;
 
   @Transactional
   public void onboarding(CurrentUser currentUser, UserOnboardingRequest request) {
@@ -25,11 +27,11 @@ public class UserOnboardingFacade {
 
   @Transactional(readOnly = true)
   public void emailDuplicateCheck(String email) {
-    userOnboardingService.emailDuplicateCheck(email);
+    userService.emailDuplicateCheck(email);
   }
 
   @Transactional(readOnly = true)
   public void nicknameDuplicateCheck(String nickname) {
-    userOnboardingService.nicknameDuplicateCheck(nickname);
+    userService.nicknameDuplicateCheck(nickname);
   }
 }

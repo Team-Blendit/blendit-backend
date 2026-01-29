@@ -2,26 +2,26 @@ package kr.blendit.api.user.service;
 
 import java.util.List;
 import kr.blendit.api.keyword.domain.Keyword;
-import kr.blendit.api.user.controller.dto.UserOnboardingRequest;
+import kr.blendit.api.user.controller.dto.UpdateUserProfileRequest;
 import kr.blendit.api.user.domain.User;
 import kr.blendit.api.user.repository.UserKeywordRepository;
+import kr.blendit.common.security.jwt.CurrentUser;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 @Transactional(readOnly = true)
-public class UserOnboardingService {
+public class UserProfileService {
 
-  private final UserKeywordRepository userKeywordRepository;
   private final UserService userService;
+  private final UserKeywordRepository userKeywordRepository;
 
   @Transactional
-  public void onboarding(String userUuid, UserOnboardingRequest request, List<Keyword> keywordList) {
-    User user = userService.getUser(userUuid);
+  public void updateUserProfile(CurrentUser currentUser, UpdateUserProfileRequest request, List<Keyword> keywordList) {
+    User user = userService.getUser(currentUser.getUserUuid());
+
     if (!request.email().equals(user.getEmail())) {
       userService.emailDuplicateCheck(request.email());
     }
@@ -30,7 +30,7 @@ public class UserOnboardingService {
       userService.nicknameDuplicateCheck(request.nickname());
     }
 
-    user.onboarding(request, keywordList);
+    user.updateProfile(request, keywordList);
     userKeywordRepository.saveAll(user.getUserKeywords());
   }
 }

@@ -51,7 +51,7 @@ public class UserBookmarkService {
 
   public Page<UserBookmarkListResponse> getUserBookMarkList(CurrentUser currentUser, Pageable pageable) {
     User user = userService.getUser(currentUser.getUserUuid());
-    return userBookmarkRepository.findAllByUser(user, pageable)
+    return userBookmarkRepository.findAllByUserOrderByCreatedDateDesc(user, pageable)
         .map(UserBookmarkListResponse::create);
   }
 }
