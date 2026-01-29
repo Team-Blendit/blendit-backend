@@ -3,6 +3,7 @@ package kr.blendit.api.user.facade;
 import java.util.List;
 import kr.blendit.api.keyword.domain.Keyword;
 import kr.blendit.api.keyword.service.KeywordService;
+import kr.blendit.api.user.controller.dto.GetMyProfileResponse;
 import kr.blendit.api.user.controller.dto.GetUserProfileResponse;
 import kr.blendit.api.user.controller.dto.UpdateUserProfileRequest;
 import kr.blendit.api.user.service.UserProfileService;
@@ -25,7 +26,13 @@ public class UserProfileFacade {
   }
 
   @Transactional(readOnly = true)
-  public GetUserProfileResponse getUserProfile(String userUuid) {
-    return userProfileService.getUserProfile(userUuid);
+  public GetUserProfileResponse getUserProfile(CurrentUser currentUser, String userUuid) {
+    String currentUserUuid = currentUser != null ? currentUser.getUserUuid() : null;
+    return userProfileService.getUserProfile(currentUserUuid, userUuid);
+  }
+
+  @Transactional(readOnly = true)
+  public GetMyProfileResponse getMyProfile(CurrentUser currentUser) {
+    return userProfileService.getMyProfile(currentUser.getUserUuid());
   }
 }

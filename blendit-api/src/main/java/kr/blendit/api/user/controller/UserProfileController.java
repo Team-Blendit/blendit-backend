@@ -3,6 +3,7 @@ package kr.blendit.api.user.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import kr.blendit.api.user.controller.dto.GetMyProfileResponse;
 import kr.blendit.api.user.controller.dto.GetUserProfileResponse;
 import kr.blendit.api.user.controller.dto.UpdateUserProfileRequest;
 import kr.blendit.api.user.facade.UserProfileFacade;
@@ -31,13 +32,13 @@ public class UserProfileController {
 
   @Operation(summary = "유저 프로필 조회")
   @GetMapping("/{userUuid}")
-  public GetUserProfileResponse getUserProfile(@PathVariable String userUuid) {
-    return userProfileFacade.getUserProfile(userUuid);
+  public GetUserProfileResponse getUserProfile(CurrentUser currentUser, @PathVariable String userUuid) {
+    return userProfileFacade.getUserProfile(currentUser, userUuid);
   }
 
   @Operation(summary = "내 프로필 조회")
   @GetMapping("/me")
-  public GetUserProfileResponse getMyProfile(CurrentUser currentUser) {
-    return userProfileFacade.getUserProfile(currentUser.getUserUuid());
+  public GetMyProfileResponse getMyProfile(CurrentUser currentUser) {
+    return userProfileFacade.getMyProfile(currentUser);
   }
 }

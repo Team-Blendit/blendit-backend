@@ -9,7 +9,8 @@ import kr.blendit.api.user.domain.UserLink;
 import kr.blendit.api.user.domain.UserSkill;
 
 public record GetUserProfileResponse(
-    String nickName,
+    String nickname,
+    String profileImage,
     Position position,
     Experience experience,
     String affiliation,
@@ -19,12 +20,14 @@ public record GetUserProfileResponse(
     String description,
     List<String> keywordList,
     List<String> skills,
-    List<UserLink> links
+    List<UserLink> links,
+    boolean isBookmarked
 ) {
 
-  public static GetUserProfileResponse create(User user) {
+  public static GetUserProfileResponse create(User user, boolean isBookmarked) {
     return new GetUserProfileResponse(
         user.getNickname(),
+        user.getProfileImage(),
         user.getPosition(),
         user.getExperience(),
         user.getAffiliation(),
@@ -41,7 +44,8 @@ public record GetUserProfileResponse(
             .toList(),
         user.getLinks().stream()
             .sorted(Comparator.comparingInt(UserLink::getOrderNum))
-            .toList()
+            .toList(),
+        isBookmarked
     );
   }
 }

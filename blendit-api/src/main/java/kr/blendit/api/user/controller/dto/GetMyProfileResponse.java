@@ -9,7 +9,8 @@ import kr.blendit.api.user.domain.UserLink;
 import kr.blendit.api.user.domain.UserSkill;
 
 public record GetMyProfileResponse(
-    String nickName,
+    String nickname,
+    String profileImage,
     Position position,
     Experience experience,
     String affiliation,
@@ -25,6 +26,7 @@ public record GetMyProfileResponse(
   public static GetMyProfileResponse create(User user) {
     return new GetMyProfileResponse(
         user.getNickname(),
+        user.getProfileImage(),
         user.getPosition(),
         user.getExperience(),
         user.getAffiliation(),
