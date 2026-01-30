@@ -10,4 +10,6 @@ public interface KeywordRepository extends JpaRepository<Keyword, Long> {
 
   List<Keyword> findAllByUuidIn(List<String> keywordUuidList);
 
+  Boolean existsByName(String name);
+
 }

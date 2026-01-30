@@ -27,11 +27,13 @@ public class BlendingListResponse {
     private Integer currentUserCount;
     private List<String> keywords;
     private Boolean isBookmark;
+    private Boolean isRecommended;
 
 
     public static List<BlendingListResponse> listFrom(
             List<Blending> blendingList,
-            Set<Long> myBookmarkedIds) {
+            Set<Long> myBookmarkedIds,
+            Boolean isRecommended) {
 
         List<BlendingListResponse> list = new ArrayList<>();
 
@@ -46,6 +48,7 @@ public class BlendingListResponse {
                     .currentUserCount(blending.getCurrentParticipantCount())
                     .keywords(BlendingKeyword.extractKeywords(blending.getKeywords()))
                     .isBookmark(myBookmarkedIds.contains(blending.getId()))
+                    .isRecommended(isRecommended)
                     .build();
 
             list.add(blendingListResponse);

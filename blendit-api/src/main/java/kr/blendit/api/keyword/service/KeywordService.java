@@ -31,4 +31,13 @@ public class KeywordService {
         .map(KeywordListResponse::create)
         .toList();
   }
+
+  public void saveKeyword(String name) {
+    if(keywordRepository.existsByName(name)) {
+      throw new BaseException(BaseErrorCode.DUPLICATE_KEYWORD);
+    }
+
+    Keyword keyword = new Keyword(name);
+    keywordRepository.save(keyword);
+  }
 }

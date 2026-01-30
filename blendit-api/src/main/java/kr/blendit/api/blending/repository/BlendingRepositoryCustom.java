@@ -13,4 +13,6 @@ public interface BlendingRepositoryCustom {
     List<Blending> findRecommendation(List<String> keywords, Integer recommendationCount);
 
     long countByCondition(String userUuid, BlendingListRequest blendingListRequest);
+
+    List<Blending> findRecent(Integer getCount, List<Long> excludeIds);
 }

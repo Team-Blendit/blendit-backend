@@ -24,116 +24,166 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public class BlendingQueryService {
 
-    private final BlendingRepository blendingRepository;
-    private final BlendingBookmarkRepository blendingBookmarkRepository;
-    private final UserKeywordRepository userKeywordRepository;
+  private final BlendingRepository blendingRepository;
+  private final BlendingBookmarkRepository blendingBookmarkRepository;
+  private final UserKeywordRepository userKeywordRepository;
 
-    /**
-     * 블렌딩 목록 조회
-     */
-    public Page<BlendingListResponse> getList(
-            CurrentUser currentUser, BlendingListRequest blendingListRequest, Pageable pageable) {
+  /**
+   * 블렌딩 목록 조회
+   */
+  public Page<BlendingListResponse> getList(
+          CurrentUser currentUser, BlendingListRequest blendingListRequest, Pageable pageable) {
 
-        String userUuid = (currentUser != null) ? currentUser.getUserUuid() : null;
+    String userUuid = (currentUser != null) ? currentUser.getUserUuid() : null;
 
-        List<BlendingListResponse> finalBlendingList = new ArrayList<>();
-        int pageSize = pageable.getPageSize();
-        int pageNumber = pageable.getPageNumber();
+    List<BlendingListResponse> finalBlendingList = new ArrayList<>();
+    int pageSize = pageable.getPageSize();
+    int pageNumber = pageable.getPageNumber();
 
-        boolean isLogin = (userUuid != null && !userUuid.equals("anonymousUser"));
+    boolean isLogin = (userUuid != null && !userUuid.equals("anonymousUser"));
 
-        // 추천 블렌딩 조회
-        if (isLogin && pageNumber == 0) {
-            int recommendationCount = 12;
-            List<UserKeyword> keywords = userKeywordRepository.findUserKeywordNamesByUserUuid(userUuid);
-            finalBlendingList.addAll(getRecommendationList(userUuid, keywords, recommendationCount));
-            // todo: 추천 개수가 12개가 되지 않는다면 모자란 개수는 최근 블렌딩을 보여줘야한다.
+    // 추천 블렌딩 목록 조회
+    if (isLogin && pageNumber == 0) {
+      int targetCount = 12;
+      finalBlendingList.addAll(getRecommendationList(userUuid, targetCount));
+    }
+
+    int layoutDeduction = 4; // 한 줄에 표시할 블렌딩 수
+    long offset = calculateOffset(isLogin, pageNumber, pageSize, layoutDeduction);
+    int limit = calculateLimit(isLogin, pageNumber, pageSize, layoutDeduction);
+
+    // 전체 블렌딩 목록 조회
+    if (limit > 0) {
+      finalBlendingList.addAll(getBlendingList(userUuid, blendingListRequest, offset, limit, isLogin));
+    }
+
+    // 전체 개수 조회 및 계산
+    long generalTotalCount = blendingRepository.countByCondition(userUuid, blendingListRequest);
+
+    return createFixedPage(finalBlendingList, pageable, generalTotalCount);
+  }
+
+
+  /**
+   * 추천 블렌딩 조회
+   */
+  private List<BlendingListResponse> getRecommendationList(String userUuid, int targetCount) {
+    List<UserKeyword> userKeywords = userKeywordRepository.findUserKeywordNamesByUserUuid(userUuid);
+    List<String> keywordNames = UserKeyword.toNames(userKeywords);
+
+    List<Blending> recommendationBlendings = blendingRepository.findRecommendation(keywordNames, targetCount);
+
+    if (recommendationBlendings.size() < targetCount) {
+      recommendationBlendings.addAll(getRecent(targetCount, recommendationBlendings));
+    }
+
+    return convertRecommendationList(userUuid, recommendationBlendings);
+  }
+
+
+  /**
+   * 추가 블렌딩 조회
+   *
+   * @apiNote 조회한 추천 블렌딩이 12개 미만일 경우 추가 조회 용도
+   */
+  private List<Blending> getRecent(int targetCount, List<Blending> recommendationBlendings) {
+    int neededCount = targetCount - recommendationBlendings.size();
+    List<Long> existingIds = recommendationBlendings.stream()
+            .map(Blending::getId)
+            .toList();
+
+    return blendingRepository.findRecent(neededCount, existingIds);
+  }
+
+
+  /**
+   * 추천 블렌딩 변환
+   */
+  private List<BlendingListResponse> convertRecommendationList(
+          String userUuid, List<Blending> recommendationBlendings) {
+
+    Set<Long> myBookmarkedIds = checkBookmark(userUuid, true, recommendationBlendings);
+    return BlendingListResponse.listFrom(recommendationBlendings, myBookmarkedIds, true);
+  }
+
+
+  /**
+   * 블렌딩 목록 조회 및 변환 (검색어 및 필터 적용)
+   */
+  private List<BlendingListResponse> getBlendingList(
+          String userUuid, BlendingListRequest blendingListRequest,
+          long offset, int limit, boolean isLogin) {
+
+    List<Blending> blendingList = blendingRepository.searchByCondition(userUuid, blendingListRequest, offset, limit);
+    Set<Long> myBookmarkedIds = checkBookmark(userUuid, isLogin, blendingList);
+    return BlendingListResponse.listFrom(blendingList, myBookmarkedIds, false);
+  }
+
+
+  /**
+   * 현재 조회된 블렌딩 목록 중 사용자가 북마크한 bookmarkId 추출
+   */
+  private Set<Long> checkBookmark(String userUuid, boolean isLogin, List<Blending> blendingList) {
+    Set<Long> myBookmarkedIds = new HashSet<>();
+    if (isLogin && !blendingList.isEmpty()) {
+      List<Long> blendingIds = blendingList.stream()
+              .map(Blending::getId)
+              .toList();
+
+      myBookmarkedIds = blendingBookmarkRepository.findBookmarkedBlendingIds(userUuid, blendingIds);
+    }
+
+    return myBookmarkedIds;
+  }
+
+
+  /**
+   * offset 계산
+   */
+  private long calculateOffset(boolean isLogin, int page, int size, int layoutDeduction) {
+
+    if (!isLogin) return (long) page * size;
+
+    if (page == 0) return 0;
+
+    // 첫 페이지의 추천 블렌딩 고려
+    int firstPageGeneralCount = size - layoutDeduction;
+    return firstPageGeneralCount + (long) (page - 1) * size;
+  }
+
+
+  /**
+   * limit 계산
+   */
+  private int calculateLimit(boolean isLogin, int page, int size, int layoutDeduction) {
+
+    // 첫 페이지의 추천 블렌딩 고려
+    if (isLogin && page == 0) return Math.max(0, size - layoutDeduction);
+    return size;
+  }
+
+
+  /**
+   * PageImpl의 자동 Total 보정 로직을 무시하고 실제 Total Count를 반환하는 커스텀 Page 생성
+   */
+  private <T> Page<T> createFixedPage(List<T> content, Pageable pageable, long fixedTotal) {
+    return new PageImpl<>(content, pageable, fixedTotal) {
+
+      @Override
+      public long getTotalElements() {
+        return fixedTotal; // 매개변수 fixedTotal를 강제로 반환한다.
+      }
+
+      @Override
+      public int getTotalPages() {
+        if (getSize() == 0) {
+          return 1;
         }
 
-        int layoutDeduction = 4; // 한 줄에 표시할 블렌딩
-
-        long offset = calculateOffset(isLogin, pageNumber, pageSize, layoutDeduction);
-        int limit = calculateLimit(isLogin, pageNumber, pageSize, layoutDeduction);
-
-        // 블렌딩 목록 조회
-        if(limit > 0) {
-            finalBlendingList.addAll(getBlendingList(userUuid, blendingListRequest, offset, limit, isLogin));
-        }
-
-        // 전체 개수 조회 및 계산
-        long generalTotalCount = blendingRepository.countByCondition(userUuid, blendingListRequest);
-
-        return new PageImpl<>(finalBlendingList, pageable, generalTotalCount);
-    }
-
-
-    /**
-     * 추천 블렌딩 추출
-     */
-    private List<BlendingListResponse> getRecommendationList(
-            String userUuid, List<UserKeyword> userKeywords, Integer recommendationCount) {
-
-        List<String> keywords = UserKeyword.toNames(userKeywords);
-
-        List<Blending> blendingList = blendingRepository.findRecommendation(keywords, recommendationCount);
-        Set<Long> myBookmarkedIds = checkBookmark(userUuid, true, blendingList);
-        return BlendingListResponse.listFrom(blendingList, myBookmarkedIds);
-    }
-
-
-    /**
-     * 블렌딩 목록 추출 (검색어 및 필터 적용)
-     */
-    private List<BlendingListResponse> getBlendingList(
-            String userUuid, BlendingListRequest blendingListRequest,
-            long offset, int limit, boolean isLogin) {
-
-        List<Blending> blendingList = blendingRepository.searchByCondition(userUuid, blendingListRequest, offset, limit);
-        Set<Long> myBookmarkedIds = checkBookmark(userUuid, isLogin, blendingList);
-        return BlendingListResponse.listFrom(blendingList, myBookmarkedIds);
-    }
-
-
-    /**
-     * 현재 조회된 블렌딩 목록 중 사용자가 북마크한 bookmarkId 추출
-     */
-    private Set<Long> checkBookmark(String userUuid, boolean isLogin, List<Blending> blendingList) {
-        Set<Long> myBookmarkedIds = new HashSet<>();
-        if (isLogin && !blendingList.isEmpty()) {
-            List<Long> blendingIds = blendingList.stream()
-                    .map(Blending::getId)
-                    .toList();
-
-            myBookmarkedIds = blendingBookmarkRepository.findBookmarkedBlendingIds(userUuid, blendingIds);
-        }
-
-        return myBookmarkedIds;
-    }
-
-
-    /**
-     * offset 계산
-     */
-    private long calculateOffset(boolean isLogin, int page, int size, int layoutDeduction) {
-
-        if (!isLogin) return (long) page * size;
-
-        if (page == 0) return 0;
-
-        // 첫 페이지의 추천 블렌딩 고려
-        int firstPageGeneralCount = size - layoutDeduction;
-        return firstPageGeneralCount + (long) (page - 1) * size;
-    }
-
-
-    /**
-     * limit 계산
-     */
-    private int calculateLimit(boolean isLogin, int page, int size, int layoutDeduction) {
-
-        // 첫 페이지의 추천 블렌딩 고려
-        if (isLogin && page == 0) return Math.max(0, size - layoutDeduction);
-        return size;
-    }
+        // 조정된 fixedTotal를 통해 TotalPage를 계산한다.
+        return (int) Math.ceil((double) fixedTotal / getSize());
+      }
+    };
+  }
 
 }

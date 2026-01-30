@@ -1,6 +1,8 @@
 package kr.blendit.api.blending.repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import kr.blendit.api.blending.constant.BlendingStatus;
@@ -10,6 +12,7 @@ import kr.blendit.api.common.constant.Position;
 import lombok.RequiredArgsConstructor;
 import org.springframework.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static kr.blendit.api.blending.domain.QBlending.blending;
@@ -51,7 +54,11 @@ public class BlendingRepositoryImpl implements BlendingRepositoryCustom{
      * 추천 블렌딩 목록 조회 (UserKeyword와 일치하는 BlendingKeyword로 조회)
      */
     @Override
-    public List<Blending> findRecommendation(List<String> keywords, Integer recommendationCount) {
+    public List<Blending> findRecommendation(List<String> keywords, Integer targetCount) {
+        // Todo: 여기서 데이터를 조회못하고 있는 것 같다. 확인 필요
+        if (keywords == null || keywords.isEmpty()) {
+            return new ArrayList<>();
+        }
 
         return queryFactory
                 .selectFrom(blending)
@@ -60,7 +67,30 @@ public class BlendingRepositoryImpl implements BlendingRepositoryCustom{
                         blending.status.eq(BlendingStatus.RECRUITING),
                         blending.useFlag.isTrue()
                 )
-                .limit(recommendationCount)
+                .orderBy(
+                        countMatchingKeywords(keywords).desc(), // 키워드 일치 개수 많은 순
+                        blending.createdDate.desc() // 최신순
+                )
+                .limit(targetCount)
+                .fetch();
+    }
+
+    /**
+     * 최근 순으로 블렌딩 목록 조회 (추천 블렌딩 12개를 못 가져온 경우 추가로 조회하는 용도)
+     *
+     * @param excludeIds 추천 블렌딩에서 이미 가져와서 제외할 블렌딩 id
+     */
+    @Override
+    public List<Blending> findRecent(Integer targetCount, List<Long> excludeIds) {
+        return queryFactory
+                .selectFrom(blending)
+                .where(
+                        blending.status.eq(BlendingStatus.RECRUITING),
+                        blending.useFlag.isTrue(),
+                        blendingIdNotIn(excludeIds) // 중복 제거
+                )
+                .orderBy(blending.createdDate.desc())
+                .limit(targetCount)
                 .fetch();
     }
 
@@ -86,6 +116,27 @@ public class BlendingRepositoryImpl implements BlendingRepositoryCustom{
         return count != null ? count : 0L;
     }
 
+    /**
+     * 일치하는 키워드 수 반환
+     */
+    private NumberExpression<Long> countMatchingKeywords(List<String> keywords) {
+        return Expressions.asNumber(
+                JPAExpressions
+                        .select(blendingKeyword.count())
+                        .from(blendingKeyword)
+                        .join(blendingKeyword.keyword, keyword)
+                        .where(
+                                blendingKeyword.blending.eq(blending),
+                                keyword.name.in(keywords)
+                        )
+        );
+    }
+
+    private BooleanExpression blendingIdNotIn(List<Long> excludeIds) {
+        return (excludeIds != null && !excludeIds.isEmpty())
+                ? blending.id.notIn(excludeIds)
+                : null;
+    }
 
     private BooleanExpression equalPosition(Position position) {
         return position != null ? blending.position.eq(position) : null;
