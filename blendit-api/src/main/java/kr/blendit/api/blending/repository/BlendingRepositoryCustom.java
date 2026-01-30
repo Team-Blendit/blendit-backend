@@ -2,7 +2,6 @@ package kr.blendit.api.blending.repository;
 
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.dto.request.BlendingListRequest;
-import kr.blendit.api.blending.dto.response.BlendingListResponse;
 
 import java.util.List;
 

@@ -55,7 +55,6 @@ public class BlendingRepositoryImpl implements BlendingRepositoryCustom{
      */
     @Override
     public List<Blending> findRecommendation(List<String> keywords, Integer targetCount) {
-        // Todo: 여기서 데이터를 조회못하고 있는 것 같다. 확인 필요
         if (keywords == null || keywords.isEmpty()) {
             return new ArrayList<>();
         }

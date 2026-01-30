@@ -3,11 +3,15 @@ package kr.blendit.api.blending.dto.response;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingKeyword;
+import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.common.constant.Position;
+import kr.blendit.api.user.constant.Experience;
+import kr.blendit.api.user.domain.User;
 import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Getter
@@ -17,9 +21,9 @@ public class BlendingListResponse {
 
     private String blendingUuid;
     private String title;
-    // Todo: private String userName;
+    private String hostNickname;
+    private Experience hostExperience;
     // Todo: private String userProfileImage;
-    // Todo: private 연차?
     private String region;
     private BlendingStatus blendingStatus;
     private Position position;
@@ -33,6 +37,7 @@ public class BlendingListResponse {
     public static List<BlendingListResponse> listFrom(
             List<Blending> blendingList,
             Set<Long> myBookmarkedIds,
+            Map<Long, BlendingUser> hostMap,
             Boolean isRecommended) {
 
         List<BlendingListResponse> list = new ArrayList<>();
@@ -41,6 +46,8 @@ public class BlendingListResponse {
             BlendingListResponse blendingListResponse = BlendingListResponse.builder()
                     .blendingUuid(blending.getUuid())
                     .title(blending.getTitle())
+                    .hostNickname(hostMap.get(blending.getId()).getUser().getNickname())
+                    .hostExperience(hostMap.get(blending.getId()).getUser().getExperience())
                     .region(blending.getRegion())
                     .blendingStatus(blending.getStatus())
                     .position(blending.getPosition())

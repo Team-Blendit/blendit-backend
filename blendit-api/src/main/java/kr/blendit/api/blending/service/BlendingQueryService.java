@@ -1,11 +1,12 @@
 package kr.blendit.api.blending.service;
 
 import kr.blendit.api.blending.domain.Blending;
+import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.blending.dto.request.BlendingListRequest;
 import kr.blendit.api.blending.dto.response.BlendingListResponse;
 import kr.blendit.api.blending.repository.BlendingBookmarkRepository;
 import kr.blendit.api.blending.repository.BlendingRepository;
-import kr.blendit.api.keyword.domain.Keyword;
+import kr.blendit.api.blending.repository.BlendingUserRepository;
 import kr.blendit.api.user.domain.UserKeyword;
 import kr.blendit.api.user.repository.UserKeywordRepository;
 import kr.blendit.common.security.jwt.CurrentUser;
@@ -14,10 +15,7 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +25,7 @@ public class BlendingQueryService {
   private final BlendingRepository blendingRepository;
   private final BlendingBookmarkRepository blendingBookmarkRepository;
   private final UserKeywordRepository userKeywordRepository;
+  private final BlendingUserRepository blendingUserRepository;
 
   /**
    * 블렌딩 목록 조회
@@ -103,7 +102,10 @@ public class BlendingQueryService {
           String userUuid, List<Blending> recommendationBlendings) {
 
     Set<Long> myBookmarkedIds = checkBookmark(userUuid, true, recommendationBlendings);
-    return BlendingListResponse.listFrom(recommendationBlendings, myBookmarkedIds, true);
+
+    Map<Long, BlendingUser> hostMap = convertHostMap(recommendationBlendings);
+
+    return BlendingListResponse.listFrom(recommendationBlendings, myBookmarkedIds, hostMap, true);
   }
 
 
@@ -116,7 +118,30 @@ public class BlendingQueryService {
 
     List<Blending> blendingList = blendingRepository.searchByCondition(userUuid, blendingListRequest, offset, limit);
     Set<Long> myBookmarkedIds = checkBookmark(userUuid, isLogin, blendingList);
-    return BlendingListResponse.listFrom(blendingList, myBookmarkedIds, false);
+
+    Map<Long, BlendingUser> hostMap = convertHostMap(blendingList);
+
+    return BlendingListResponse.listFrom(blendingList, myBookmarkedIds, hostMap, false);
+  }
+
+
+  /**
+   * 블렌딩 목록에서 Host의 PK를 추출하여 Map으로 변환
+   */
+  private Map<Long, BlendingUser> convertHostMap(List<Blending> blendingList) {
+
+    List<Long> blendingIds = blendingList.stream()
+            .map(Blending::getId)
+            .toList();
+
+    Map<Long, BlendingUser> hostMap = new HashMap<>();
+    List<BlendingUser> hosts = blendingUserRepository.findHostsByBlendingIds(blendingIds);
+
+    for(BlendingUser blendingUser : hosts) {
+      hostMap.putIfAbsent(blendingUser.getBlending().getId(), blendingUser);
+    }
+
+    return hostMap;
   }
 
 

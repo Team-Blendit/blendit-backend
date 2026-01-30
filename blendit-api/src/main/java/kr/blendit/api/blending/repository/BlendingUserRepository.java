@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long> {
+public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long>, BlendingUserRepositoryCustom {
 
 
     /**
