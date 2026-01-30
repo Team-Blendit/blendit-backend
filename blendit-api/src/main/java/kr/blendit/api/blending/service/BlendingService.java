@@ -14,7 +14,6 @@ import kr.blendit.api.blending.repository.BlendingUserRepository;
 import kr.blendit.api.keyword.domain.Keyword;
 import kr.blendit.api.keyword.repository.KeywordRepository;
 import kr.blendit.api.user.domain.User;
-import kr.blendit.api.user.repository.UserRepository;
 import kr.blendit.common.exception.BaseErrorCode;
 import kr.blendit.common.exception.BaseException;
 import kr.blendit.common.security.jwt.CurrentUser;
@@ -35,22 +34,16 @@ public class BlendingService {
 
     private final BlendingRepository blendingRepository;
     private final BlendingUserRepository blendingUserRepository;
-    private final UserRepository userRepository;
     private final KeywordRepository keywordRepository;
     private final BlendingBookmarkRepository blendingBookmarkRepository;
 
     /**
      * 블렌딩 생성
      */
-    public void create(String userUuid, BlendingCreateRequest blendingCreateRequest) {
-
-        User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new BaseException(BaseErrorCode.USER_NOT_FOUND));
+    public void create(User user, BlendingCreateRequest blendingCreateRequest, List<Keyword> keywordList) {
 
         Blending blending = Blending.create(blendingCreateRequest);
-
-        List<Keyword> keywords = keywordRepository.findAllByUuidIn(blendingCreateRequest.getKeywordUuidList());
-        blending.addKeywords(keywords);
+        blending.addKeywords(keywordList);
 
         BlendingUser blendingUser = blending.addParticipant(
                 user,
@@ -69,8 +62,7 @@ public class BlendingService {
      */
     public void delete(String userUuid, String blendingUuid) {
 
-        Blending blending = blendingRepository.findByUuid(blendingUuid)
-                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+        Blending blending = getBlending(blendingUuid);
 
         // Host 인지 검증
         if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingUserGrade(blending, userUuid, BlendingUserGrade.HOST)) {
@@ -86,8 +78,7 @@ public class BlendingService {
      */
     public void update(String userUuid, String blendingUuid, BlendingUpdateRequest blendingUpdateRequest) {
 
-        Blending blending = blendingRepository.findByUuid(blendingUuid)
-                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+        Blending blending = getBlending(blendingUuid);
 
         if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingUserGrade(blending, userUuid, BlendingUserGrade.HOST)) {
             throw new BaseException(BaseErrorCode.BLENDING_PERMISSION_DENIED);
@@ -123,8 +114,7 @@ public class BlendingService {
      */
     public void updateStatus(String userUuid, String blendingUuid, BlendingStatus blendingStatus) {
 
-        Blending blending = blendingRepository.findByUuid(blendingUuid)
-                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+        Blending blending = getBlending(blendingUuid);
 
         // Host 인지 검증
         if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingUserGrade(blending, userUuid, BlendingUserGrade.HOST)) {
@@ -140,7 +130,7 @@ public class BlendingService {
      *
      * @return BlendingDetailResponse 참여자를 포함한 블렌딩 관련 모든 데이터
      */
-    public BlendingDetailResponse find(CurrentUser currentUser, String blendingUuid) {
+    public BlendingDetailResponse getBlendingDetail(CurrentUser currentUser, String blendingUuid) {
         String userUuid = currentUser != null ? currentUser.getUserUuid() : null;
 
         // todo: 추후 currentUser가 해당 블렌딩의 참여자가 아니라면 BlendingStatus가 COMPLETED, CANCELED는 볼 수 없도록 수정 필요
@@ -167,6 +157,12 @@ public class BlendingService {
                 blending, joinStatuses);
 
         return BlendingDetailResponse.from(blending, blendingUsers, bookmarkCount, isBookmark, isHost);
+    }
+
+
+    public Blending getBlending(String blendingUuid) {
+        return blendingRepository.findByUuid(blendingUuid)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
     }
 
 }
