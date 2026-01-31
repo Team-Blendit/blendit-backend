@@ -138,9 +138,7 @@ public class User extends BaseEntity {
     this.province = request.province();
     this.district = request.district();
     this.nickname = request.nickname();
-    this.userKeywords = keywordList.stream()
-        .map(keyword -> UserKeyword.create(this, keyword))
-        .toList();
+    updateUserKeywords(keywordList);
   }
 
   public boolean isOnboardingComplete() {
@@ -150,6 +148,7 @@ public class User extends BaseEntity {
   public void updateProfile(UpdateUserProfileRequest request, List<Keyword> keywordList) {
     this.nickname = request.nickname();
     this.description = request.description();
+    this.email = request.email();
     this.experience = request.experience();
     this.position = request.position();
     this.province = request.province();
