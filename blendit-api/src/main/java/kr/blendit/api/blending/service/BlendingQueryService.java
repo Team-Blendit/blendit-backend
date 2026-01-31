@@ -68,9 +68,9 @@ public class BlendingQueryService {
    */
   private List<BlendingListResponse> getRecommendationList(String userUuid, int targetCount) {
     List<UserKeyword> userKeywords = userKeywordRepository.findUserKeywordNamesByUserUuid(userUuid);
-    List<String> keywordNames = UserKeyword.toNames(userKeywords);
+    List<String> userKeywordNames = UserKeyword.toNames(userKeywords);
 
-    List<Blending> recommendationBlendings = blendingRepository.findRecommendation(keywordNames, targetCount);
+    List<Blending> recommendationBlendings = blendingRepository.findRecommendation(userKeywordNames, targetCount);
 
     if (recommendationBlendings.size() < targetCount) {
       recommendationBlendings.addAll(getRecent(targetCount, recommendationBlendings));
@@ -83,9 +83,10 @@ public class BlendingQueryService {
   /**
    * 추가 블렌딩 조회
    *
-   * @apiNote 조회한 추천 블렌딩이 12개 미만일 경우 추가 조회 용도
+   * @apiNote 조회한 추천 블렌딩이 12개 미만일 경우 추가 조회 용도 (이미 조회한 추천 블렌딩을 제외하고 조회)
    */
   private List<Blending> getRecent(int targetCount, List<Blending> recommendationBlendings) {
+
     int neededCount = targetCount - recommendationBlendings.size();
     List<Long> existingIds = recommendationBlendings.stream()
             .map(Blending::getId)
@@ -101,11 +102,10 @@ public class BlendingQueryService {
   private List<BlendingListResponse> convertRecommendationList(
           String userUuid, List<Blending> recommendationBlendings) {
 
-    Set<Long> myBookmarkedIds = checkBookmark(userUuid, true, recommendationBlendings);
-
+    Set<Long> myBookmarkedBlendingIds = checkBookmark(userUuid, true, recommendationBlendings);
     Map<Long, BlendingUser> hostMap = convertHostMap(recommendationBlendings);
 
-    return BlendingListResponse.listFrom(recommendationBlendings, myBookmarkedIds, hostMap, true);
+    return BlendingListResponse.listFrom(recommendationBlendings, myBookmarkedBlendingIds, hostMap, true);
   }
 
 
@@ -117,11 +117,11 @@ public class BlendingQueryService {
           long offset, int limit, boolean isLogin) {
 
     List<Blending> blendingList = blendingRepository.searchByCondition(userUuid, blendingListRequest, offset, limit);
-    Set<Long> myBookmarkedIds = checkBookmark(userUuid, isLogin, blendingList);
+    Set<Long> myBookmarkedBlendingIds = checkBookmark(userUuid, isLogin, blendingList);
 
     Map<Long, BlendingUser> hostMap = convertHostMap(blendingList);
 
-    return BlendingListResponse.listFrom(blendingList, myBookmarkedIds, hostMap, false);
+    return BlendingListResponse.listFrom(blendingList, myBookmarkedBlendingIds, hostMap, false);
   }
 
 
@@ -149,16 +149,16 @@ public class BlendingQueryService {
    * 현재 조회된 블렌딩 목록 중 사용자가 북마크한 bookmarkId 추출
    */
   private Set<Long> checkBookmark(String userUuid, boolean isLogin, List<Blending> blendingList) {
-    Set<Long> myBookmarkedIds = new HashSet<>();
+    Set<Long> myBookmarkedBlendingIds = new HashSet<>();
     if (isLogin && !blendingList.isEmpty()) {
       List<Long> blendingIds = blendingList.stream()
               .map(Blending::getId)
               .toList();
 
-      myBookmarkedIds = blendingBookmarkRepository.findBookmarkedBlendingIds(userUuid, blendingIds);
+      myBookmarkedBlendingIds = blendingBookmarkRepository.findBookmarkedBlendingIds(userUuid, blendingIds);
     }
 
-    return myBookmarkedIds;
+    return myBookmarkedBlendingIds;
   }
 
 

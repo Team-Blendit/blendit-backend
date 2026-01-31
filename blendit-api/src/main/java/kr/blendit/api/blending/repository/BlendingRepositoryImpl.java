@@ -54,20 +54,20 @@ public class BlendingRepositoryImpl implements BlendingRepositoryCustom{
      * 추천 블렌딩 목록 조회 (UserKeyword와 일치하는 BlendingKeyword로 조회)
      */
     @Override
-    public List<Blending> findRecommendation(List<String> keywords, Integer targetCount) {
-        if (keywords == null || keywords.isEmpty()) {
+    public List<Blending> findRecommendation(List<String> userKeywordNames, Integer targetCount) {
+        if (userKeywordNames == null || userKeywordNames.isEmpty()) {
             return new ArrayList<>();
         }
 
         return queryFactory
                 .selectFrom(blending)
                 .where(
-                        containsKeywords(keywords),
+                        containsKeywords(userKeywordNames),
                         blending.status.eq(BlendingStatus.RECRUITING),
                         blending.useFlag.isTrue()
                 )
                 .orderBy(
-                        countMatchingKeywords(keywords).desc(), // 키워드 일치 개수 많은 순
+                        countMatchingKeywords(userKeywordNames).desc(), // 키워드 일치 개수 많은 순
                         blending.createdDate.desc() // 최신순
                 )
                 .limit(targetCount)
@@ -156,14 +156,14 @@ public class BlendingRepositoryImpl implements BlendingRepositoryCustom{
         }
     }
 
-    private BooleanExpression containsKeywords(List<String> keywords) {
-        if (keywords == null || keywords.isEmpty()) return null;
+    private BooleanExpression containsKeywords(List<String> userKeywordNames) {
+        if (userKeywordNames == null || userKeywordNames.isEmpty()) return null;
 
         return JPAExpressions
                 .selectOne()
                 .from(blendingKeyword)
                 .join(blendingKeyword.keyword, keyword)
-                .where(blendingKeyword.blending.eq(blending), keyword.name.in(keywords))
+                .where(blendingKeyword.blending.eq(blending), keyword.name.in(userKeywordNames))
                 .exists();
     }
 

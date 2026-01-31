@@ -36,7 +36,7 @@ public class BlendingListResponse {
 
     public static List<BlendingListResponse> listFrom(
             List<Blending> blendingList,
-            Set<Long> myBookmarkedIds,
+            Set<Long> myBookmarkedBlendingIds,
             Map<Long, BlendingUser> hostMap,
             Boolean isRecommended) {
 
@@ -54,7 +54,7 @@ public class BlendingListResponse {
                     .capacity(blending.getCapacity())
                     .currentUserCount(blending.getCurrentParticipantCount())
                     .keywords(BlendingKeyword.extractKeywords(blending.getKeywords()))
-                    .isBookmark(myBookmarkedIds.contains(blending.getId()))
+                    .isBookmark(myBookmarkedBlendingIds.contains(blending.getId()))
                     .isRecommended(isRecommended)
                     .build();
 

@@ -135,6 +135,8 @@ public class BlendingService {
 
         // todo: 추후 currentUser가 해당 블렌딩의 참여자가 아니라면 BlendingStatus가 COMPLETED, CANCELED는 볼 수 없도록 수정 필요
 
+        // todo: 삭제된 블렌딩은 Host만 조회할 수 있도록 개선 필요 (추후 기획에 따라)
+
         Blending blending = blendingRepository.findByUuidWithKeywords(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
