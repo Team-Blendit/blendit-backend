@@ -11,7 +11,7 @@ import java.util.List;
 
 @Entity
 @Table(
-        name ="blending_keyword",
+        name = "blending_keyword",
         uniqueConstraints = {
                 @UniqueConstraint(
                         name = "uk_blending_keyword",
@@ -55,18 +55,18 @@ public class BlendingKeyword {
       throw new BaseException(BaseErrorCode.INVALID_PARAMETER);
     }
 
-        return BlendingKeyword.builder()
-                .blending(blending)
-                .keyword(keyword)
-                .build();
-    }
+    return BlendingKeyword.builder()
+            .blending(blending)
+            .keyword(keyword)
+            .build();
+  }
 
-    public static List<String> extractKeywords(List<BlendingKeyword> blendingKeywords) {
-        List<String> strKeywords = new ArrayList<>();
+  public static List<String> extractKeywords(List<BlendingKeyword> blendingKeywords) {
+    List<String> strKeywords = new ArrayList<>();
 
-        for(BlendingKeyword blendingKeyword : blendingKeywords) {
-            strKeywords.add(blendingKeyword.getKeyword().getName());
-        }
-        return strKeywords;
+    for (BlendingKeyword blendingKeyword : blendingKeywords) {
+      strKeywords.add(blendingKeyword.getKeyword().getName());
     }
+    return strKeywords;
+  }
 }

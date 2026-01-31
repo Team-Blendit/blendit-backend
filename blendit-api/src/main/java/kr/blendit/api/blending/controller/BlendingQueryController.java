@@ -1,7 +1,6 @@
 package kr.blendit.api.blending.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.blendit.api.blending.dto.request.BlendingListRequest;
 import kr.blendit.api.blending.dto.response.BlendingListResponse;
