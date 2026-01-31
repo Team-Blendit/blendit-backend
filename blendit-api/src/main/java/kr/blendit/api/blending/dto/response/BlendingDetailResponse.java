@@ -5,6 +5,7 @@ import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingKeyword;
 import kr.blendit.api.blending.domain.BlendingUser;
+import kr.blendit.api.common.constant.Position;
 import lombok.*;
 import org.hibernate.mapping.Join;
 
@@ -21,7 +22,7 @@ public class BlendingDetailResponse {
     private List<BlendingParticipantResponse> blendingParticipant;
     private String title;
     private String content;
-    private String position;
+    private Position position;
     private List<String> keywords;
     private Integer capacity;
     private String region;
@@ -47,7 +48,7 @@ public class BlendingDetailResponse {
                 .blendingParticipant(BlendingParticipantResponse.from(blendingUsers))
                 .title(blending.getTitle())
                 .content(blending.getContent())
-                .position(blending.getPosition().getDescription())
+                .position(blending.getPosition())
                 .keywords(BlendingKeyword.extractKeywords(blending.getKeywords()))
                 .capacity(blending.getCapacity())
                 .region(blending.getRegion())
