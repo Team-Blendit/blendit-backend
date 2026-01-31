@@ -47,6 +47,7 @@ public enum BaseErrorCode implements ErrorCode {
   KEYWORD_NOT_FOUND("키워드를 찾을 수 없습니다."),
   KEYWORD_IS_EMPTY("키워드 입력이 필요합니다."),
   KEYWORD_LIMIT_EXCEEDED("키워드는 최대 3개까지 입력 가능합니다."),
+  DUPLICATE_KEYWORD("이미 등록된 키워드입니다."),
 
   // 블렌딩
   BLENDING_NOT_FOUND("블렌딩을 찾을 수 없습니다."),

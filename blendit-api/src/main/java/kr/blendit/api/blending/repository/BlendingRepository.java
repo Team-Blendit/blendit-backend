@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.Optional;
 
-public interface BlendingRepository extends JpaRepository<Blending, Long> {
+public interface BlendingRepository extends JpaRepository<Blending, Long>, BlendingRepositoryCustom {
 
     Optional<Blending> findByUuid(String uuid);
 

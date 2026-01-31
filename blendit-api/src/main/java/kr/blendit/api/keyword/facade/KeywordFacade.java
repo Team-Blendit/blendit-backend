@@ -17,4 +17,9 @@ public class KeywordFacade {
   public List<KeywordListResponse> getKeywordList() {
     return keywordService.getKeywordList();
   }
+
+  @Transactional
+  public void saveKeyword(String name) {
+    keywordService.saveKeyword(name);
+  }
 }

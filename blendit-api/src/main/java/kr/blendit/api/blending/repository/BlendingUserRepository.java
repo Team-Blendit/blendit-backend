@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long> {
+public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long>, BlendingUserRepositoryCustom {
 
 
     /**
@@ -48,4 +48,15 @@ public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long
             WHERE bu.blending = :blending AND bu.joinStatus IN :joinStatuses
             """)
     List<BlendingUser> findByBlendingAndJoinStatusInWithUser(Blending blending, List<JoinStatus> joinStatuses);
+
+//    /**
+//     * 특정 유저의 참여 상태 조회
+//     */
+//    @Query("""
+//            SELECT bu
+//            FROM BlendingUser bu
+//            WHERE bu.blending = :blending
+//                AND bu.user.uuid = :userUuid
+//            """)
+//    BlendingUser findByBlendingAndUser_Uuid(Blending blending, String userUuid);
 }

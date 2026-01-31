@@ -16,4 +16,8 @@ public class Keyword extends BaseEntity {
 
   @Column(nullable = false, length = 50, unique = true)
   private String name;
+
+  public Keyword(String name) {
+    this.name = name;
+  }
 }
