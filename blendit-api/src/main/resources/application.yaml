@@ -39,6 +39,8 @@ security:
       methods: [ "*" ]
     - path: /api/blendit/public/**
       methods: [ "*" ]
+    - path: /api/blendit/storage/**
+      methods: [ "*" ]
     - path: /api/blendit/blending/**
       methods: [ "GET" ]
     - path: /api/blendit/keyword/**
