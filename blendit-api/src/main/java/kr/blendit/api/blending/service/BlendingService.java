@@ -158,13 +158,29 @@ public class BlendingService {
         List<BlendingUser> blendingUsers = blendingUserRepository.findByBlendingAndJoinStatusInWithUser(
                 blending, joinStatuses);
 
-        return BlendingDetailResponse.from(blending, blendingUsers, bookmarkCount, isBookmark, isHost);
+        String currentUserJoinStatus = "GUEST";
+        if(userUuid != null) {
+            currentUserJoinStatus = getCurrentUserJoinStatus(blending, userUuid);
+        }
+
+        return BlendingDetailResponse.from(blending, blendingUsers, bookmarkCount, isBookmark, isHost, currentUserJoinStatus);
     }
 
 
     public Blending getBlending(String blendingUuid) {
         return blendingRepository.findByUuid(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+    }
+
+    private String getCurrentUserJoinStatus(Blending blending, String userUuid) {
+        BlendingUser CurrentBlendingUser = blendingUserRepository.findByBlendingAndUser_Uuid(blending, userUuid)
+                .orElse(null);
+
+        if(CurrentBlendingUser == null) {
+            return "NOT_APPLIED";
+        } else {
+            return String.valueOf(CurrentBlendingUser.getJoinStatus());
+        }
     }
 
 }
