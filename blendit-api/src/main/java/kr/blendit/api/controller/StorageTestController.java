@@ -2,7 +2,8 @@ package kr.blendit.api.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.blendit.common.storage.dto.PresignedUrl;
+import java.io.IOException;
+import java.util.Map;
 import kr.blendit.common.storage.dto.UploadedObject;
 import kr.blendit.common.storage.service.ObjectStorageService;
 import lombok.RequiredArgsConstructor;
@@ -10,11 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Map;
-
-@Tag(name = "Storage Test API", description = "오브젝트 스토리지 테스트용 API")
+@Tag(name = "Storage Test API", description = "로컬 볼륨 스토리지 테스트용 API")
 @RestController
 @RequestMapping("/api/blendit/storage")
 @RequiredArgsConstructor
@@ -23,71 +20,53 @@ public class StorageTestController {
     private final ObjectStorageService objectStorageService;
 
     @Operation(
-        summary = "Presigned PUT URL 발급",
-        description = "클라이언트가 직접 업로드할 수 있는 Presigned PUT URL을 발급합니다. (key는 내부에서 생성)"
+        summary = "서버 업로드 테스트",
+        description = "multipart 파일을 서버로 업로드하면, 서버 볼륨(rootDir)에 저장하고 UploadedObject를 반환합니다."
     )
-    @PostMapping("/presign/put")
-    public PresignedUrl presignPut(@RequestBody PresignPutRequest request) {
-        Duration ttl = Duration.ofSeconds(request.ttlSeconds() == null ? 300 : request.ttlSeconds());
-
-        return objectStorageService.presignPut(
-            request.prefix(),
-            request.originalFilename(),
-            request.contentType(),
-            ttl
-        );
-    }
-
-    @Operation(
-        summary = "Presigned PUT URL 발급 (key 지정)",
-        description = "클라이언트가 직접 업로드할 수 있는 Presigned PUT URL을 발급합니다. (key는 호출자가 지정)"
-    )
-    @PostMapping("/presign/put-with-key")
-    public PresignedUrl presignPutWithKey(@RequestBody PresignPutWithKeyRequest request) {
-        Duration ttl = Duration.ofSeconds(request.ttlSeconds() == null ? 300 : request.ttlSeconds());
-
-        return objectStorageService.presignPutWithKey(
-            request.key(),
-            request.contentType(),
-            ttl
-        );
-    }
-
-    @Operation(
-        summary = "Presigned GET URL 발급",
-        description = "private 객체 다운로드용 Presigned GET URL을 발급합니다."
-    )
-    @PostMapping("/presign/get")
-    public PresignedUrl presignGet(@RequestBody PresignGetRequest request) {
-        Duration ttl = Duration.ofSeconds(request.ttlSeconds() == null ? 300 : request.ttlSeconds());
-
-        return objectStorageService.presignGet(
-            request.key(),
-            ttl
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public UploadedObject upload(
+        @RequestPart("file") MultipartFile file,
+        @RequestParam(required = false) String prefix
+    ) throws IOException {
+        return objectStorageService.upload(
+            file.getInputStream(),
+            file.getSize(),
+            file.getContentType(),
+            file.getOriginalFilename(),
+            prefix
         );
     }
 
     @Operation(
         summary = "서버 업로드 테스트 (key 지정)",
-        description = "서버가 직접 Object Storage로 파일을 업로드합니다. (key를 호출자가 지정)"
+        description = "※ 테스트용. 실제 운영에서는 권장하지 않음. 키를 직접 지정해 서버 볼륨에 저장합니다."
     )
     @PostMapping(value = "/upload-with-key", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public UploadedObject uploadWithKey(
         @RequestPart("file") MultipartFile file,
         @RequestParam String key
     ) throws IOException {
-        return objectStorageService.uploadWithKey(
-            file.getInputStream(),
-            file.getSize(),
-            file.getContentType(),
-            file.getOriginalFilename(),
-            key
+        // ObjectStorageService에 uploadWithKey가 없다면, 이 API는 제거하는 게 맞습니다.
+        // 만약 필요하면 인터페이스에 uploadWithKey를 다시 추가하거나,
+        // key 지정 업로드를 LocalObjectStorageService에 별도 메서드로 노출하세요.
+        throw new UnsupportedOperationException("upload-with-key is not supported by current ObjectStorageService.");
+    }
+
+    @Operation(
+        summary = "업로드 URL 확인",
+        description = "해당 key의 공개 URL을 계산해서 반환합니다. (Nginx /uploads alias or static serving 필요)"
+    )
+    @GetMapping("/url")
+    public Map<String, String> publicUrl(@RequestParam String key) {
+        return Map.of(
+            "key", key,
+            "url", objectStorageService.publicUrl(key)
         );
     }
 
     @Operation(
         summary = "업로드 삭제",
-        description = "Object Storage에서 해당 key를 삭제합니다."
+        description = "서버 볼륨(rootDir)에서 해당 key 파일을 삭제합니다."
     )
     @DeleteMapping("/delete")
     public Map<String, Object> delete(@RequestParam String key) {
@@ -99,36 +78,12 @@ public class StorageTestController {
         );
     }
 
-    @Operation(summary = "스토리지 모듈 상태 확인", description = "스토리지 모듈이 빈으로 정상 로딩되었는지 간단히 확인합니다.")
+    @Operation(summary = "스토리지 모듈 상태 확인", description = "스토리지 모듈이 빈으로 정상 로딩되었는지 확인합니다.")
     @GetMapping("/ping")
     public Map<String, String> ping() {
         return Map.of(
-            "message", "pong - storage module is alive",
+            "message", "pong - local storage module is alive",
             "path", "/api/blendit/storage/ping"
         );
-    }
-
-    public record PresignPutRequest(
-        String prefix,
-        String originalFilename,
-        String contentType,
-        Integer ttlSeconds
-    ) {
-
-    }
-
-    public record PresignPutWithKeyRequest(
-        String key,
-        String contentType,
-        Integer ttlSeconds
-    ) {
-
-    }
-
-    public record PresignGetRequest(
-        String key,
-        Integer ttlSeconds
-    ) {
-
     }
 }
