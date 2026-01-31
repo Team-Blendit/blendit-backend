@@ -23,6 +23,7 @@ public class BlendingParticipantResponse {
 
   private String uuid;
   private String nickname;
+  private String profileImage;
   private Position position;
   private Experience experience;
   private String province;
@@ -46,6 +47,7 @@ public class BlendingParticipantResponse {
       BlendingParticipantResponse blendingUserResponse = BlendingParticipantResponse.builder()
               .uuid(blendingUser.getUser().getUuid())
               .nickname(blendingUser.getUser().getNickname())
+              .profileImage(blendingUser.getUser().getProfileImage())
               .position(blendingUser.getUser().getPosition())
               .experience(blendingUser.getUser().getExperience())
               .province(blendingUser.getUser().getProvince())
