@@ -6,8 +6,8 @@ import kr.blendit.api.blending.dto.request.BlendingApplyRequest;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
 import kr.blendit.api.blending.dto.request.BlendingListRequest;
 import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
-import kr.blendit.api.blending.dto.response.BlendingDetailResponse;
-import kr.blendit.api.blending.dto.response.BlendingListResponse;
+import kr.blendit.api.blending.dto.response.*;
+import kr.blendit.api.blending.service.BlendingMyQueryService;
 import kr.blendit.api.blending.service.BlendingParticipationService;
 import kr.blendit.api.blending.service.BlendingQueryService;
 import kr.blendit.api.blending.service.BlendingService;
@@ -36,6 +36,7 @@ public class BlendingFacade {
   private final BlendingQueryService blendingQueryService;
   private final UserService userService;
   private final KeywordService keywordService;
+  private final BlendingMyQueryService blendingMyQueryService;
 
   /**
    * 블렌딩 생성 흐름
@@ -107,6 +108,15 @@ public class BlendingFacade {
   }
 
   /**
+   * 블렌딩 참여 신청 내역 삭제
+   */
+  @Transactional
+  public void deleteParticipation(String userUuid, String blendingUuid) {
+    Blending blending = blendingService.getBlending(blendingUuid);
+    blendingParticipationService.delete(userUuid, blending);
+  }
+
+  /**
    * 블렌딩 참여 승인
    */
   @Transactional
@@ -152,4 +162,20 @@ public class BlendingFacade {
     Blending blending = blendingService.getBlending(blendingUuid);
     blendingService.removeBookmark(user, blending);
   }
+  
+  @Transactional(readOnly = true)
+  public Page<MyCreatedBlendingResponse> getMyCreatedList(CurrentUser currentUser, Pageable pageable) {
+    return blendingMyQueryService.getMyCreatedList(currentUser, pageable);
+  }
+
+  @Transactional(readOnly = true)
+  public Page<MyAppliedBlendingResponse> getMyAppliedList(CurrentUser currentUser, Pageable pageable) {
+    return blendingMyQueryService.getMyAppliedList(currentUser, pageable);
+  }
+
+  @Transactional(readOnly = true)
+  public Page<MyHistoryBlendingResponse> getMyHistoryList(CurrentUser currentUser, Pageable pageable) {
+    return blendingMyQueryService.getMyHistoryList(currentUser, pageable);
+  }
+  
 }

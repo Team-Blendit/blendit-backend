@@ -83,4 +83,8 @@ public class BlendingUser extends BaseTimeEntity {
   public void updateJoinStatus(JoinStatus joinStatus) {
     this.joinStatus = joinStatus;
   }
+
+  public void cancelParticipant() {
+    this.joinStatus = JoinStatus.CANCEL;
+  }
 }

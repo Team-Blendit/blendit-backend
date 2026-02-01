@@ -1,10 +1,13 @@
 package kr.blendit.api.blending.repository;
 
+import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.constant.BlendingUserGrade;
 import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.user.domain.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -49,14 +52,42 @@ public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long
             """)
     List<BlendingUser> findByBlendingAndJoinStatusInWithUser(Blending blending, List<JoinStatus> joinStatuses);
 
-//    /**
-//     * 특정 유저의 참여 상태 조회
-//     */
-//    @Query("""
-//            SELECT bu
-//            FROM BlendingUser bu
-//            WHERE bu.blending = :blending
-//                AND bu.user.uuid = :userUuid
-//            """)
-//    BlendingUser findByBlendingAndUser_Uuid(Blending blending, String userUuid);
+    /**
+     * 특정 권한이 아닌 BlendingUser 조회
+     */
+    @Query(value = """
+            SELECT bu
+            FROM BlendingUser bu
+                JOIN FETCH bu.blending
+            WHERE bu.user.uuid = :userUuid
+                AND bu.blendingUserGrade != :blendingUserGrade
+            """,
+            countQuery = """
+            SELECT count(bu)
+            FROM BlendingUser bu
+            WHERE bu.user.uuid = :userUuid
+                AND bu.blendingUserGrade != :blendingUserGrade
+            """)
+    Page<BlendingUser> findAllByUserUuidAndNotBlendingUserGrade(
+            String userUuid, BlendingUserGrade blendingUserGrade, Pageable pageable);
+
+
+    /**
+     * 특정 권한의 BlendingUser 조회
+     */
+    @Query(value = """
+            SELECT bu
+            FROM BlendingUser bu
+                JOIN FETCH bu.blending
+            WHERE bu.user.uuid = :userUuid
+                AND bu.blendingUserGrade = :blendingUserGrade
+            """,
+            countQuery = """
+            SELECT count(bu)
+            FROM BlendingUser bu
+            WHERE bu.user.uuid = :userUuid
+                AND bu.blendingUserGrade = :blendingUserGrade
+            """)
+    Page<BlendingUser> findAllByUserUuidAndBlendingUserGrade(
+            String userUuid, BlendingUserGrade blendingUserGrade, Pageable pageable);
 }
