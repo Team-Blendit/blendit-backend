@@ -6,6 +6,7 @@ import kr.blendit.api.blending.dto.request.BlendingListRequest;
 import kr.blendit.api.blending.dto.response.BlendingListResponse;
 import kr.blendit.api.blending.dto.response.MyAppliedBlendingResponse;
 import kr.blendit.api.blending.dto.response.MyCreatedBlendingResponse;
+import kr.blendit.api.blending.dto.response.MyHistoryBlendingResponse;
 import kr.blendit.api.blending.facade.BlendingFacade;
 import kr.blendit.common.security.jwt.CurrentUser;
 import lombok.RequiredArgsConstructor;
@@ -56,10 +57,10 @@ public class BlendingQueryController {
 
   @Operation(summary = "나의 활동 내역 조회 API")
   @GetMapping("/my/history")
-  public Page<MyCreatedBlendingResponse> getMyHistoryList(
+  public Page<MyHistoryBlendingResponse> getMyHistoryList(
           CurrentUser currentUser,
           @ParameterObject @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
-    return blendingFacade.getMyCreatedList(currentUser, pageable);
+    return blendingFacade.getMyHistoryList(currentUser, pageable);
   }
 }
 

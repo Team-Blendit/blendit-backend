@@ -6,10 +6,7 @@ import kr.blendit.api.blending.dto.request.BlendingApplyRequest;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
 import kr.blendit.api.blending.dto.request.BlendingListRequest;
 import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
-import kr.blendit.api.blending.dto.response.BlendingDetailResponse;
-import kr.blendit.api.blending.dto.response.BlendingListResponse;
-import kr.blendit.api.blending.dto.response.MyAppliedBlendingResponse;
-import kr.blendit.api.blending.dto.response.MyCreatedBlendingResponse;
+import kr.blendit.api.blending.dto.response.*;
 import kr.blendit.api.blending.service.BlendingMyQueryService;
 import kr.blendit.api.blending.service.BlendingParticipationService;
 import kr.blendit.api.blending.service.BlendingQueryService;
@@ -155,8 +152,8 @@ public class BlendingFacade {
     return blendingMyQueryService.getMyAppliedList(currentUser, pageable);
   }
 
-//  @Transactional(readOnly = true)
-//  public Page<> getMyHistoryList(CurrentUser currentUser, Pageable pageable) {
-//    return blendingMyQueryService.getMyHistoryList(currentUser, pageable);
-//  }
+  @Transactional(readOnly = true)
+  public Page<MyHistoryBlendingResponse> getMyHistoryList(CurrentUser currentUser, Pageable pageable) {
+    return blendingMyQueryService.getMyHistoryList(currentUser, pageable);
+  }
 }

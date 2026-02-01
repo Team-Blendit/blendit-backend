@@ -1,5 +1,6 @@
 package kr.blendit.api.blending.repository;
 
+import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.constant.BlendingUserGrade;
 import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;

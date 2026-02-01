@@ -1,6 +1,10 @@
 package kr.blendit.api.blending.repository;
 
+import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.domain.Blending;
+import kr.blendit.api.blending.domain.BlendingUser;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -48,14 +52,22 @@ public interface BlendingRepository extends JpaRepository<Blending, Long>, Blend
 
 
     /**
-     * 특정 유저가
+     * 유저가 참여하고 있는 특정 상태의 Blending 조회
      */
-    @Query("""
+    @Query(value = """
             SELECT b
             FROM Blending b
-                LEFT JOIN FETCH b.keywords bk
-                LEFT JOIN FETCH bk.keyword
-            WHERE 
+                JOIN FETCH b.participants bu
+            WHERE bu.user.uuid = :userUuid
+                AND b.status = :blendingStatus
+            """,
+            countQuery = """
+            SELECT count(b)
+            FROM Blending b
+                JOIN b.participants bu
+            WHERE bu.user.uuid = :userUuid
+                AND b.status = :blendingStatus
             """)
-    List<Blending> findAllByUuidWithKeywords();
+    Page<Blending> findAllByUserUuidAnBlendingStatus(
+            String userUuid, BlendingStatus blendingStatus, Pageable pageable);
 }

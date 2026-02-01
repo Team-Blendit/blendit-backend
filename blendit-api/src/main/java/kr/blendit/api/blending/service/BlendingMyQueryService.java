@@ -1,11 +1,15 @@
 package kr.blendit.api.blending.service;
 
+import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.constant.BlendingUserGrade;
+import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingKeyword;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.blending.dto.response.MyAppliedBlendingResponse;
 import kr.blendit.api.blending.dto.response.MyCreatedBlendingResponse;
+import kr.blendit.api.blending.dto.response.MyHistoryBlendingResponse;
 import kr.blendit.api.blending.repository.BlendingKeywordRepository;
+import kr.blendit.api.blending.repository.BlendingRepository;
 import kr.blendit.api.blending.repository.BlendingUserRepository;
 import kr.blendit.common.security.jwt.CurrentUser;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +28,7 @@ public class BlendingMyQueryService {
 
   private final BlendingUserRepository blendingUserRepository;
   private final BlendingKeywordRepository blendingKeywordRepository;
+  private final BlendingRepository blendingRepository;
 
   public Page<MyAppliedBlendingResponse> getMyAppliedList(CurrentUser currentUser, Pageable pageable) {
 
@@ -72,9 +77,30 @@ public class BlendingMyQueryService {
     return new PageImpl<>(myCreatedBlendingResponseList, pageable, blendingUsers.getTotalElements());
   }
 
-//  public Page<> getMyHistoryList(CurrentUser currentUser, Pageable pageable) {
-//    return null;
-//  }
+
+
+  public Page<MyHistoryBlendingResponse> getMyHistoryList(CurrentUser currentUser, Pageable pageable) {
+
+    String userUuid = (currentUser != null) ? currentUser.getUserUuid() : null;
+
+    Page<Blending> blendings =
+            blendingRepository.findAllByUserUuidAnBlendingStatus(userUuid, BlendingStatus.COMPLETED, pageable);
+
+    if (blendings.isEmpty()) {
+      return Page.empty(pageable);
+    }
+
+    List<Long> blendingIds = blendings.getContent().stream()
+            .map(b -> b.getId())
+            .toList();
+
+    Map<Long, List<String>> keywordMap = getKeywordMap(blendingIds);
+
+    List<MyHistoryBlendingResponse> myHistoryBlendingResponses =
+            MyHistoryBlendingResponse.listFrom(blendings.getContent(), keywordMap);
+
+    return new PageImpl<>(myHistoryBlendingResponses, pageable, blendings.getTotalElements());
+  }
 
 
   private Map<Long, List<String>> getKeywordMap(List<Long> blendingIds) {
