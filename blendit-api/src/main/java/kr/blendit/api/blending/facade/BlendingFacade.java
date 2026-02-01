@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -130,5 +131,25 @@ public class BlendingFacade {
   public Page<BlendingListResponse> getBlendingList(
           CurrentUser currentUser, BlendingListRequest blendingListRequest, Pageable pageable) {
     return blendingQueryService.getList(currentUser, blendingListRequest, pageable);
+  }
+
+  /**
+   * 블렌딩 북마크 추가
+   */
+  @Transactional
+  public void addBookmark(String userUuid, String blendingUuid) {
+    User user = userService.getUser(userUuid);
+    Blending blending = blendingService.getBlending(blendingUuid);
+    blendingService.addBookmark(user, blending);
+  }
+
+  /**
+   * 블렌딩 북마크 제거
+   */
+  @Transactional
+  public void removeBookmark(String userUuid, String blendingUuid) {
+    User user = userService.getUser(userUuid);
+    Blending blending = blendingService.getBlending(blendingUuid);
+    blendingService.removeBookmark(user, blending);
   }
 }

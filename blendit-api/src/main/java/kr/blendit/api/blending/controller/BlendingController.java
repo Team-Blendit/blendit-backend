@@ -84,4 +84,18 @@ public class BlendingController {
     blendingFacade.rejectParticipation(currentUser.getUserUuid(), blendingUuid, participantUuid);
   }
 
+  @Operation(summary = "블렌딩 북마크 추가 API")
+  @PostMapping("/{blendingUuid}/bookmark")
+  public void addBookmark(CurrentUser currentUser, @PathVariable String blendingUuid) {
+
+    blendingFacade.addBookmark(currentUser.getUserUuid(), blendingUuid);
+  }
+
+  @Operation(summary = "블렌딩 북마크 취소 API")
+  @DeleteMapping("/{blendingUuid}/bookmark")
+  public void removeBookmark(CurrentUser currentUser, @PathVariable String blendingUuid) {
+
+    blendingFacade.removeBookmark(currentUser.getUserUuid(), blendingUuid);
+  }
+
 }

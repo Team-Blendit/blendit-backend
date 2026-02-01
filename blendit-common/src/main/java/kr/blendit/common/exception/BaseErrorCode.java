@@ -61,7 +61,9 @@ public enum BaseErrorCode implements ErrorCode {
   BLENDING_NOT_APPLIED("신청하지 않은 블렌딩입니다."),
   BLENDING_NOT_RECRUITING("모집 중인 블렌딩이 아닙니다."),
   BLENDING_ALREADY_PROCESSED("이미 처리된 신청 내역입니다."),
-  BLENDING_HOST_CANNOT_LEAVE("호스트는 블렌딩을 탈퇴할 없습니다.");
+  BLENDING_HOST_CANNOT_LEAVE("호스트는 블렌딩을 탈퇴할 없습니다."),
+  ALREADY_BOOKMARKED("이미 북마크된 블렌딩입니다."),
+  BOOKMARK_NOT_FOUND("북마크 내역이 존재하지 않습니다.");
 
   private final String message;
 }

@@ -4,6 +4,7 @@ import kr.blendit.api.blending.constant.BlendingUserGrade;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;
+import kr.blendit.api.blending.domain.BlendingBookmark;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
 import kr.blendit.api.blending.dto.response.BlendingDetailResponse;
@@ -183,4 +184,30 @@ public class BlendingService {
         }
     }
 
+    /**
+     * 블렌딩 북마크 추가
+     */
+    public void addBookmark(User user, Blending blending) {
+
+        if(blendingBookmarkRepository.existsByBlendingAndUser_Uuid(blending, user.getUuid())) {
+            throw new BaseException(BaseErrorCode.ALREADY_BOOKMARKED);
+        }
+
+        BlendingBookmark blendingBookmark = BlendingBookmark.create(user, blending);
+        blendingBookmarkRepository.save(blendingBookmark);
+    }
+
+    /**
+     * 블렌딩 북마크 제거
+     */
+    public void removeBookmark(User user, Blending blending) {
+
+        BlendingBookmark blendingBookmark = blendingBookmarkRepository.findByBlendingAndUser(blending, user)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.BOOKMARK_NOT_FOUND));
+
+        blendingBookmarkRepository.delete(blendingBookmark);
+    }
+
 }
+
+
