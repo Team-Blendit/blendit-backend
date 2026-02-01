@@ -6,10 +6,8 @@ import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.blending.dto.request.BlendingApplyRequest;
-import kr.blendit.api.blending.repository.BlendingRepository;
 import kr.blendit.api.blending.repository.BlendingUserRepository;
 import kr.blendit.api.user.domain.User;
-import kr.blendit.api.user.repository.UserRepository;
 import kr.blendit.common.exception.BaseErrorCode;
 import kr.blendit.common.exception.BaseException;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class BlendingParticipationService {
 
-    private final BlendingRepository blendingRepository;
-    private final UserRepository userRepository;
     private final BlendingUserRepository blendingUserRepository;
 
     /**
@@ -33,13 +29,7 @@ public class BlendingParticipationService {
      * @apiNote MEMBER 권한으로 저장되며 JoinStatus 값은 autoApproval에 따라 결정됩니다.
      * @apiNote 신청이 거절되면 다시 신청할 수 없습니다.
      */
-    public void apply(String userUuid, String blendingUuid, BlendingApplyRequest blendingApplyRequest) {
-
-        User user = userRepository.findByUuid(userUuid)
-                .orElseThrow(() -> new BaseException(BaseErrorCode.USER_NOT_FOUND));;
-
-        Blending blending = blendingRepository.findByUuid(blendingUuid)
-                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+    public void apply(User user, Blending blending, BlendingApplyRequest blendingApplyRequest) {
 
         // 모집중이 아닐 경우 예외
         if(!blending.getStatus().equals(BlendingStatus.RECRUITING)) {
@@ -51,7 +41,6 @@ public class BlendingParticipationService {
             throw new BaseException(BaseErrorCode.BLENDING_ALREADY_APPLIED);
         }
 
-        // todo: 동시성 문제 고려
         // 인원 수 검증
         long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
         if(blending.getCapacity() <= currentUserCount) {
@@ -75,6 +64,7 @@ public class BlendingParticipationService {
         if(joinStatus.equals(JoinStatus.APPROVED)) {
             long finalUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
 
+            // Todo: 추후 락으로 동시성 관리
             // 저장 후 정원이 초과된 경우 예외 -> 롤백
             if (finalUserCount > blending.getCapacity()) {
                 throw new BaseException(BaseErrorCode.BLENDING_FULL);
@@ -93,10 +83,7 @@ public class BlendingParticipationService {
      *
      * @apiNote 신청 취소 후 참여인원이 정원보다 적더라도 마감 상태가 유지됩니다.
      */
-    public void cancel(String userUuid, String blendingUuid) {
-
-        Blending blending = blendingRepository.findByUuid(blendingUuid)
-                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+    public void cancel(String userUuid, Blending blending) {
 
         BlendingUser blendingUser = blendingUserRepository.findByBlendingAndUser_Uuid(blending, userUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_APPLIED));
@@ -129,10 +116,7 @@ public class BlendingParticipationService {
     /**
      * 블렌딩 참여 승인
      */
-    public void approve(String userUuid, String blendingUuid, String participantUuid) {
-
-        Blending blending = blendingRepository.findByUuid(blendingUuid)
-                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+    public void approve(String userUuid, Blending blending, String participantUuid) {
 
         // Host 검증
         if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingUserGrade(blending, userUuid, BlendingUserGrade.HOST)) {
@@ -171,10 +155,7 @@ public class BlendingParticipationService {
     /**
      * 블렌딩 참여 거부
      */
-    public void reject(String userUuid, String blendingUuid, String participantUuid) {
-
-        Blending blending = blendingRepository.findByUuid(blendingUuid)
-                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+    public void reject(String userUuid, Blending blending, String participantUuid) {
 
         // Host 검증
         if(!blendingUserRepository.existsByBlendingAndUser_UuidAndBlendingUserGrade(blending, userUuid, BlendingUserGrade.HOST)) {

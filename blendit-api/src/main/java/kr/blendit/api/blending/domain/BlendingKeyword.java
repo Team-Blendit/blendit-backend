@@ -1,10 +1,13 @@
 package kr.blendit.api.blending.domain;
 
 import jakarta.persistence.*;
+import kr.blendit.api.keyword.domain.Keyword;
 import kr.blendit.common.exception.BaseErrorCode;
 import kr.blendit.common.exception.BaseException;
 import lombok.*;
-import kr.blendit.api.keyword.domain.Keyword;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(
@@ -56,5 +59,14 @@ public class BlendingKeyword {
             .blending(blending)
             .keyword(keyword)
             .build();
+  }
+
+  public static List<String> extractKeywords(List<BlendingKeyword> blendingKeywords) {
+    List<String> strKeywords = new ArrayList<>();
+
+    for (BlendingKeyword blendingKeyword : blendingKeywords) {
+      strKeywords.add(blendingKeyword.getKeyword().getName());
+    }
+    return strKeywords;
   }
 }

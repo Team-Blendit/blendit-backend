@@ -90,6 +90,15 @@ public class SwaggerConfig {
   }
 
   @Bean
+  public GroupedOpenApi blendingQueryGroup() {
+    return GroupedOpenApi.builder()
+            .group("6. 블렌딩 목록")
+            .displayName("블렌딩 목록 (Blending Query)")
+            .pathsToMatch("/api/blendit/blending/query/**")
+            .build();
+  }
+
+  @Bean
   public GroupedOpenApi keywordGroup() {
     return GroupedOpenApi.builder()
         .group("키워드")

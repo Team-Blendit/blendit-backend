@@ -1,13 +1,15 @@
 package kr.blendit.api.blending.dto.response;
 
 import kr.blendit.api.blending.constant.BlendingStatus;
+import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingKeyword;
 import kr.blendit.api.blending.domain.BlendingUser;
+import kr.blendit.api.common.constant.Position;
 import lombok.*;
+import org.hibernate.mapping.Join;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -20,7 +22,7 @@ public class BlendingDetailResponse {
     private List<BlendingParticipantResponse> blendingParticipant;
     private String title;
     private String content;
-    private String position;
+    private Position position;
     private List<String> keywords;
     private Integer capacity;
     private String region;
@@ -33,10 +35,12 @@ public class BlendingDetailResponse {
     private LocalDateTime lastModifiedDate;
     private Boolean isBookmarked;
     private Boolean isHost;
+    private String currentUserJoinStatus;
 
 
     public static BlendingDetailResponse from(
-            Blending blending, List<BlendingUser> blendingUsers, long bookmarkCount, boolean isBookmarked, boolean isHost) {
+            Blending blending, List<BlendingUser> blendingUsers, long bookmarkCount,
+            boolean isBookmarked, boolean isHost, String currentUserJoinStatus) {
 
         return BlendingDetailResponse.builder()
                 .id(blending.getId())
@@ -44,8 +48,8 @@ public class BlendingDetailResponse {
                 .blendingParticipant(BlendingParticipantResponse.from(blendingUsers))
                 .title(blending.getTitle())
                 .content(blending.getContent())
-                .position(blending.getPosition().getDescription())
-                .keywords(extractKeywords(blending.getKeywords()))
+                .position(blending.getPosition())
+                .keywords(BlendingKeyword.extractKeywords(blending.getKeywords()))
                 .capacity(blending.getCapacity())
                 .region(blending.getRegion())
                 .status(blending.getStatus())
@@ -57,16 +61,8 @@ public class BlendingDetailResponse {
                 .lastModifiedDate(blending.getLastModifiedDate())
                 .isBookmarked(isBookmarked)
                 .isHost(isHost)
+                .currentUserJoinStatus(currentUserJoinStatus)
                 .build();
-    }
-
-    private static List<String> extractKeywords(List<BlendingKeyword> blendingKeywords) {
-        List<String> strKeywords = new ArrayList<>();
-
-        for(BlendingKeyword blendingKeyword : blendingKeywords) {
-            strKeywords.add(blendingKeyword.getKeyword().getName());
-        }
-        return strKeywords;
     }
 
 }

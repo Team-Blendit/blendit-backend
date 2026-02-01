@@ -12,6 +12,11 @@ dependencies {
     // Configuration Processor
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
+    // NCP Object Storage
+    api platform('software.amazon.awssdk:bom:2.25.0')
+    api 'software.amazon.awssdk:s3'
+    api 'software.amazon.awssdk:auth'
+
     // QueryDSL
     api 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'

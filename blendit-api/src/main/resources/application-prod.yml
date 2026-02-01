@@ -13,6 +13,15 @@ spring:
       hibernate:
         format_sql: true
 
+ncp:
+  object-storage:
+    endpoint: ${OBJECT_STORAGE_ENDPOINT}
+    region: kr-standard
+    bucket: ${OBJECT_STORAGE_BUCKET_NAME}
+    access-key: ${NCP_ACCESS_KEY}
+    secret-key: ${NCP_SECRET_KEY}
+    default-prefix: uploads-local
+
 # P6Spy 비활성화 (운영 환경)
 decorator:
   datasource:

@@ -6,9 +6,7 @@ import java.util.List;
 import kr.blendit.api.keyword.controller.dto.KeywordListResponse;
 import kr.blendit.api.keyword.facade.KeywordFacade;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "Keyword API")
 @RestController
@@ -22,6 +20,12 @@ public class KeywordController {
   @GetMapping
   public List<KeywordListResponse> getKeywordList() {
     return keywordFacade.getKeywordList();
+  }
+
+  @Operation(summary = "키워드 생성", description = "테스트용입니다.")
+  @PostMapping
+  public void addKeyword(String keyword) {
+    keywordFacade.saveKeyword(keyword);
   }
 
 }
