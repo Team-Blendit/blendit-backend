@@ -6,7 +6,6 @@ import kr.blendit.api.blending.domain.BlendingKeyword;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.common.constant.Position;
 import kr.blendit.api.user.constant.Experience;
-import kr.blendit.api.user.domain.User;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ public class BlendingListResponse {
     private String title;
     private String hostNickname;
     private Experience hostExperience;
-    // Todo: private String userProfileImage;
+    private String userProfileImage;
     private String region;
     private BlendingStatus blendingStatus;
     private Position position;
@@ -48,6 +47,7 @@ public class BlendingListResponse {
                     .title(blending.getTitle())
                     .hostNickname(hostMap.get(blending.getId()).getUser().getNickname())
                     .hostExperience(hostMap.get(blending.getId()).getUser().getExperience())
+                    .userProfileImage(hostMap.get(blending.getId()).getUser().getProfileImage())
                     .region(blending.getRegion())
                     .blendingStatus(blending.getStatus())
                     .position(blending.getPosition())
