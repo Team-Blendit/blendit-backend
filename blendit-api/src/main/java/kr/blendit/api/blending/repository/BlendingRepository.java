@@ -4,6 +4,7 @@ import kr.blendit.api.blending.domain.Blending;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface BlendingRepository extends JpaRepository<Blending, Long>, BlendingRepositoryCustom {
@@ -44,4 +45,17 @@ public interface BlendingRepository extends JpaRepository<Blending, Long>, Blend
                 AND b.useFlag = true
             """)
     Optional<Blending> findByUuidWithUsers(String uuid);
+
+
+    /**
+     * 특정 유저가
+     */
+    @Query("""
+            SELECT b
+            FROM Blending b
+                LEFT JOIN FETCH b.keywords bk
+                LEFT JOIN FETCH bk.keyword
+            WHERE 
+            """)
+    List<Blending> findAllByUuidWithKeywords();
 }

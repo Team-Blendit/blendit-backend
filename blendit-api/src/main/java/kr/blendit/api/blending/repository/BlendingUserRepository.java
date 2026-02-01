@@ -52,7 +52,7 @@ public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long
     List<BlendingUser> findByBlendingAndJoinStatusInWithUser(Blending blending, List<JoinStatus> joinStatuses);
 
     /**
-     * 특정 권한의 BlendingUser 조회
+     * 특정 권한이 아닌 BlendingUser 조회
      */
     @Query(value = """
             SELECT bu
@@ -65,7 +65,27 @@ public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long
             SELECT count(bu)
             FROM BlendingUser bu
             WHERE bu.user.uuid = :userUuid
-                AND bu.blendingUserGrade != :hostGrade
+                AND bu.blendingUserGrade != :blendingUserGrade
+            """)
+    Page<BlendingUser> findAllByUserUuidAndNotBlendingUserGrade(
+            String userUuid, BlendingUserGrade blendingUserGrade, Pageable pageable);
+
+
+    /**
+     * 특정 권한의 BlendingUser 조회
+     */
+    @Query(value = """
+            SELECT bu
+            FROM BlendingUser bu
+                JOIN FETCH bu.blending
+            WHERE bu.user.uuid = :userUuid
+                AND bu.blendingUserGrade = :blendingUserGrade
+            """,
+            countQuery = """
+            SELECT count(bu)
+            FROM BlendingUser bu
+            WHERE bu.user.uuid = :userUuid
+                AND bu.blendingUserGrade = :blendingUserGrade
             """)
     Page<BlendingUser> findAllByUserUuidAndBlendingUserGrade(
             String userUuid, BlendingUserGrade blendingUserGrade, Pageable pageable);

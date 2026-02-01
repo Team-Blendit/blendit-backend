@@ -30,7 +30,7 @@ public class BlendingMyQueryService {
     String userUuid = (currentUser != null) ? currentUser.getUserUuid() : null;
 
     Page<BlendingUser> blendingUsers =
-            blendingUserRepository.findAllByUserUuidAndBlendingUserGrade(userUuid, BlendingUserGrade.HOST, pageable);
+            blendingUserRepository.findAllByUserUuidAndNotBlendingUserGrade(userUuid, BlendingUserGrade.HOST, pageable);
 
     if (blendingUsers.isEmpty()) {
       return Page.empty(pageable);
@@ -50,8 +50,31 @@ public class BlendingMyQueryService {
 
 
   public Page<MyCreatedBlendingResponse> getMyCreatedList(CurrentUser currentUser, Pageable pageable) {
-    return null;
+
+    String userUuid = (currentUser != null) ? currentUser.getUserUuid() : null;
+
+    Page<BlendingUser> blendingUsers =
+            blendingUserRepository.findAllByUserUuidAndBlendingUserGrade(userUuid, BlendingUserGrade.HOST, pageable);
+
+    if (blendingUsers.isEmpty()) {
+      return Page.empty(pageable);
+    }
+
+    List<Long> blendingIds = blendingUsers.getContent().stream()
+            .map(bu -> bu.getBlending().getId())
+            .toList();
+
+    Map<Long, List<String>> keywordMap = getKeywordMap(blendingIds);
+
+    List<MyCreatedBlendingResponse> myCreatedBlendingResponseList =
+            MyCreatedBlendingResponse.listFrom(blendingUsers.getContent(), keywordMap);
+
+    return new PageImpl<>(myCreatedBlendingResponseList, pageable, blendingUsers.getTotalElements());
   }
+
+//  public Page<> getMyHistoryList(CurrentUser currentUser, Pageable pageable) {
+//    return null;
+//  }
 
 
   private Map<Long, List<String>> getKeywordMap(List<Long> blendingIds) {

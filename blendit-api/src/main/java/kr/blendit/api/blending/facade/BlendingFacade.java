@@ -154,4 +154,9 @@ public class BlendingFacade {
   public Page<MyAppliedBlendingResponse> getMyAppliedList(CurrentUser currentUser, Pageable pageable) {
     return blendingMyQueryService.getMyAppliedList(currentUser, pageable);
   }
+
+//  @Transactional(readOnly = true)
+//  public Page<> getMyHistoryList(CurrentUser currentUser, Pageable pageable) {
+//    return blendingMyQueryService.getMyHistoryList(currentUser, pageable);
+//  }
 }

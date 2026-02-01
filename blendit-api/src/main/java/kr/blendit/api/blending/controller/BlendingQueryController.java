@@ -53,6 +53,14 @@ public class BlendingQueryController {
           @ParameterObject @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
     return blendingFacade.getMyCreatedList(currentUser, pageable);
   }
+
+  @Operation(summary = "나의 활동 내역 조회 API")
+  @GetMapping("/my/history")
+  public Page<MyCreatedBlendingResponse> getMyHistoryList(
+          CurrentUser currentUser,
+          @ParameterObject @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
+    return blendingFacade.getMyCreatedList(currentUser, pageable);
+  }
 }
 
 
