@@ -8,6 +8,8 @@ import kr.blendit.api.user.controller.dto.GetUserProfileResponse;
 import kr.blendit.api.user.controller.dto.UpdateUserProfileRequest;
 import kr.blendit.api.user.service.UserProfileService;
 import kr.blendit.common.security.jwt.CurrentUser;
+import kr.blendit.common.storage.dto.UploadedObject;
+import kr.blendit.common.storage.service.LocalObjectStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +20,17 @@ public class UserProfileFacade {
 
   private final UserProfileService userProfileService;
   private final KeywordService keywordService;
+  private final LocalObjectStorageService localObjectStorageService;
 
   @Transactional
   public void updateUserProfile(CurrentUser currentUser, UpdateUserProfileRequest request) {
+    UploadedObject uploadedObject = localObjectStorageService.upload(request.profileImage(), "user-profile-image");
     List<Keyword> keywordList = keywordService.getKeywordList(request.keywordUuidList());
-    userProfileService.updateUserProfile(currentUser, request, keywordList);
+    userProfileService.updateUserProfile(
+        currentUser,
+        request,
+        keywordList,
+        uploadedObject == null ? null : uploadedObject.url());
   }
 
   @Transactional(readOnly = true)

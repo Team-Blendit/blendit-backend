@@ -23,7 +23,8 @@ public class UserProfileService {
   private final UserBookmarkRepository userBookmarkRepository;
 
   @Transactional
-  public void updateUserProfile(CurrentUser currentUser, UpdateUserProfileRequest request, List<Keyword> keywordList) {
+  public void updateUserProfile(CurrentUser currentUser, UpdateUserProfileRequest request, List<Keyword> keywordList,
+      String profileImageUrl) {
     User user = userService.getUser(currentUser.getUserUuid());
 
     if (!request.email().equals(user.getEmail())) {
@@ -34,7 +35,7 @@ public class UserProfileService {
       userService.nicknameDuplicateCheck(request.nickname());
     }
 
-    user.updateProfile(request, keywordList);
+    user.updateProfile(request, keywordList, profileImageUrl);
     userKeywordRepository.saveAll(user.getUserKeywords());
   }
 

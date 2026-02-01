@@ -9,6 +9,7 @@ import kr.blendit.api.common.constant.Position;
 import kr.blendit.api.user.constant.Experience;
 import kr.blendit.api.user.domain.UserLink;
 import kr.blendit.api.user.domain.UserSkill;
+import org.springframework.web.multipart.MultipartFile;
 
 public record UpdateUserProfileRequest(
     @NotBlank
@@ -41,7 +42,9 @@ public record UpdateUserProfileRequest(
 
     List<UserSkill> skills,
 
-    List<UserLink> links
+    List<UserLink> links,
+
+    MultipartFile profileImage
 ) {
 
 }

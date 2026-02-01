@@ -145,7 +145,7 @@ public class User extends BaseEntity {
     return !this.userKeywords.isEmpty();
   }
 
-  public void updateProfile(UpdateUserProfileRequest request, List<Keyword> keywordList) {
+  public void updateProfile(UpdateUserProfileRequest request, List<Keyword> keywordList, String profileImageUrl) {
     this.nickname = request.nickname();
     this.description = request.description();
     this.email = request.email();
@@ -156,6 +156,7 @@ public class User extends BaseEntity {
     this.affiliation = request.affiliation();
     this.skills = request.skills();
     this.links = request.links();
+    this.profileImage = profileImageUrl;
     updateUserKeywords(keywordList);
   }
 
