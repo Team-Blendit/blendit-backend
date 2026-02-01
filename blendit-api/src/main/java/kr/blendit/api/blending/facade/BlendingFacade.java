@@ -6,8 +6,8 @@ import kr.blendit.api.blending.dto.request.BlendingApplyRequest;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
 import kr.blendit.api.blending.dto.request.BlendingListRequest;
 import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
-import kr.blendit.api.blending.dto.response.BlendingDetailResponse;
-import kr.blendit.api.blending.dto.response.BlendingListResponse;
+import kr.blendit.api.blending.dto.response.*;
+import kr.blendit.api.blending.service.BlendingMyQueryService;
 import kr.blendit.api.blending.service.BlendingParticipationService;
 import kr.blendit.api.blending.service.BlendingQueryService;
 import kr.blendit.api.blending.service.BlendingService;
@@ -22,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -35,6 +36,7 @@ public class BlendingFacade {
   private final BlendingQueryService blendingQueryService;
   private final UserService userService;
   private final KeywordService keywordService;
+  private final BlendingMyQueryService blendingMyQueryService;
 
   /**
    * 블렌딩 생성 흐름
@@ -106,6 +108,15 @@ public class BlendingFacade {
   }
 
   /**
+   * 블렌딩 참여 신청 내역 삭제
+   */
+  @Transactional
+  public void deleteParticipation(String userUuid, String blendingUuid) {
+    Blending blending = blendingService.getBlending(blendingUuid);
+    blendingParticipationService.delete(userUuid, blending);
+  }
+
+  /**
    * 블렌딩 참여 승인
    */
   @Transactional
@@ -131,4 +142,40 @@ public class BlendingFacade {
           CurrentUser currentUser, BlendingListRequest blendingListRequest, Pageable pageable) {
     return blendingQueryService.getList(currentUser, blendingListRequest, pageable);
   }
+
+  /**
+   * 블렌딩 북마크 추가
+   */
+  @Transactional
+  public void addBookmark(String userUuid, String blendingUuid) {
+    User user = userService.getUser(userUuid);
+    Blending blending = blendingService.getBlending(blendingUuid);
+    blendingService.addBookmark(user, blending);
+  }
+
+  /**
+   * 블렌딩 북마크 제거
+   */
+  @Transactional
+  public void removeBookmark(String userUuid, String blendingUuid) {
+    User user = userService.getUser(userUuid);
+    Blending blending = blendingService.getBlending(blendingUuid);
+    blendingService.removeBookmark(user, blending);
+  }
+  
+  @Transactional(readOnly = true)
+  public Page<MyCreatedBlendingResponse> getMyCreatedList(CurrentUser currentUser, Pageable pageable) {
+    return blendingMyQueryService.getMyCreatedList(currentUser, pageable);
+  }
+
+  @Transactional(readOnly = true)
+  public Page<MyAppliedBlendingResponse> getMyAppliedList(CurrentUser currentUser, Pageable pageable) {
+    return blendingMyQueryService.getMyAppliedList(currentUser, pageable);
+  }
+
+  @Transactional(readOnly = true)
+  public Page<MyHistoryBlendingResponse> getMyHistoryList(CurrentUser currentUser, Pageable pageable) {
+    return blendingMyQueryService.getMyHistoryList(currentUser, pageable);
+  }
+  
 }

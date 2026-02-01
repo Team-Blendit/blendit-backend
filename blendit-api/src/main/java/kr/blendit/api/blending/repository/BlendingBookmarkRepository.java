@@ -2,10 +2,12 @@ package kr.blendit.api.blending.repository;
 
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingBookmark;
+import kr.blendit.api.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface BlendingBookmarkRepository extends JpaRepository<BlendingBookmark, Long> {
@@ -27,4 +29,6 @@ public interface BlendingBookmarkRepository extends JpaRepository<BlendingBookma
                 AND bb.blending.id IN :blendingIds
             """)
     Set<Long> findBookmarkedBlendingIds(String userUuid, List<Long> blendingIds);
+
+    Optional<BlendingBookmark> findByBlendingAndUser(Blending blending, User user);
 }

@@ -4,6 +4,7 @@ import kr.blendit.api.blending.constant.BlendingUserGrade;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;
+import kr.blendit.api.blending.domain.BlendingBookmark;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
 import kr.blendit.api.blending.dto.response.BlendingDetailResponse;
@@ -135,8 +136,6 @@ public class BlendingService {
 
         // todo: 추후 currentUser가 해당 블렌딩의 참여자가 아니라면 BlendingStatus가 COMPLETED, CANCELED는 볼 수 없도록 수정 필요
 
-        // todo: 삭제된 블렌딩은 Host만 조회할 수 있도록 개선 필요 (추후 기획에 따라)
-
         Blending blending = blendingRepository.findByUuidWithKeywords(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
 
@@ -183,4 +182,30 @@ public class BlendingService {
         }
     }
 
+    /**
+     * 블렌딩 북마크 추가
+     */
+    public void addBookmark(User user, Blending blending) {
+
+        if(blendingBookmarkRepository.existsByBlendingAndUser_Uuid(blending, user.getUuid())) {
+            throw new BaseException(BaseErrorCode.ALREADY_BOOKMARKED);
+        }
+
+        BlendingBookmark blendingBookmark = BlendingBookmark.create(user, blending);
+        blendingBookmarkRepository.save(blendingBookmark);
+    }
+
+    /**
+     * 블렌딩 북마크 제거
+     */
+    public void removeBookmark(User user, Blending blending) {
+
+        BlendingBookmark blendingBookmark = blendingBookmarkRepository.findByBlendingAndUser(blending, user)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.BOOKMARK_NOT_FOUND));
+
+        blendingBookmarkRepository.delete(blendingBookmark);
+    }
+
 }
+
+

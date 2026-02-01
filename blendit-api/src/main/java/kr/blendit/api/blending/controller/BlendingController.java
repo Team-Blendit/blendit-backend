@@ -64,10 +64,17 @@ public class BlendingController {
   }
 
   @Operation(summary = "블렌딩 참여 신청 취소 API")
-  @DeleteMapping("/{blendingUuid}/participation")
+  @PatchMapping("/{blendingUuid}/participation") // @DeleteMapping에서 @PatchMapping으로 변경
   public void cancelParticipation(CurrentUser currentUser, @PathVariable String blendingUuid) {
 
     blendingFacade.cancelParticipation(currentUser.getUserUuid(), blendingUuid);
+  }
+
+  @Operation(summary = "블렌딩 참여 신청 내역 삭제 API")
+  @DeleteMapping("/{blendingUuid}/participation")
+  public void deleteParticipation(CurrentUser currentUser, @PathVariable String blendingUuid) {
+
+    blendingFacade.deleteParticipation(currentUser.getUserUuid(), blendingUuid);
   }
 
   @Operation(summary = "블렌딩 참여 승인 API")
@@ -82,6 +89,20 @@ public class BlendingController {
   public void rejectParticipation(CurrentUser currentUser, @PathVariable String blendingUuid, @PathVariable String participantUuid) {
 
     blendingFacade.rejectParticipation(currentUser.getUserUuid(), blendingUuid, participantUuid);
+  }
+
+  @Operation(summary = "블렌딩 북마크 추가 API")
+  @PostMapping("/{blendingUuid}/bookmark")
+  public void addBookmark(CurrentUser currentUser, @PathVariable String blendingUuid) {
+
+    blendingFacade.addBookmark(currentUser.getUserUuid(), blendingUuid);
+  }
+
+  @Operation(summary = "블렌딩 북마크 취소 API")
+  @DeleteMapping("/{blendingUuid}/bookmark")
+  public void removeBookmark(CurrentUser currentUser, @PathVariable String blendingUuid) {
+
+    blendingFacade.removeBookmark(currentUser.getUserUuid(), blendingUuid);
   }
 
 }

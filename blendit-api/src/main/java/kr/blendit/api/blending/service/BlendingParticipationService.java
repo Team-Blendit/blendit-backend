@@ -98,18 +98,21 @@ public class BlendingParticipationService {
             throw new BaseException(BaseErrorCode.BLENDING_ALREADY_PROCESSED);
         }
 
-        JoinStatus joinStatus = blendingUser.getJoinStatus();
-        blending.deleteParticipant(blendingUser);
+        blendingUser.cancelParticipant();
+    }
 
-//        // 승인된 유저가 탈퇴 시, 현재 참여 인원이 정원보다 적으면서, 마감된 상태라면 모집 중으로 자동 상태 변경
-//        // 기획에 따라 자동 변경 x
-//        if(joinStatus.equals(JoinStatus.APPROVED) && blending.getStatus().equals(BlendingStatus.RECRUITMENT_CLOSED)) {
-//
-//            long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
-//            if(blending.getCapacity() > currentUserCount) {
-//                blending.updateStatus(BlendingStatus.RECRUITING);
-//            }
-//        }
+
+    public void delete(String userUuid, Blending blending) {
+
+        BlendingUser blendingUser = blendingUserRepository.findByBlendingAndUser_Uuid(blending, userUuid)
+                .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_APPLIED));
+
+        // 취소 상태의 신청 내역이 아니라면 예외
+        if(!blendingUser.getJoinStatus().equals(JoinStatus.CANCEL)) {
+            throw new BaseException(BaseErrorCode.BLENDING_APPLICATION_NOT_CANCELLED);
+        }
+
+        blending.deleteParticipant(blendingUser);
     }
 
 

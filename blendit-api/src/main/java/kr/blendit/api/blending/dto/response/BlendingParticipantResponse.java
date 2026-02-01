@@ -19,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class BlendingParticipantResponse {
 
-  // Todo: 지수, 프로필사진, 북마크 여부,
+  // Todo: 지수, 북마크 여부,
 
   private String uuid;
   private String nickname;
