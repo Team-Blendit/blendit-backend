@@ -2,18 +2,16 @@ package kr.blendit.common.storage.service;
 
 import java.io.InputStream;
 import kr.blendit.common.storage.dto.UploadedObject;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface ObjectStorageService {
 
     UploadedObject upload(
-        InputStream inputStream,
-        long size,
-        String contentType,
-        String originalFilename,
+        MultipartFile file,
         String prefix
     );
 
-    void delete(String key);
+    void deleteByUrl(String url);
 
     String publicUrl(String key);
 }
