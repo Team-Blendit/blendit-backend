@@ -2,7 +2,6 @@ package kr.blendit.api.blending.dto.response;
 
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.domain.Blending;
-import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.common.constant.Position;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

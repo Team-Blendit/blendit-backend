@@ -30,6 +30,10 @@ public class BlendingMyQueryService {
   private final BlendingKeywordRepository blendingKeywordRepository;
   private final BlendingRepository blendingRepository;
 
+
+  /**
+   * 내가 신청한 블렌딩 목록 조회
+   */
   public Page<MyAppliedBlendingResponse> getMyAppliedList(CurrentUser currentUser, Pageable pageable) {
 
     String userUuid = (currentUser != null) ? currentUser.getUserUuid() : null;
@@ -41,11 +45,11 @@ public class BlendingMyQueryService {
       return Page.empty(pageable);
     }
 
-    List<Long> blendingIds = blendingUsers.getContent().stream()
-            .map(bu -> bu.getBlending().getId())
+    List<Blending> blendings = blendingUsers.getContent().stream()
+            .map(BlendingUser::getBlending)
             .toList();
 
-    Map<Long, List<String>> keywordMap = getKeywordMap(blendingIds);
+    Map<Long, List<String>> keywordMap = getKeywordMap(blendings);
 
     List<MyAppliedBlendingResponse> myAppliedBlendingResponseList =
             MyAppliedBlendingResponse.listFrom(blendingUsers.getContent(), keywordMap);
@@ -54,6 +58,9 @@ public class BlendingMyQueryService {
   }
 
 
+  /**
+   * 내가 생성한 블렌딩 목록 조회
+   */
   public Page<MyCreatedBlendingResponse> getMyCreatedList(CurrentUser currentUser, Pageable pageable) {
 
     String userUuid = (currentUser != null) ? currentUser.getUserUuid() : null;
@@ -65,11 +72,11 @@ public class BlendingMyQueryService {
       return Page.empty(pageable);
     }
 
-    List<Long> blendingIds = blendingUsers.getContent().stream()
-            .map(bu -> bu.getBlending().getId())
+    List<Blending> blendings = blendingUsers.getContent().stream()
+            .map(BlendingUser::getBlending)
             .toList();
 
-    Map<Long, List<String>> keywordMap = getKeywordMap(blendingIds);
+    Map<Long, List<String>> keywordMap = getKeywordMap(blendings);
 
     List<MyCreatedBlendingResponse> myCreatedBlendingResponseList =
             MyCreatedBlendingResponse.listFrom(blendingUsers.getContent(), keywordMap);
@@ -78,7 +85,9 @@ public class BlendingMyQueryService {
   }
 
 
-
+  /**
+   * 나의 활동 내역 조회
+   */
   public Page<MyHistoryBlendingResponse> getMyHistoryList(CurrentUser currentUser, Pageable pageable) {
 
     String userUuid = (currentUser != null) ? currentUser.getUserUuid() : null;
@@ -90,11 +99,7 @@ public class BlendingMyQueryService {
       return Page.empty(pageable);
     }
 
-    List<Long> blendingIds = blendings.getContent().stream()
-            .map(b -> b.getId())
-            .toList();
-
-    Map<Long, List<String>> keywordMap = getKeywordMap(blendingIds);
+    Map<Long, List<String>> keywordMap = getKeywordMap(blendings.getContent());
 
     List<MyHistoryBlendingResponse> myHistoryBlendingResponses =
             MyHistoryBlendingResponse.listFrom(blendings.getContent(), keywordMap);
@@ -103,8 +108,11 @@ public class BlendingMyQueryService {
   }
 
 
-  private Map<Long, List<String>> getKeywordMap(List<Long> blendingIds) {
-    List<BlendingKeyword> blendingKeywordList = blendingKeywordRepository.findAllByBlendingIdIn(blendingIds);
+  /**
+   * 블렌딩의 keyword List 조회
+   */
+  private Map<Long, List<String>> getKeywordMap(List<Blending> blendings) {
+    List<BlendingKeyword> blendingKeywordList = blendingKeywordRepository.findAllByBlendingIdIn(blendings);
 
     return blendingKeywordList.stream()
             .collect(Collectors.groupingBy(
