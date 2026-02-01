@@ -46,9 +46,6 @@ public class BlendingMyQueryService {
             MyAppliedBlendingResponse.listFrom(blendingUsers.getContent(), keywordMap);
 
     return new PageImpl<>(myAppliedBlendingResponseList, pageable, blendingUsers.getTotalElements());
-    // joinStatus에 취소 상태도 추가해서 보여줘야한다. (신청 취소 시 삭제가 아니라 취소 상태로 변경해야함)
-
-    // API를 하나 더 만들어서 취소 상태인 블렌딩 흔적을 아예 삭제 (BlendingUser 데이터)할 수 있어야 한다.
   }
 
 

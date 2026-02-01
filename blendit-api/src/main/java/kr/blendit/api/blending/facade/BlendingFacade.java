@@ -110,6 +110,15 @@ public class BlendingFacade {
   }
 
   /**
+   * 블렌딩 참여 신청 내역 삭제
+   */
+  @Transactional
+  public void deleteParticipation(String userUuid, String blendingUuid) {
+    Blending blending = blendingService.getBlending(blendingUuid);
+    blendingParticipationService.delete(userUuid, blending);
+  }
+
+  /**
    * 블렌딩 참여 승인
    */
   @Transactional
