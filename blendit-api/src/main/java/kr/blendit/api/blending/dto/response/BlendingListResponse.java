@@ -6,7 +6,6 @@ import kr.blendit.api.blending.domain.BlendingKeyword;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.common.constant.Position;
 import kr.blendit.api.user.constant.Experience;
-import kr.blendit.api.user.domain.User;
 import lombok.*;
 
 import java.util.ArrayList;

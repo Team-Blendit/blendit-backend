@@ -4,12 +4,15 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.blendit.api.blending.dto.request.BlendingListRequest;
 import kr.blendit.api.blending.dto.response.BlendingListResponse;
+import kr.blendit.api.blending.dto.response.MyAppliedBlendingResponse;
+import kr.blendit.api.blending.dto.response.MyCreatedBlendingResponse;
 import kr.blendit.api.blending.facade.BlendingFacade;
 import kr.blendit.common.security.jwt.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -33,4 +36,24 @@ public class BlendingQueryController {
 
     return blendingFacade.getBlendingList(currentUser, blendingListRequest, pageable);
   }
+
+  @Operation(summary = "내가 신청한 블렌딩 목록 조회 API")
+  @GetMapping("/my/applied")
+  public Page<MyAppliedBlendingResponse> getMyAppliedList(
+          CurrentUser currentUser,
+          @ParameterObject @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
+
+    return blendingFacade.getMyAppliedList(currentUser, pageable);
+  }
+
+  @Operation(summary = "내가 생성한 블렌딩 목록 조회 API")
+  @GetMapping("/my/created")
+  public Page<MyCreatedBlendingResponse> getMyCreatedList(
+          CurrentUser currentUser,
+          @ParameterObject @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
+    return blendingFacade.getMyCreatedList(currentUser, pageable);
+  }
 }
+
+
+
