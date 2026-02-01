@@ -34,6 +34,9 @@ public enum BaseErrorCode implements ErrorCode {
   DUPLICATE_EMAIL("이미 등록된 이메일이에요."),
   DUPLICATE_NICKNAME("이미 사용 중인 닉네임이에요."),
   ALREADY_ONBOARDED("이미 온보딩이 완료된 사용자입니다."),
+  DUPLICATE_USER_BOOKMARK("이미 북마크한 사용자입니다."),
+  CANNOT_BOOKMARK_SELF("자기 자신을 북마크할 수 없습니다."),
+  USER_BOOKMARK_NOT_FOUND("유저 북마크를 찾을 수 없습니다."),
 
   // OAuth
   OAUTH_TOKEN_REQUEST_FAILED("OAuth 토큰 요청에 실패했습니다."),
@@ -61,7 +64,10 @@ public enum BaseErrorCode implements ErrorCode {
   BLENDING_NOT_APPLIED("신청하지 않은 블렌딩입니다."),
   BLENDING_NOT_RECRUITING("모집 중인 블렌딩이 아닙니다."),
   BLENDING_ALREADY_PROCESSED("이미 처리된 신청 내역입니다."),
-  BLENDING_HOST_CANNOT_LEAVE("호스트는 블렌딩을 탈퇴할 없습니다.");
+  BLENDING_HOST_CANNOT_LEAVE("호스트는 블렌딩을 탈퇴할 없습니다."),
+
+  // 파일 업로드
+  FILE_UPLOAD_FAILED("파일 업로드에 실패했습니다.");
 
   private final String message;
 }
