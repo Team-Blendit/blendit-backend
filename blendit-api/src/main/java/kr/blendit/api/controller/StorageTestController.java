@@ -8,13 +8,7 @@ import kr.blendit.common.storage.dto.UploadedObject;
 import kr.blendit.common.storage.service.ObjectStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "Storage Test API", description = "로컬 볼륨 스토리지 테스트용 API")
@@ -33,7 +27,7 @@ public class StorageTestController {
   public UploadedObject upload(
       @RequestPart("file") MultipartFile file,
       @RequestParam(required = false) String prefix
-  ) {
+  ) throws IOException {
     return objectStorageService.upload(
         file,
         prefix
@@ -69,14 +63,14 @@ public class StorageTestController {
 
   @Operation(
       summary = "업로드 삭제",
-      description = "서버 볼륨(rootDir)에서 해당 key 파일을 삭제합니다."
+      description = "서버 볼륨(rootDir)에서 해당 파일을 삭제합니다."
   )
   @DeleteMapping("/delete")
-  public Map<String, Object> delete(@RequestParam String key) {
-    objectStorageService.delete(key);
+  public Map<String, Object> delete(@RequestParam String url) {
+    objectStorageService.deleteByUrl(url);
 
     return Map.of(
-        "key", key,
+        "url", url,
         "message", "삭제 완료"
     );
   }

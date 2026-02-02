@@ -39,7 +39,7 @@ public class BlendingQueryService {
     int pageSize = pageable.getPageSize();
     int pageNumber = pageable.getPageNumber();
 
-    boolean isLogin = (userUuid != null && !userUuid.equals("anonymousUser"));
+    boolean isLogin = (userUuid != null);
 
     // 추천 블렌딩 목록 조회
     if (isLogin && pageNumber == 0) {

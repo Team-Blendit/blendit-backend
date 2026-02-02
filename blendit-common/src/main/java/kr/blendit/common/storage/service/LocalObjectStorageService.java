@@ -2,13 +2,10 @@ package kr.blendit.common.storage.service;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.AtomicMoveNotSupportedException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.List;
@@ -35,6 +32,7 @@ public class LocalObjectStorageService implements ObjectStorageService {
       MultipartFile file,
       String prefix
   ) {
+
     if (file == null || file.isEmpty()) {
       return null;
     }
@@ -98,16 +96,36 @@ public class LocalObjectStorageService implements ObjectStorageService {
     }
   }
 
+  /**
+   * URL로 파일 삭제 - public-base-url 하위 URL만 허용 - URL의 path 부분을 key로 복원(디코딩) - root-dir 안에서만 삭제되도록 resolveSafe로 path traversal 방어
+   */
   @Override
-  public void delete(String key) {
-    Path root = Paths.get(required(props.rootDir(), "storage.local.root-dir"))
-        .toAbsolutePath().normalize();
+  public void deleteByUrl(String url) {
+    if (url == null || url.isBlank()) {
+      return;
+    }
+
+    String base = required(props.publicBaseUrl(), "storage.local.public-base-url");
+    base = base.endsWith("/") ? base.substring(0, base.length() - 1) : base;
+
+    if (!url.startsWith(base + "/")) {
+      throw new IllegalArgumentException("url is not under public base url. base=" + base);
+    }
+
+    String encodedPath = url.substring((base + "/").length());
+
+    String key = URLDecoder.decode(encodedPath, StandardCharsets.UTF_8);
+
+    Path root = Paths
+        .get(required(props.rootDir(), "storage.local.root-dir"))
+        .toAbsolutePath()
+        .normalize();
     Path target = resolveSafe(root, key);
 
     try {
       Files.deleteIfExists(target);
     } catch (Exception e) {
-      throw new IllegalStateException("Failed to delete local file: " + key, e);
+      throw new IllegalStateException("Failed to delete local file by url: " + url, e);
     }
   }
 
@@ -149,9 +167,8 @@ public class LocalObjectStorageService implements ObjectStorageService {
     String[] parts = key.split("/");
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < parts.length; i++) {
-      if (i > 0) {
+      if (i > 0)
         sb.append("/");
-      }
       sb.append(URLEncoder.encode(parts[i], StandardCharsets.UTF_8));
     }
     return sb.toString();

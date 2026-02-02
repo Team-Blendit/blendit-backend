@@ -19,16 +19,21 @@ spring:
       hibernate:
         format_sql: true
 
-ncp:
-  object-storage:
-    endpoint: ${OBJECT_STORAGE_ENDPOINT}
-    region: kr-standard
-    bucket: ${OBJECT_STORAGE_BUCKET_NAME}
-    access-key: ${NCP_ACCESS_KEY}
-    secret-key: ${NCP_SECRET_KEY}
-    default-prefix: uploads-local
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
-# P6Spy 비활성화 (운영 환경)
+storage:
+  local:
+    root-dir: /home/ubuntu/app/local-uploads
+    public-base-url: https://blendit.kr/uploads
+    max-upload-bytes: 10485760
+    allowed-mime-types:
+      - image/jpeg
+      - image/png
+      - image/webp
+
 decorator:
   datasource:
     p6spy:
