@@ -10,6 +10,9 @@ import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.dto.request.BlendingListRequest;
 import kr.blendit.api.common.constant.Position;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
@@ -30,24 +33,43 @@ public class BlendingRepositoryImpl implements BlendingRepositoryCustom{
      * 블렌딩 목록 조회 (검색어 및 필터링 적용)
      */
     @Override
-    public List<Blending> searchByCondition(
-            String userUuid, BlendingListRequest blendingListRequest, long offset, int limit) {
+    public Page<Blending> searchByCondition(
+            String userUuid, BlendingListRequest blendingListRequest, Pageable pageable) {
 
-        return queryFactory
+        List<Blending> content = queryFactory
                 .selectFrom(blending)
                 .where(
                         equalPosition(blendingListRequest.getPosition()),
                         inRegions(blendingListRequest.getRegion()),
                         equalStatus(blendingListRequest.getIsRecruiting()),
                         containsKeywords(blendingListRequest.getKeywords()),
+                        equalCapacity(blendingListRequest.getCapacity()),
                         isBookmark(blendingListRequest.getIsBookmark(), userUuid),
                         containsSearchQuery(blendingListRequest.getQuery()),
                         blending.useFlag.isTrue()
                 )
                 .orderBy(blending.createdDate.desc())
-                .offset(offset)
-                .limit(limit)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
+
+        Long totalCount = queryFactory
+                .select(blending.count())
+                .from(blending)
+                .where(
+                        equalPosition(blendingListRequest.getPosition()),
+                        inRegions(blendingListRequest.getRegion()),
+                        equalStatus(blendingListRequest.getIsRecruiting()),
+                        containsKeywords(blendingListRequest.getKeywords()),
+                        equalCapacity(blendingListRequest.getCapacity()),
+                        isBookmark(blendingListRequest.getIsBookmark(), userUuid),
+                        containsSearchQuery(blendingListRequest.getQuery()),
+                        blending.useFlag.isTrue()
+                )
+            .fetchOne();
+
+        long total = (totalCount != null) ? totalCount : 0L;
+        return new PageImpl<>(content, pageable, total);
     }
 
     /**
@@ -147,13 +169,9 @@ public class BlendingRepositoryImpl implements BlendingRepositoryCustom{
 
     private BooleanExpression equalStatus(Boolean isRecruiting) {
 
-        if(isRecruiting == null) return null;
+        if(isRecruiting == null || !isRecruiting) return null;
 
-        if(isRecruiting) {
-            return blending.status.eq(BlendingStatus.RECRUITING);
-        } else {
-            return blending.status.eq(BlendingStatus.RECRUITMENT_CLOSED);
-        }
+        return blending.status.eq(BlendingStatus.RECRUITING);
     }
 
     private BooleanExpression containsKeywords(List<String> userKeywordNames) {
@@ -165,6 +183,13 @@ public class BlendingRepositoryImpl implements BlendingRepositoryCustom{
                 .join(blendingKeyword.keyword, keyword)
                 .where(blendingKeyword.blending.eq(blending), keyword.name.in(userKeywordNames))
                 .exists();
+    }
+
+    private BooleanExpression equalCapacity(Integer capacity) {
+
+        if(capacity == null) return null;
+
+        return blending.capacity.eq(capacity);
     }
 
     /**
