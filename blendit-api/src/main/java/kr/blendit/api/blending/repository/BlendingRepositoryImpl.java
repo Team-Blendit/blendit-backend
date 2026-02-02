@@ -42,7 +42,7 @@ public class BlendingRepositoryImpl implements BlendingRepositoryCustom{
                         equalPosition(blendingListRequest.getPosition()),
                         inRegions(blendingListRequest.getRegion()),
                         equalStatus(blendingListRequest.getIsRecruiting()),
-                        containsKeywords(blendingListRequest.getKeywords()),
+                        containsKeywords(blendingListRequest.getKeywordUuidList()),
                         equalCapacity(blendingListRequest.getCapacity()),
                         isBookmark(blendingListRequest.getIsBookmark(), userUuid),
                         containsSearchQuery(blendingListRequest.getQuery()),
@@ -60,7 +60,7 @@ public class BlendingRepositoryImpl implements BlendingRepositoryCustom{
                         equalPosition(blendingListRequest.getPosition()),
                         inRegions(blendingListRequest.getRegion()),
                         equalStatus(blendingListRequest.getIsRecruiting()),
-                        containsKeywords(blendingListRequest.getKeywords()),
+                        containsKeywords(blendingListRequest.getKeywordUuidList()),
                         equalCapacity(blendingListRequest.getCapacity()),
                         isBookmark(blendingListRequest.getIsBookmark(), userUuid),
                         containsSearchQuery(blendingListRequest.getQuery()),
@@ -127,7 +127,7 @@ public class BlendingRepositoryImpl implements BlendingRepositoryCustom{
                         equalPosition(blendingListRequest.getPosition()),
                         inRegions(blendingListRequest.getRegion()),
                         equalStatus(blendingListRequest.getIsRecruiting()),
-                        containsKeywords(blendingListRequest.getKeywords()),
+                        containsKeywords(blendingListRequest.getKeywordUuidList()),
                         isBookmark(blendingListRequest.getIsBookmark(), userUuid),
                         containsSearchQuery(blendingListRequest.getQuery()),
                         blending.useFlag.isTrue()
@@ -174,14 +174,14 @@ public class BlendingRepositoryImpl implements BlendingRepositoryCustom{
         return blending.status.eq(BlendingStatus.RECRUITING);
     }
 
-    private BooleanExpression containsKeywords(List<String> userKeywordNames) {
-        if (userKeywordNames == null || userKeywordNames.isEmpty()) return null;
+    private BooleanExpression containsKeywords(List<String> keywordUuidList) {
+        if (keywordUuidList == null || keywordUuidList.isEmpty()) return null;
 
         return JPAExpressions
                 .selectOne()
                 .from(blendingKeyword)
                 .join(blendingKeyword.keyword, keyword)
-                .where(blendingKeyword.blending.eq(blending), keyword.name.in(userKeywordNames))
+                .where(blendingKeyword.blending.eq(blending), keyword.uuid.in(keywordUuidList))
                 .exists();
     }
 
