@@ -15,7 +15,6 @@ import kr.blendit.api.blending.repository.BlendingUserRepository;
 import kr.blendit.api.keyword.domain.Keyword;
 import kr.blendit.api.keyword.repository.KeywordRepository;
 import kr.blendit.api.user.domain.User;
-import kr.blendit.api.user.repository.UserRepository;
 import kr.blendit.common.exception.BaseErrorCode;
 import kr.blendit.common.exception.BaseException;
 import kr.blendit.common.security.jwt.CurrentUser;
@@ -208,3 +207,5 @@ public class BlendingService {
     }
 
 }
+
+
