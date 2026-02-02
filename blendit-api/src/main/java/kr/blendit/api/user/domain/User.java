@@ -106,9 +106,6 @@ public class User extends BaseEntity {
     return User.builder()
         .loginType(loginType)
         .socialCompanyUserId(userInfo.socialCompanyUserId())
-        .nickname(userInfo.nickname())
-        .profileImage(userInfo.profileImage())
-        .email(userInfo.email())
         .role(UserRole.USER)
         .build();
   }
