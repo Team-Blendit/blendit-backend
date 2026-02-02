@@ -1,17 +1,26 @@
 package kr.blendit.api.blending.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.dto.request.BlendingApplyRequest;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
-import kr.blendit.api.blending.dto.response.BlendingDetailResponse;
 import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
+import kr.blendit.api.blending.dto.response.BlendingDetailResponse;
 import kr.blendit.api.blending.facade.BlendingFacade;
 import kr.blendit.common.security.jwt.CurrentUser;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "Blending API")
 @RestController
@@ -37,14 +46,16 @@ public class BlendingController {
 
   @Operation(summary = "블렌딩 정보 수정 API", description = "openChattingUrl은 생략할 수 있습니다.")
   @PatchMapping("/{blendingUuid}")
-  public void updateBlending(CurrentUser currentUser, @PathVariable String blendingUuid, @RequestBody BlendingUpdateRequest blendingUpdateRequest) {
+  public void updateBlending(CurrentUser currentUser, @PathVariable String blendingUuid,
+      @RequestBody BlendingUpdateRequest blendingUpdateRequest) {
 
     blendingFacade.updateBlending(currentUser.getUserUuid(), blendingUuid, blendingUpdateRequest);
   }
 
   @Operation(summary = "블렌딩 상태 변경 API")
   @PatchMapping("/{blendingUuid}/status")
-  public void updateBlendingStatus(CurrentUser currentUser, @PathVariable String blendingUuid, @RequestParam BlendingStatus blendingStatus) {
+  public void updateBlendingStatus(CurrentUser currentUser, @PathVariable String blendingUuid,
+      @RequestParam BlendingStatus blendingStatus) {
 
     blendingFacade.updateBlendingStatus(currentUser.getUserUuid(), blendingUuid, blendingStatus);
   }
@@ -58,7 +69,8 @@ public class BlendingController {
 
   @Operation(summary = "블렌딩 참여 신청 API")
   @PostMapping("/{blendingUuid}/participation")
-  public void applyParticipation(CurrentUser currentUser, @PathVariable String blendingUuid, @RequestBody BlendingApplyRequest blendingApplyRequest) {
+  public void applyParticipation(CurrentUser currentUser, @PathVariable String blendingUuid,
+      @RequestBody BlendingApplyRequest blendingApplyRequest) {
 
     blendingFacade.applyParticipation(currentUser.getUserUuid(), blendingUuid, blendingApplyRequest);
   }
@@ -79,17 +91,19 @@ public class BlendingController {
 
   @Operation(summary = "블렌딩 참여 승인 API")
   @PatchMapping("/{blendingUuid}/participation/{participantUuid}/approve")
-  public void approveParticipation(CurrentUser currentUser, @PathVariable String blendingUuid, @PathVariable String participantUuid) {
+  public void approveParticipation(CurrentUser currentUser, @PathVariable String blendingUuid,
+      @PathVariable String participantUuid) {
 
-        blendingFacade.approveParticipation(currentUser.getUserUuid(), blendingUuid, participantUuid);
-    }
+    blendingFacade.approveParticipation(currentUser.getUserUuid(), blendingUuid, participantUuid);
+  }
 
-    @Operation(summary = "블렌딩 참여 거부 API", security = @SecurityRequirement(name = "bearerAuth"))
-    @PatchMapping("/{blendingUuid}/participation/{participantUuid}/reject")
-    public void rejectParticipation(CurrentUser currentUser, @PathVariable String blendingUuid, @PathVariable String participantUuid) {
+  @Operation(summary = "블렌딩 참여 거부 API", security = @SecurityRequirement(name = "bearerAuth"))
+  @PatchMapping("/{blendingUuid}/participation/{participantUuid}/reject")
+  public void rejectParticipation(CurrentUser currentUser, @PathVariable String blendingUuid,
+      @PathVariable String participantUuid) {
 
-        blendingFacade.rejectParticipation(currentUser.getUserUuid(), blendingUuid, participantUuid);
-    }
+    blendingFacade.rejectParticipation(currentUser.getUserUuid(), blendingUuid, participantUuid);
+  }
 
   @Operation(summary = "블렌딩 북마크 추가 API")
   @PostMapping("/{blendingUuid}/bookmark")

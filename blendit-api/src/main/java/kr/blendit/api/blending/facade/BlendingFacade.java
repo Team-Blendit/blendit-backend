@@ -1,12 +1,17 @@
 package kr.blendit.api.blending.facade;
 
+import java.util.List;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.dto.request.BlendingApplyRequest;
 import kr.blendit.api.blending.dto.request.BlendingCreateRequest;
 import kr.blendit.api.blending.dto.request.BlendingListRequest;
 import kr.blendit.api.blending.dto.request.BlendingUpdateRequest;
-import kr.blendit.api.blending.dto.response.*;
+import kr.blendit.api.blending.dto.response.BlendingDetailResponse;
+import kr.blendit.api.blending.dto.response.BlendingListResponse;
+import kr.blendit.api.blending.dto.response.MyAppliedBlendingResponse;
+import kr.blendit.api.blending.dto.response.MyCreatedBlendingResponse;
+import kr.blendit.api.blending.dto.response.MyHistoryBlendingResponse;
 import kr.blendit.api.blending.service.BlendingMyQueryService;
 import kr.blendit.api.blending.service.BlendingParticipationService;
 import kr.blendit.api.blending.service.BlendingQueryService;
@@ -22,9 +27,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -39,9 +41,7 @@ public class BlendingFacade {
   private final BlendingMyQueryService blendingMyQueryService;
 
   /**
-   * 블렌딩 생성 흐름
-   * 1. 블렌딩 및 키워드 생성
-   * 2. 호스트 권한 부여
+   * 블렌딩 생성 흐름 1. 블렌딩 및 키워드 생성 2. 호스트 권한 부여
    */
   @Transactional
   public void createBlending(String userUuid, BlendingCreateRequest request) {
@@ -51,9 +51,7 @@ public class BlendingFacade {
   }
 
   /**
-   * 블렌딩 삭제 흐름
-   * 1. 호스트 검증
-   * 2. 논리 삭제 처리
+   * 블렌딩 삭제 흐름 1. 호스트 검증 2. 논리 삭제 처리
    */
   @Transactional
   public void deleteBlending(String userUuid, String blendingUuid) {
@@ -61,9 +59,7 @@ public class BlendingFacade {
   }
 
   /**
-   * 블렌딩 정보 수정 흐름
-   * 1. 호스트 검증
-   * 2. 정보 및 키워드 업데이트
+   * 블렌딩 정보 수정 흐름 1. 호스트 검증 2. 정보 및 키워드 업데이트
    */
   @Transactional
   public void updateBlending(String userUuid, String blendingUuid, BlendingUpdateRequest request) {
@@ -71,9 +67,7 @@ public class BlendingFacade {
   }
 
   /**
-   * 블렌딩 상태 변경 흐름
-   * 1. 호스트 검증
-   * 2. 상태 업데이트
+   * 블렌딩 상태 변경 흐름 1. 호스트 검증 2. 상태 업데이트
    */
   @Transactional
   public void updateBlendingStatus(String userUuid, String blendingUuid, BlendingStatus blendingStatus) {
@@ -116,13 +110,14 @@ public class BlendingFacade {
     blendingParticipationService.delete(userUuid, blending);
   }
 
-    /**
-     * 블렌딩 참여 승인
-     */
-    @Transactional
-    public void approveParticipation(String userUuid, String blendingUuid, String participantUuid) {
-        blendingParticipationService.approve(userUuid, blendingUuid, participantUuid);
-    }
+  /**
+   * 블렌딩 참여 승인
+   */
+  @Transactional
+  public void approveParticipation(String userUuid, String blendingUuid, String participantUuid) {
+    Blending blending = blendingService.getBlending(blendingUuid);
+    blendingParticipationService.approve(userUuid, blending, participantUuid);
+  }
 
   /**
    * 블렌딩 참여 거부
@@ -138,7 +133,7 @@ public class BlendingFacade {
    */
   @Transactional(readOnly = true)
   public Page<BlendingListResponse> getBlendingList(
-          CurrentUser currentUser, BlendingListRequest blendingListRequest, Pageable pageable) {
+      CurrentUser currentUser, BlendingListRequest blendingListRequest, Pageable pageable) {
     return blendingQueryService.getList(currentUser, blendingListRequest, pageable);
   }
 
