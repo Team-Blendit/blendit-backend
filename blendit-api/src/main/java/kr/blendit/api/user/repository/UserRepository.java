@@ -5,7 +5,7 @@ import kr.blendit.api.user.constant.LoginType;
 import kr.blendit.api.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, UserRepositoryCustom {
 
   Optional<User> findByUuid(String uuid);
 

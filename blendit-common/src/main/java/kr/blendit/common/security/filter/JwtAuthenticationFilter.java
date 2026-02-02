@@ -6,6 +6,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import kr.blendit.common.security.config.SecurityProperties.ProtectedEndpoint;
 import kr.blendit.common.security.config.SecurityProperties.PublicEndpoint;
 import kr.blendit.common.security.exception.JwtTokenErrorCode;
 import kr.blendit.common.security.exception.JwtTokenException;
@@ -31,11 +32,13 @@ public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFil
     private final AuthenticationProvider provider;
     private final SkipPathRequestMatcher skipPathRequestMatcher;
 
-    public JwtAuthenticationFilter(List<PublicEndpoint> publicEndpoints, List<String> processingPaths,
+    public JwtAuthenticationFilter(List<PublicEndpoint> publicEndpoints,
+                                   List<ProtectedEndpoint> protectedEndpoints,
+                                   List<String> processingPaths,
                                    AuthenticationFailureHandler failureHandler,
                                    AuthenticationProvider provider) {
-        super(new SkipPathRequestMatcher(publicEndpoints, processingPaths));
-        this.skipPathRequestMatcher = new SkipPathRequestMatcher(publicEndpoints, processingPaths);
+        super(new SkipPathRequestMatcher(publicEndpoints, protectedEndpoints, processingPaths));
+        this.skipPathRequestMatcher = new SkipPathRequestMatcher(publicEndpoints, protectedEndpoints, processingPaths);
         this.provider = provider;
         this.setAuthenticationFailureHandler(failureHandler);
     }

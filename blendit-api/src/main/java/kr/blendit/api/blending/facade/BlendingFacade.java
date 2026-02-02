@@ -162,7 +162,7 @@ public class BlendingFacade {
     Blending blending = blendingService.getBlending(blendingUuid);
     blendingService.removeBookmark(user, blending);
   }
-  
+
   @Transactional(readOnly = true)
   public Page<MyCreatedBlendingResponse> getMyCreatedList(CurrentUser currentUser, Pageable pageable) {
     return blendingMyQueryService.getMyCreatedList(currentUser, pageable);
@@ -177,5 +177,5 @@ public class BlendingFacade {
   public Page<MyHistoryBlendingResponse> getMyHistoryList(CurrentUser currentUser, Pageable pageable) {
     return blendingMyQueryService.getMyHistoryList(currentUser, pageable);
   }
-  
+
 }
