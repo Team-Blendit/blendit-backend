@@ -29,7 +29,6 @@ public class MyCreatedBlendingResponse {
   private LocalDateTime schedule;
   private String openChattingUrl;
   private BlendingStatus blendingStatus;
-  private Boolean useFlag;
 
 
   public static List<MyCreatedBlendingResponse> listFrom(List<BlendingUser> blendingUsers, Map<Long, List<String>> keywordMap) {
@@ -51,7 +50,6 @@ public class MyCreatedBlendingResponse {
               .schedule(blending.getSchedule())
               .openChattingUrl(blending.getOpenChattingUrl())
               .blendingStatus(blending.getStatus())
-              .useFlag(blending.isUseFlag())
               .build();
 
       list.add(myCreatedBlendingResponse);
