@@ -79,7 +79,7 @@ public class BlendingParticipationService {
 
 
     /**
-     * 블렌딩 참여 신청 취소
+     * 블렌딩 참여 신청 취소 (JoinStatus.CANCEL로 변경합니다.)
      *
      * @apiNote 신청 취소 후 참여인원이 정원보다 적더라도 마감 상태가 유지됩니다.
      */
@@ -102,6 +102,9 @@ public class BlendingParticipationService {
     }
 
 
+    /**
+     * 블렌딩 신청 내역 삭제(BlendingUser 데이터를 삭제합니다.)
+     */
     public void delete(String userUuid, Blending blending) {
 
         BlendingUser blendingUser = blendingUserRepository.findByBlendingAndUser_Uuid(blending, userUuid)

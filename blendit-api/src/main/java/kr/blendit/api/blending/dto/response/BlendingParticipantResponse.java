@@ -5,6 +5,7 @@ import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.common.constant.Position;
 import kr.blendit.api.user.constant.Experience;
+import kr.blendit.api.user.domain.UserBookmark;
 import kr.blendit.api.user.domain.UserKeyword;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -19,8 +20,6 @@ import java.util.List;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class BlendingParticipantResponse {
 
-  // Todo: 지수, 북마크 여부,
-
   private String uuid;
   private String nickname;
   private String profileImage;
@@ -31,10 +30,11 @@ public class BlendingParticipantResponse {
   private List<String> keywords;
   private BlendingUserGrade blendingUserGrade;
   private JoinStatus joinStatus;
+  private Boolean isBookmark;
 
 
-  public static List<BlendingParticipantResponse> from(List<BlendingUser> blendingUsers) {
-    // Todo: 북마크 여부 필요
+  public static List<BlendingParticipantResponse> from(List<BlendingUser> blendingUsers, List<Long> bookmarkedIds) {
+
     List<BlendingParticipantResponse> blendingParticipantResponses = new ArrayList<>();
 
     for (BlendingUser blendingUser : blendingUsers) {
@@ -55,6 +55,7 @@ public class BlendingParticipantResponse {
               .keywords(userKeywords)
               .blendingUserGrade(blendingUser.getBlendingUserGrade())
               .joinStatus(blendingUser.getJoinStatus())
+              .isBookmark(bookmarkedIds.contains(blendingUser.getUser().getId()))
               .build();
       blendingParticipantResponses.add(blendingUserResponse);
 
