@@ -78,15 +78,18 @@ public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long
     @Query(value = """
             SELECT bu
             FROM BlendingUser bu
-                JOIN FETCH bu.blending
+                JOIN FETCH bu.blending b
             WHERE bu.user.uuid = :userUuid
                 AND bu.blendingUserGrade = :blendingUserGrade
+                AND b.useFlag = true
             """,
             countQuery = """
             SELECT count(bu)
             FROM BlendingUser bu
+                JOIN bu.blending b
             WHERE bu.user.uuid = :userUuid
                 AND bu.blendingUserGrade = :blendingUserGrade
+                AND b.useFlag = true
             """)
     Page<BlendingUser> findAllByUserUuidAndBlendingUserGrade(
             String userUuid, BlendingUserGrade blendingUserGrade, Pageable pageable);
