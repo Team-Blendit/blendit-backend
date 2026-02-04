@@ -10,14 +10,18 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import kr.blendit.api.auth.dto.oidc.OidcUserInfo;
 import kr.blendit.api.common.constant.Position;
 import kr.blendit.api.keyword.domain.Keyword;
 import kr.blendit.api.user.constant.Experience;
 import kr.blendit.api.user.constant.LoginType;
+import kr.blendit.api.user.controller.dto.UpdateUserProfileRequest;
 import kr.blendit.api.user.controller.dto.UserOnboardingRequest;
-import kr.blendit.api.user.domain.converter.StringListConverter;
-import kr.blendit.api.user.domain.converter.UserLinkListConverter;
+import kr.blendit.api.user.domain.converter.UserLinkConverter;
+import kr.blendit.api.user.domain.converter.UserSkillConverter;
 import kr.blendit.common.constant.UserRole;
 import kr.blendit.common.entity.BaseEntity;
 import kr.blendit.common.exception.BaseErrorCode;
@@ -65,12 +69,12 @@ public class User extends BaseEntity {
   private String affiliation;
 
   @Comment("기술 스택")
-  @Convert(converter = StringListConverter.class)
+  @Convert(converter = UserSkillConverter.class)
   @Column(columnDefinition = "TEXT")
-  private List<String> skills = new ArrayList<>();
+  private List<UserSkill> skills = new ArrayList<>();
 
   @Comment("링크")
-  @Convert(converter = UserLinkListConverter.class)
+  @Convert(converter = UserLinkConverter.class)
   @Column(columnDefinition = "TEXT")
   private List<UserLink> links = new ArrayList<>();
 
@@ -91,7 +95,7 @@ public class User extends BaseEntity {
   @Builder.Default
   private Integer tokenVersion = 0;
 
-  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
   @Builder.Default
   private List<UserKeyword> userKeywords = new ArrayList<>();
 
@@ -102,9 +106,6 @@ public class User extends BaseEntity {
     return User.builder()
         .loginType(loginType)
         .socialCompanyUserId(userInfo.socialCompanyUserId())
-        .nickname(userInfo.nickname())
-        .profileImage(userInfo.profileImage())
-        .email(userInfo.email())
         .role(UserRole.USER)
         .build();
   }
@@ -124,18 +125,6 @@ public class User extends BaseEntity {
     this.tokenVersion++;
   }
 
-  public void updateProfile(String nickname, String profileImage, String email) {
-    if (nickname != null) {
-      this.nickname = nickname;
-    }
-    if (profileImage != null) {
-      this.profileImage = profileImage;
-    }
-    if (email != null && this.email == null) {
-      this.email = email;
-    }
-  }
-
   public void onboarding(UserOnboardingRequest request, List<Keyword> keywordList) {
     if (isOnboardingComplete()) {
       throw new BaseException(BaseErrorCode.ALREADY_ONBOARDED);
@@ -146,12 +135,38 @@ public class User extends BaseEntity {
     this.province = request.province();
     this.district = request.district();
     this.nickname = request.nickname();
-    this.userKeywords = keywordList.stream()
-        .map(keyword -> UserKeyword.create(this, keyword))
-        .toList();
+    updateUserKeywords(keywordList);
   }
 
   public boolean isOnboardingComplete() {
     return !this.userKeywords.isEmpty();
+  }
+
+  public void updateProfile(UpdateUserProfileRequest request, List<Keyword> keywordList, String profileImageUrl) {
+    this.nickname = request.nickname();
+    this.description = request.description();
+    this.email = request.email();
+    this.experience = request.experience();
+    this.position = request.position();
+    this.province = request.province();
+    this.district = request.district();
+    this.affiliation = request.affiliation();
+    this.skills = request.skills();
+    this.links = request.links();
+    this.profileImage = profileImageUrl;
+    updateUserKeywords(keywordList);
+  }
+
+  private void updateUserKeywords(List<Keyword> newKeywords) {
+    Map<Keyword, UserKeyword> existingByKeyword = this.userKeywords.stream()
+        .collect(Collectors.toMap(UserKeyword::getKeyword, Function.identity()));
+
+    List<UserKeyword> updatedKeywords = newKeywords.stream()
+        .map(keyword ->
+            existingByKeyword.getOrDefault(keyword, UserKeyword.create(this, keyword)))
+        .toList();
+
+    this.userKeywords.clear();
+    this.userKeywords.addAll(updatedKeywords);
   }
 }

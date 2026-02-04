@@ -34,6 +34,9 @@ springdoc:
     path: /docs/swagger
 
 security:
+  protected-endpoints:
+    - path: /api/blendit/user/profile/me
+      methods: [ "GET" ]
   public-endpoints:
     - path: /api/blendit/auth/**
       methods: [ "*" ]
@@ -49,7 +52,10 @@ security:
       methods: [ "GET" ]
     - path: /api/blendit/user/onboarding/nickname-duplicate-check
       methods: [ "GET" ]
-
+    - path: /api/blendit/user/profile/{userUuid}
+      methods: [ "GET" ]
+    - path: /api/blendit/user/search
+      methods: [ "GET" ]
 oidc:
   kakao:
     client-id: ${KAKAO_CLIENT_ID:your-kakao-client-id}

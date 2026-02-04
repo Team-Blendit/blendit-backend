@@ -34,7 +34,7 @@ public class LocalObjectStorageService implements ObjectStorageService {
   ) {
 
     if (file == null || file.isEmpty()) {
-      throw new BaseException(BaseErrorCode.FILE_UPLOAD_FAILED);
+      return null;
     }
     Path tmp = null;
 
@@ -102,7 +102,7 @@ public class LocalObjectStorageService implements ObjectStorageService {
   @Override
   public void deleteByUrl(String url) {
     if (url == null || url.isBlank()) {
-      throw new IllegalArgumentException("url is blank");
+      return;
     }
 
     String base = required(props.publicBaseUrl(), "storage.local.public-base-url");
