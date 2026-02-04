@@ -15,6 +15,8 @@ import kr.blendit.api.blending.repository.BlendingUserRepository;
 import kr.blendit.api.keyword.domain.Keyword;
 import kr.blendit.api.keyword.repository.KeywordRepository;
 import kr.blendit.api.user.domain.User;
+import kr.blendit.api.user.domain.UserBookmark;
+import kr.blendit.api.user.repository.UserBookmarkRepository;
 import kr.blendit.common.exception.BaseErrorCode;
 import kr.blendit.common.exception.BaseException;
 import kr.blendit.common.security.jwt.CurrentUser;
@@ -37,6 +39,7 @@ public class BlendingService {
     private final BlendingUserRepository blendingUserRepository;
     private final KeywordRepository keywordRepository;
     private final BlendingBookmarkRepository blendingBookmarkRepository;
+    private final UserBookmarkRepository userBookmarkRepository;
 
     /**
      * 블렌딩 생성
@@ -157,29 +160,28 @@ public class BlendingService {
         List<BlendingUser> blendingUsers = blendingUserRepository.findByBlendingAndJoinStatusInWithUser(
                 blending, joinStatuses);
 
+        List<Long> bookmarkedIds = getBookmarkedIds(blendingUsers, userUuid);
+
         String currentUserJoinStatus = "GUEST";
         if(userUuid != null) {
             currentUserJoinStatus = getCurrentUserJoinStatus(blending, userUuid);
         }
 
-        return BlendingDetailResponse.from(blending, blendingUsers, bookmarkCount, isBookmark, isHost, currentUserJoinStatus);
+        return BlendingDetailResponse.from(
+                blending,
+                blendingUsers,
+                bookmarkCount,
+                isBookmark,
+                isHost,
+                currentUserJoinStatus,
+                bookmarkedIds
+        );
     }
 
 
     public Blending getBlending(String blendingUuid) {
         return blendingRepository.findByUuid(blendingUuid)
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
-    }
-
-    private String getCurrentUserJoinStatus(Blending blending, String userUuid) {
-        BlendingUser CurrentBlendingUser = blendingUserRepository.findByBlendingAndUser_Uuid(blending, userUuid)
-                .orElse(null);
-
-        if(CurrentBlendingUser == null) {
-            return "NOT_APPLIED";
-        } else {
-            return String.valueOf(CurrentBlendingUser.getJoinStatus());
-        }
     }
 
     /**
@@ -204,6 +206,25 @@ public class BlendingService {
                 .orElseThrow(() -> new BaseException(BaseErrorCode.BOOKMARK_NOT_FOUND));
 
         blendingBookmarkRepository.delete(blendingBookmark);
+    }
+
+    private String getCurrentUserJoinStatus(Blending blending, String userUuid) {
+        BlendingUser CurrentBlendingUser = blendingUserRepository.findByBlendingAndUser_Uuid(blending, userUuid)
+                .orElse(null);
+
+        if(CurrentBlendingUser == null) {
+            return "NOT_APPLIED";
+        } else {
+            return String.valueOf(CurrentBlendingUser.getJoinStatus());
+        }
+    }
+
+    private List<Long> getBookmarkedIds(List<BlendingUser> blendingUsers, String userUuid) {
+        List<User> targetUsers = blendingUsers.stream()
+                .map(BlendingUser::getUser)
+                .toList();
+
+        return userBookmarkRepository.findBookmarkedUserIds(userUuid, targetUsers);
     }
 
 }

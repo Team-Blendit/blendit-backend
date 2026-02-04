@@ -6,6 +6,7 @@ import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingKeyword;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.common.constant.Position;
+import kr.blendit.api.user.domain.UserBookmark;
 import lombok.*;
 import org.hibernate.mapping.Join;
 
@@ -40,12 +41,12 @@ public class BlendingDetailResponse {
 
     public static BlendingDetailResponse from(
             Blending blending, List<BlendingUser> blendingUsers, long bookmarkCount,
-            boolean isBookmarked, boolean isHost, String currentUserJoinStatus) {
+            boolean isBookmarked, boolean isHost, String currentUserJoinStatus, List<Long> bookmarkedIds) {
 
         return BlendingDetailResponse.builder()
                 .id(blending.getId())
                 .uuid(blending.getUuid())
-                .blendingParticipant(BlendingParticipantResponse.from(blendingUsers))
+                .blendingParticipant(BlendingParticipantResponse.from(blendingUsers, bookmarkedIds))
                 .title(blending.getTitle())
                 .content(blending.getContent())
                 .position(blending.getPosition())

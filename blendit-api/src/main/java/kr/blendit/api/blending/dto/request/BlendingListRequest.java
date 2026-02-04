@@ -13,8 +13,9 @@ import java.util.List;
 public class BlendingListRequest {
 
     private Position position;
-    private List<String> keywords;
+    private List<String> keywordUuidList;
     private List<String> region;
+    private Integer capacity;
     private Boolean isRecruiting;
     private Boolean isBookmark;
     private String query;
