@@ -30,7 +30,7 @@ public class BlendingParticipantResponse {
   private List<String> keywords;
   private BlendingUserGrade blendingUserGrade;
   private JoinStatus joinStatus;
-  private Boolean isBookmark;
+  private Boolean isBookmarked;
 
 
   public static List<BlendingParticipantResponse> from(List<BlendingUser> blendingUsers, List<Long> bookmarkedIds) {
@@ -55,7 +55,7 @@ public class BlendingParticipantResponse {
               .keywords(userKeywords)
               .blendingUserGrade(blendingUser.getBlendingUserGrade())
               .joinStatus(blendingUser.getJoinStatus())
-              .isBookmark(bookmarkedIds.contains(blendingUser.getUser().getId()))
+              .isBookmarked(bookmarkedIds.contains(blendingUser.getUser().getId()))
               .build();
       blendingParticipantResponses.add(blendingUserResponse);
 
