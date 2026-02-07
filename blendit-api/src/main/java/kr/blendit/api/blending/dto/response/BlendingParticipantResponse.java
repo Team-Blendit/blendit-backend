@@ -29,6 +29,7 @@ public class BlendingParticipantResponse {
   private String district;
   private List<String> keywords;
   private BlendingUserGrade blendingUserGrade;
+  private String message;
   private JoinStatus joinStatus;
   private Boolean isBookmarked;
 
@@ -54,6 +55,7 @@ public class BlendingParticipantResponse {
               .district(blendingUser.getUser().getDistrict())
               .keywords(userKeywords)
               .blendingUserGrade(blendingUser.getBlendingUserGrade())
+              .message(blendingUser.getMessage())
               .joinStatus(blendingUser.getJoinStatus())
               .isBookmarked(bookmarkedIds.contains(blendingUser.getUser().getId()))
               .build();
