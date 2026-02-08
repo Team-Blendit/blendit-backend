@@ -36,11 +36,6 @@ public class BlendingParticipationService {
             throw new BaseException(BaseErrorCode.BLENDING_NOT_RECRUITING);
         }
 
-        // 참여 이력 검증 (중복 신청 방지)
-        if(blendingUserRepository.existsByBlendingAndUser(blending, user)) {
-            throw new BaseException(BaseErrorCode.BLENDING_ALREADY_APPLIED);
-        }
-
         // 인원 수 검증
         long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
         if(blending.getCapacity() <= currentUserCount) {
@@ -53,13 +48,25 @@ public class BlendingParticipationService {
             joinStatus = JoinStatus.APPROVED;
         }
 
-        BlendingUser blendingUser = blending.addParticipant(
-                user,
-                BlendingUserGrade.MEMBER,
-                blendingApplyRequest.getMessage(),
-                joinStatus);
+        BlendingUser blendingUser = blendingUserRepository.findByBlendingAndUser(blending, user)
+                        .orElse(null);
 
-        blendingUserRepository.save(blendingUser);
+        // 취소 상태라면 상태 변경, 신청 내역이 없다면 데이터 생성
+        if(blendingUser != null) {
+            if(blendingUser.getJoinStatus().equals(JoinStatus.CANCEL)) { // 참여 이력 검증
+                blendingUser.updateJoinStatus(joinStatus);
+            } else {
+                throw new BaseException(BaseErrorCode.BLENDING_ALREADY_APPLIED);
+            }
+        } else {
+            BlendingUser newBlendingUser = blending.addParticipant(
+                    user,
+                    BlendingUserGrade.MEMBER,
+                    blendingApplyRequest.getMessage(),
+                    joinStatus);
+
+            blendingUserRepository.save(newBlendingUser);
+        }
 
         if(joinStatus.equals(JoinStatus.APPROVED)) {
             long finalUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);

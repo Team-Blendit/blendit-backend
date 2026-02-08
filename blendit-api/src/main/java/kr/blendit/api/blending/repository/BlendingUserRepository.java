@@ -6,6 +6,7 @@ import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.user.domain.User;
+import org.hibernate.mapping.Join;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,9 +34,9 @@ public interface BlendingUserRepository extends JpaRepository<BlendingUser, Long
     long countByBlendingAndJoinStatus(Blending blending, JoinStatus joinStatus);
 
     /**
-     * 유저의 블렌딩 참여 여부 추출(모든 JoinStatus 포함)
+     * 유저의 블렌딩 참여 여부 추출
      */
-    boolean existsByBlendingAndUser(Blending blending, User user);
+    Optional<BlendingUser> findByBlendingAndUser(Blending blending, User user);
 
     /**
      * 참여중인 특정 BlendingUser 조회
