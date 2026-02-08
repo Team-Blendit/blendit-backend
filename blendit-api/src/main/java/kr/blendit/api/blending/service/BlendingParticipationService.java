@@ -55,6 +55,7 @@ public class BlendingParticipationService {
         if(blendingUser != null) {
             if(blendingUser.getJoinStatus().equals(JoinStatus.CANCEL)) { // 참여 이력 검증
                 blendingUser.updateJoinStatus(joinStatus);
+                blendingUser.updateMessage(blendingApplyRequest.getMessage());
             } else {
                 throw new BaseException(BaseErrorCode.BLENDING_ALREADY_APPLIED);
             }
