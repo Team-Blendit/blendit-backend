@@ -71,7 +71,7 @@ public class Blending extends BaseEntity {
    * 블렌딩 생성자
    */
   @Builder(access = AccessLevel.PRIVATE)
-  public Blending(String title, String content, Position position, int capacity, String region,
+  private Blending(String title, String content, Position position, int capacity, String region,
                   String openChattingUrl, LocalDateTime schedule, Boolean autoApproval) {
     this.title = title;
     this.content = content;
@@ -222,24 +222,6 @@ public class Blending extends BaseEntity {
     }
 
     return participantCount;
-  }
-
-
-  /**
-   * 이 블렌딩에서 해당 유저가 HOST 등급인지 확인
-   *
-   * @apiNote Blending과 BlendingUser 까지 프록시 객체가 아닌 실제 엔티티를 들고 있는 경우 사용하기 적합합니다.
-   */
-  // Todo: 메서드 사용 x -> BlendingUserRepository.existsByBlendingAndUser_UuidAndBlendingUserGrade() 사용할 것
-  public boolean isHost(String userUuid) {
-    boolean isHost = false;
-    for (BlendingUser blendingUser : this.getParticipants()) {
-      if (blendingUser.getBlendingUserGrade() == BlendingUserGrade.HOST) {
-        if (blendingUser.getUser().getUuid().equals(userUuid)) isHost = true;
-        break;
-      }
-    }
-    return isHost;
   }
 
 
