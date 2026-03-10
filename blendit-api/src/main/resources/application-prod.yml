@@ -5,6 +5,12 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+  # Redis 설정
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
   jpa:
     hibernate:
       ddl-auto: none
@@ -12,3 +18,23 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+storage:
+  local:
+    root-dir: /home/ubuntu/app/local-uploads
+    public-base-url: https://blendit.kr/uploads
+    max-upload-bytes: 10485760
+    allowed-mime-types:
+      - image/jpeg
+      - image/png
+      - image/webp
+
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: false

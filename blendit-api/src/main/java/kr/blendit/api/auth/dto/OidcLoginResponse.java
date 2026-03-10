@@ -1,0 +1,40 @@
+package kr.blendit.api.auth.dto;
+
+import kr.blendit.api.user.constant.LoginType;
+import kr.blendit.api.user.domain.User;
+
+public record OidcLoginResponse(
+    String accessToken,
+    String refreshToken,
+    UserInfo user
+) {
+
+  public static OidcLoginResponse of(TokenDto tokenDto, User user) {
+    return new OidcLoginResponse(
+        tokenDto.accessToken(),
+        tokenDto.refreshToken(),
+        UserInfo.from(user)
+    );
+  }
+
+  public record UserInfo(
+      String uuid,
+      String email,
+      String nickname,
+      String profileImage,
+      LoginType loginType,
+      boolean isOnboardingComplete
+  ) {
+
+    public static UserInfo from(User user) {
+      return new UserInfo(
+          user.getUuid(),
+          user.getEmail(),
+          user.getNickname(),
+          user.getProfileImage(),
+          user.getLoginType(),
+          user.isOnboardingComplete()
+      );
+    }
+  }
+}

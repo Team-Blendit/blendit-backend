@@ -7,31 +7,23 @@ plugins {
 dependencies {
     implementation project(':blendit-common')
 
-    // Spring Boot Starters
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-validation'
-
     // Database (MySQL)
     runtimeOnly 'com.mysql:mysql-connector-j'
+
+    // P6Spy (SQL 로깅) - 개발 환경 전용
+    runtimeOnly 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.2'
 
     // Configuration Processor
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
-    // QueryDSL
-    implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
+    // QueryDSL (annotationProcessor는 각 모듈에서 별도로 필요)
     annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'
     annotationProcessor 'jakarta.annotation:jakarta.annotation-api'
     annotationProcessor 'jakarta.persistence:jakarta.persistence-api'
 
-    // JWT
-    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
-
-    // Swagger
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+    // OAuth OIDC - JWT 파싱 및 JWKS 검증
+    implementation 'com.auth0:java-jwt:4.5.0'
+    implementation 'com.auth0:jwks-rsa:0.22.1'
 
     // Test
     testImplementation 'org.springframework.security:spring-security-test'
