@@ -12,8 +12,6 @@ SOURCE_JAR="$2"
 
 APP_ROOT="${APP_ROOT:-${HOME}/app}"
 SERVICE_NAME="${SERVICE_NAME:-blendit-api}"
-REMOTE_SERVICE_FILE="${REMOTE_SERVICE_FILE:-}"
-REMOTE_NGINX_FILE="${REMOTE_NGINX_FILE:-}"
 RELEASES_DIR="${APP_ROOT}/releases"
 RELEASE_DIR="${RELEASES_DIR}/${RELEASE_ID}"
 CURRENT_LINK="${APP_ROOT}/current"
@@ -29,20 +27,6 @@ fi
 mkdir -p "${RELEASES_DIR}" "${RELEASE_DIR}" "${UPLOADS_DIR}"
 sudo install -d -o "$(id -un)" -g "$(id -gn)" -m 755 "${LOG_DIR}"
 install -m 644 "${SOURCE_JAR}" "${TARGET_JAR}"
-
-if [[ -n "${REMOTE_SERVICE_FILE}" ]]; then
-  sudo install -m 644 "${REMOTE_SERVICE_FILE}" "/etc/systemd/system/${SERVICE_NAME}.service"
-  sudo systemctl daemon-reload
-  sudo systemctl enable "${SERVICE_NAME}"
-  rm -f "${REMOTE_SERVICE_FILE}"
-fi
-
-if [[ -n "${REMOTE_NGINX_FILE}" ]]; then
-  sudo install -m 644 "${REMOTE_NGINX_FILE}" "/etc/nginx/conf.d/${SERVICE_NAME}.conf"
-  sudo nginx -t
-  sudo systemctl reload nginx
-  rm -f "${REMOTE_NGINX_FILE}"
-fi
 
 PREVIOUS_TARGET=""
 if [[ -L "${CURRENT_LINK}" ]]; then
