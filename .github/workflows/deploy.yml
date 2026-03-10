@@ -1,27 +1,21 @@
-name: deploy
+name: api-ci-and-deploy
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "dev", "main" ]
+  pull_request:
+    branches: [ "dev" ]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
-env:
-  NCR_REGISTRY: ${{ secrets.NCR_REGISTRY }}
-  NCP_ACCESS_KEY: ${{ secrets.NCP_ACCESS_KEY }}
-  NCP_SECRET_KEY: ${{ secrets.NCP_SECRET_KEY }}
-
-  SOURCE_DEPLOY_BASE_URL: https://vpcsourcedeploy.apigw.ntruss.com
-  SOURCE_DEPLOY_PROJECT_ID_API: ${{ secrets.SOURCE_DEPLOY_PROJECT_ID_API }}
-  SOURCE_DEPLOY_STAGE_ID_API: ${{ secrets.SOURCE_DEPLOY_STAGE_ID_API }}
-  SOURCE_DEPLOY_SCENARIO_ID_API: ${{ secrets.SOURCE_DEPLOY_SCENARIO_ID_API }}
-  SOURCE_DEPLOY_PROJECT_ID_CHAT: ${{ secrets.SOURCE_DEPLOY_PROJECT_ID_CHAT }}
-  SOURCE_DEPLOY_STAGE_ID_CHAT: ${{ secrets.SOURCE_DEPLOY_STAGE_ID_CHAT }}
-  SOURCE_DEPLOY_SCENARIO_ID_CHAT: ${{ secrets.SOURCE_DEPLOY_SCENARIO_ID_CHAT }}
+concurrency:
+  group: api-ci-and-deploy-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
-  build_push:
+  build_api:
     runs-on: ubuntu-latest
 
     steps:
@@ -38,113 +32,87 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      - name: Build bootJars (skip tests)
-        run: |
-          ./gradlew --no-daemon :blendit-api:bootJar :blendit-chat:bootJar -x test
+      - name: Build API (skip tests)
+        run: ./gradlew --no-daemon :blendit-api:build -x test
 
-      - name: Resolve JAR paths
-        id: jars
+      - name: Build bootJar (skip tests)
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+        run: ./gradlew --no-daemon :blendit-api:bootJar -x test
+
+      - name: Upload deploy artifact
+        if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: blendit-api-jar
+          path: blendit-api/build/libs/*.jar
+          if-no-files-found: error
+
+  deploy_api:
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
+    needs: build_api
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download deploy artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: blendit-api-jar
+          path: blendit-api/build/libs
+
+      - name: Resolve deploy variables
+        id: vars
         shell: bash
         run: |
-          API_JAR="$(ls -1 blendit-api/build/libs/*.jar | grep -v 'plain' | head -n 1)"
-          CHAT_JAR="$(ls -1 blendit-chat/build/libs/*.jar | grep -v 'plain' | head -n 1)"
+          set -euo pipefail
 
-          if [[ -z "$API_JAR" || -z "$CHAT_JAR" ]]; then
-            echo "ERROR: jar not found"
-            echo "API_JAR=$API_JAR"
-            echo "CHAT_JAR=$CHAT_JAR"
-            ls -al blendit-api/build/libs || true
-            ls -al blendit-chat/build/libs || true
+          JAR_PATH="$(ls -1 blendit-api/build/libs/*.jar | grep -v 'plain' | head -n 1)"
+          if [[ -z "${JAR_PATH}" ]]; then
+            echo "Executable jar not found"
             exit 1
           fi
 
-          echo "api_jar=$API_JAR" >> $GITHUB_OUTPUT
-          echo "chat_jar=$CHAT_JAR" >> $GITHUB_OUTPUT
+          PORT="${{ secrets.LIGHTSAIL_PORT }}"
+          if [[ -z "${PORT}" ]]; then
+            PORT="22"
+          fi
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+          echo "jar_path=${JAR_PATH}" >> "$GITHUB_OUTPUT"
+          echo "port=${PORT}" >> "$GITHUB_OUTPUT"
+          echo "release_id=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "remote_jar=/tmp/blendit-api-${GITHUB_SHA}.jar" >> "$GITHUB_OUTPUT"
+          echo "remote_script=/tmp/deploy_lightsail.sh" >> "$GITHUB_OUTPUT"
 
-      - name: Login to NCR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.NCR_REGISTRY }}
-          username: ${{ env.NCP_ACCESS_KEY }}
-          password: ${{ env.NCP_SECRET_KEY }}
-
-      - name: Build & Push API image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile.api
-          push: true
-          platforms: linux/amd64
-          build-args: |
-            JAR_FILE=${{ steps.jars.outputs.api_jar }}
-          tags: |
-            ${{ env.NCR_REGISTRY }}/blendit-api:${{ github.sha }}
-            ${{ env.NCR_REGISTRY }}/blendit-api:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      - name: Build & Push CHAT image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: Dockerfile.chat
-          push: true
-          platforms: linux/amd64
-          build-args: |
-            JAR_FILE=${{ steps.jars.outputs.chat_jar }}
-          tags: |
-            ${{ env.NCR_REGISTRY }}/blendit-chat:${{ github.sha }}
-            ${{ env.NCR_REGISTRY }}/blendit-chat:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  deploy_api:
-    runs-on: ubuntu-latest
-    needs: build_push
-
-    steps:
-      - name: Trigger SourceDeploy scenario (API)
+      - name: Configure SSH
         shell: bash
         run: |
           set -euo pipefail
 
-          METHOD="POST"
-          URL="/api/v1/project/${SOURCE_DEPLOY_PROJECT_ID_API}/stage/${SOURCE_DEPLOY_STAGE_ID_API}/scenario/${SOURCE_DEPLOY_SCENARIO_ID_API}/deploy"
-          TIMESTAMP="$(date +%s%3N)"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.LIGHTSAIL_SSH_PRIVATE_KEY }}" > ~/.ssh/id_lightsail
+          chmod 600 ~/.ssh/id_lightsail
+          ssh-keyscan -p "${{ steps.vars.outputs.port }}" "${{ secrets.LIGHTSAIL_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
 
-          SIGNATURE="$(printf "%b" "${METHOD} ${URL}\n${TIMESTAMP}\n${NCP_ACCESS_KEY}" \
-            | openssl dgst -sha256 -hmac "${NCP_SECRET_KEY}" -binary \
-            | openssl base64 -A)"
-
-          curl -sS -X "${METHOD}" "${SOURCE_DEPLOY_BASE_URL}${URL}" \
-            -H "x-ncp-apigw-timestamp: ${TIMESTAMP}" \
-            -H "x-ncp-iam-access-key: ${NCP_ACCESS_KEY}" \
-            -H "x-ncp-apigw-signature-v2: ${SIGNATURE}" \
-            -H "Content-Type: application/json"
-
-  deploy_chat:
-    runs-on: ubuntu-latest
-    needs: build_push
-
-    steps:
-      - name: Trigger SourceDeploy scenario (CHAT)
+      - name: Upload artifact and deploy script
         shell: bash
         run: |
           set -euo pipefail
 
-          METHOD="POST"
-          URL="/api/v1/project/${SOURCE_DEPLOY_PROJECT_ID_CHAT}/stage/${SOURCE_DEPLOY_STAGE_ID_CHAT}/scenario/${SOURCE_DEPLOY_SCENARIO_ID_CHAT}/deploy"
-          TIMESTAMP="$(date +%s%3N)"
+          scp -i ~/.ssh/id_lightsail -P "${{ steps.vars.outputs.port }}" \
+            "${{ steps.vars.outputs.jar_path }}" \
+            "${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}:${{ steps.vars.outputs.remote_jar }}"
 
-          SIGNATURE="$(printf "%b" "${METHOD} ${URL}\n${TIMESTAMP}\n${NCP_ACCESS_KEY}" \
-            | openssl dgst -sha256 -hmac "${NCP_SECRET_KEY}" -binary \
-            | openssl base64 -A)"
+          scp -i ~/.ssh/id_lightsail -P "${{ steps.vars.outputs.port }}" \
+            scripts/deploy_lightsail.sh \
+            "${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}:${{ steps.vars.outputs.remote_script }}"
 
-          curl -sS -X "${METHOD}" "${SOURCE_DEPLOY_BASE_URL}${URL}" \
-            -H "x-ncp-apigw-timestamp: ${TIMESTAMP}" \
-            -H "x-ncp-iam-access-key: ${NCP_ACCESS_KEY}" \
-            -H "x-ncp-apigw-signature-v2: ${SIGNATURE}" \
-            -H "Content-Type: application/json"
+      - name: Restart service on Lightsail
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ssh -i ~/.ssh/id_lightsail -p "${{ steps.vars.outputs.port }}" \
+            "${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}" \
+            "chmod +x '${{ steps.vars.outputs.remote_script }}' && APP_ROOT=/home/ubuntu/app SERVICE_NAME=blendit-api '${{ steps.vars.outputs.remote_script }}' '${{ steps.vars.outputs.release_id }}' '${{ steps.vars.outputs.remote_jar }}'"

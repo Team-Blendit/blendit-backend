@@ -36,6 +36,13 @@ out/
 ### VS Code ###
 .vscode/
 
+### Node / NestJS ###
+blendit-chat/node_modules/
+blendit-chat/dist/
+blendit-chat/.env
+blendit-chat/.env.*
+blendit-chat/coverage/
+
 ### Generated ###
 **/src/main/generated/
 
