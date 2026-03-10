@@ -1,14 +1,14 @@
 [Unit]
 Description=Blendit API
-After=network-online.target redis-server.service
+After=network-online.target redis6.service
 Wants=network-online.target
 
 [Service]
 Type=simple
-User=ubuntu
-WorkingDirectory=/home/ubuntu/app/current
+User=ec2-user
+WorkingDirectory=/home/ec2-user/app/current
 EnvironmentFile=/etc/blendit/blendit-api.env
-ExecStart=/usr/bin/java -jar /home/ubuntu/app/current/blendit-api.jar
+ExecStart=/usr/bin/java -jar /home/ec2-user/app/current/blendit-api.jar
 SuccessExitStatus=143
 Restart=always
 RestartSec=5

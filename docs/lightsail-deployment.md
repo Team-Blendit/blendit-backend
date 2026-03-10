@@ -2,45 +2,48 @@
 
 ## Architecture
 - `main` push builds `:blendit-api:bootJar` and deploys over SSH to Lightsail.
-- Lightsail runs `nginx`, `redis-server`, and the Spring Boot JAR on the same instance.
+- Lightsail runs `nginx`, `redis6`, and the Spring Boot JAR on the same instance.
 - MySQL uses Lightsail Managed Database.
-- Uploaded files live on the instance under `/home/ubuntu/app/local-uploads` and are exposed through `https://blendit.kr/uploads`.
+- Uploaded files live on the instance under `/home/ec2-user/app/local-uploads` and are exposed through `https://blendit.kr/uploads`.
 
 ## GitHub Actions Secrets
 - `LIGHTSAIL_HOST`
 - `LIGHTSAIL_USER`
 - `LIGHTSAIL_SSH_PRIVATE_KEY`
 - `LIGHTSAIL_PORT` (optional, defaults to `22`)
+- `LIGHTSAIL_APP_ROOT` (optional, defaults to `/home/<LIGHTSAIL_USER>/app`)
+- `LIGHTSAIL_SERVICE_NAME` (optional, defaults to `blendit-api`)
 
 ## Server Layout
-- App root: `/home/ubuntu/app`
-- Releases: `/home/ubuntu/app/releases/<git-sha>`
-- Current symlink: `/home/ubuntu/app/current`
-- Uploads: `/home/ubuntu/app/local-uploads`
+- App root: `/home/ec2-user/app`
+- Releases: `/home/ec2-user/app/releases/<git-sha>`
+- Current symlink: `/home/ec2-user/app/current`
+- Uploads: `/home/ec2-user/app/local-uploads`
 - Env file: `/etc/blendit/blendit-api.env`
 - Logs: `/var/log/blendit`
 
 ## AWS Checklist
-1. Create a Lightsail Ubuntu instance and attach a static IP.
+1. Create an Amazon Linux 2023 Lightsail instance and attach a static IP.
 2. Create a Lightsail Managed Database for MySQL and record host, port, DB name, username, and password.
 3. Point `blendit.kr` DNS to the Lightsail static IP.
 4. Open only `22`, `80`, and `443` on the Lightsail networking page.
 5. Install packages on the instance:
 
 ```bash
-sudo apt-get update
-sudo apt-get install -y openjdk-17-jre-headless nginx redis-server certbot python3-certbot-nginx
+sudo dnf install -y java-17-amazon-corretto-headless nginx redis6
 ```
+
+Install Certbot and the nginx plugin with an Amazon Linux 2023 compatible method before issuing certificates.
 
 6. Create runtime directories:
 
 ```bash
 sudo mkdir -p /etc/blendit /var/log/blendit
-sudo chown ubuntu:ubuntu /var/log/blendit
-mkdir -p /home/ubuntu/app/releases /home/ubuntu/app/local-uploads
+sudo chown ec2-user:ec2-user /var/log/blendit
+mkdir -p /home/ec2-user/app/releases /home/ec2-user/app/local-uploads
 ```
 
-7. Configure Redis for local-only access by setting `bind 127.0.0.1 ::1` and `protected-mode yes` in `/etc/redis/redis.conf`, then restart Redis.
+7. Configure Redis for local-only access by setting `bind 127.0.0.1 ::1` and `protected-mode yes` in `/etc/redis6/redis6.conf`, then restart Redis.
 8. Create `/etc/blendit/blendit-api.env` with production secrets:
 
 ```bash
@@ -58,7 +61,7 @@ KAKAO_REDIRECT_URI=<frontend-kakao-callback-url>
 GOOGLE_CLIENT_ID=<google-client-id>
 GOOGLE_CLIENT_SECRET=<google-client-secret>
 GOOGLE_REDIRECT_URI=<frontend-google-callback-url>
-STORAGE_LOCAL_ROOT_DIR=/home/ubuntu/app/local-uploads
+STORAGE_LOCAL_ROOT_DIR=/home/ec2-user/app/local-uploads
 STORAGE_PUBLIC_BASE_URL=https://blendit.kr/uploads
 ```
 
@@ -73,8 +76,7 @@ sudo systemctl enable blendit-api
 10. Install the nginx site from a checked-out copy of this repo using `infra/nginx/blendit-api.conf` and enable it:
 
 ```bash
-sudo cp infra/nginx/blendit-api.conf /etc/nginx/sites-available/blendit-api
-sudo ln -s /etc/nginx/sites-available/blendit-api /etc/nginx/sites-enabled/blendit-api
+sudo cp infra/nginx/blendit-api.conf /etc/nginx/conf.d/blendit-api.conf
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -87,6 +89,7 @@ sudo certbot --nginx -d blendit.kr -d www.blendit.kr
 
 12. Add the Lightsail SSH secrets to GitHub Actions.
 13. Merge to `main` and let the deploy workflow upload the JAR and restart `blendit-api`.
+14. Subsequent deployments will also refresh the systemd unit and nginx config from the repo.
 
 ## Verification
 1. Confirm the service is running:

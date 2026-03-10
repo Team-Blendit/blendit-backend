@@ -79,11 +79,25 @@ jobs:
             PORT="22"
           fi
 
+          APP_ROOT="${{ secrets.LIGHTSAIL_APP_ROOT }}"
+          if [[ -z "${APP_ROOT}" ]]; then
+            APP_ROOT="/home/${{ secrets.LIGHTSAIL_USER }}/app"
+          fi
+
+          SERVICE_NAME="${{ secrets.LIGHTSAIL_SERVICE_NAME }}"
+          if [[ -z "${SERVICE_NAME}" ]]; then
+            SERVICE_NAME="blendit-api"
+          fi
+
           echo "jar_path=${JAR_PATH}" >> "$GITHUB_OUTPUT"
           echo "port=${PORT}" >> "$GITHUB_OUTPUT"
+          echo "app_root=${APP_ROOT}" >> "$GITHUB_OUTPUT"
+          echo "service_name=${SERVICE_NAME}" >> "$GITHUB_OUTPUT"
           echo "release_id=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
           echo "remote_jar=/tmp/blendit-api-${GITHUB_SHA}.jar" >> "$GITHUB_OUTPUT"
           echo "remote_script=/tmp/deploy_lightsail.sh" >> "$GITHUB_OUTPUT"
+          echo "remote_service=/tmp/blendit-api.service" >> "$GITHUB_OUTPUT"
+          echo "remote_nginx=/tmp/blendit-api-nginx.conf" >> "$GITHUB_OUTPUT"
 
       - name: Configure SSH
         shell: bash
@@ -108,6 +122,14 @@ jobs:
             scripts/deploy_lightsail.sh \
             "${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}:${{ steps.vars.outputs.remote_script }}"
 
+          scp -i ~/.ssh/id_lightsail -P "${{ steps.vars.outputs.port }}" \
+            infra/systemd/blendit-api.service \
+            "${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}:${{ steps.vars.outputs.remote_service }}"
+
+          scp -i ~/.ssh/id_lightsail -P "${{ steps.vars.outputs.port }}" \
+            infra/nginx/blendit-api.conf \
+            "${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}:${{ steps.vars.outputs.remote_nginx }}"
+
       - name: Restart service on Lightsail
         shell: bash
         run: |
@@ -115,4 +137,4 @@ jobs:
 
           ssh -i ~/.ssh/id_lightsail -p "${{ steps.vars.outputs.port }}" \
             "${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}" \
-            "chmod +x '${{ steps.vars.outputs.remote_script }}' && APP_ROOT=/home/ubuntu/app SERVICE_NAME=blendit-api '${{ steps.vars.outputs.remote_script }}' '${{ steps.vars.outputs.release_id }}' '${{ steps.vars.outputs.remote_jar }}'"
+            "chmod +x '${{ steps.vars.outputs.remote_script }}' && APP_ROOT='${{ steps.vars.outputs.app_root }}' SERVICE_NAME='${{ steps.vars.outputs.service_name }}' REMOTE_SERVICE_FILE='${{ steps.vars.outputs.remote_service }}' REMOTE_NGINX_FILE='${{ steps.vars.outputs.remote_nginx }}' '${{ steps.vars.outputs.remote_script }}' '${{ steps.vars.outputs.release_id }}' '${{ steps.vars.outputs.remote_jar }}'"
