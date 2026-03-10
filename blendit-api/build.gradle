@@ -13,6 +13,8 @@ dependencies {
     // P6Spy (SQL 로깅) - 개발 환경 전용
     runtimeOnly 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.2'
 
+    runtimeOnly 'com.h2database:h2'
+
     // Configuration Processor
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 

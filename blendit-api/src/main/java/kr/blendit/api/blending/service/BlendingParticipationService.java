@@ -6,6 +6,7 @@ import kr.blendit.api.blending.constant.JoinStatus;
 import kr.blendit.api.blending.domain.Blending;
 import kr.blendit.api.blending.domain.BlendingUser;
 import kr.blendit.api.blending.dto.request.BlendingApplyRequest;
+import kr.blendit.api.blending.repository.BlendingRepository;
 import kr.blendit.api.blending.repository.BlendingUserRepository;
 import kr.blendit.api.user.domain.User;
 import kr.blendit.common.exception.BaseErrorCode;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BlendingParticipationService {
 
     private final BlendingUserRepository blendingUserRepository;
+    private final BlendingRepository blendingRepository;
 
     /**
      * 블렌딩 참여 신청
@@ -29,23 +31,27 @@ public class BlendingParticipationService {
      * @apiNote MEMBER 권한으로 저장되며 JoinStatus 값은 autoApproval에 따라 결정됩니다.
      * @apiNote 신청이 거절되면 다시 신청할 수 없습니다.
      */
+    @Transactional
     public void apply(User user, Blending blending, BlendingApplyRequest blendingApplyRequest) {
+
+        JoinStatus joinStatus = JoinStatus.PENDING;
+
+        if(blending.getAutoApproval()) {
+            // 자동 승인 블렌딩일 경우 비관적 락으로 Blending 재조회
+            blending = blendingRepository.findByUuidLock(blending.getUuid())
+                    .orElseThrow(() -> new BaseException(BaseErrorCode.BLENDING_NOT_FOUND));
+
+            joinStatus = JoinStatus.APPROVED;
+        }
 
         // 모집중이 아닐 경우 예외
         if(!blending.getStatus().equals(BlendingStatus.RECRUITING)) {
             throw new BaseException(BaseErrorCode.BLENDING_NOT_RECRUITING);
         }
 
-        // 인원 수 검증
         long currentUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
         if(blending.getCapacity() <= currentUserCount) {
             throw new BaseException(BaseErrorCode.BLENDING_FULL);
-        }
-        
-        // 자동 승인 여부에 따른 상태값 설정
-        JoinStatus joinStatus = JoinStatus.PENDING;
-        if(blending.getAutoApproval()) {
-            joinStatus = JoinStatus.APPROVED;
         }
 
         BlendingUser blendingUser = blendingUserRepository.findByBlendingAndUser(blending, user)
@@ -69,17 +75,9 @@ public class BlendingParticipationService {
             blendingUserRepository.save(newBlendingUser);
         }
 
+        // 승인 인원이 가득찬 경우 마감으로 변경
         if(joinStatus.equals(JoinStatus.APPROVED)) {
-            long finalUserCount = blendingUserRepository.countByBlendingAndJoinStatus(blending, JoinStatus.APPROVED);
-
-            // Todo: 추후 락으로 동시성 관리
-            // 저장 후 정원이 초과된 경우 예외 -> 롤백
-            if (finalUserCount > blending.getCapacity()) {
-                throw new BaseException(BaseErrorCode.BLENDING_FULL);
-            }
-
-            // 저장 후 정원이 가득찬 경우 마감으로 변경
-            if (finalUserCount == blending.getCapacity()) {
+            if (currentUserCount + 1 == blending.getCapacity()) {
                 blending.updateStatus(BlendingStatus.RECRUITMENT_CLOSED);
             }
         }

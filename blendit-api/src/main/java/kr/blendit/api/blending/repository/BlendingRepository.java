@@ -1,14 +1,14 @@
 package kr.blendit.api.blending.repository;
 
+import jakarta.persistence.LockModeType;
 import kr.blendit.api.blending.constant.BlendingStatus;
 import kr.blendit.api.blending.domain.Blending;
-import kr.blendit.api.blending.domain.BlendingUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface BlendingRepository extends JpaRepository<Blending, Long>, BlendingRepositoryCustom {
@@ -70,4 +70,12 @@ public interface BlendingRepository extends JpaRepository<Blending, Long>, Blend
             """)
     Page<Blending> findAllByUserUuidAnBlendingStatus(
             String userUuid, BlendingStatus blendingStatus, Pageable pageable);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("""
+            SELECT b
+            FROM Blending b
+            WHERE b.uuid = :uuid
+            """)
+    Optional<Blending> findByUuidLock(String uuid);
 }
