@@ -1,0 +1,19 @@
+[Unit]
+Description=Blendit API
+After=network-online.target redis-server.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/app/current
+EnvironmentFile=/etc/blendit/blendit-api.env
+ExecStart=/usr/bin/java -jar /home/ubuntu/app/current/blendit-api.jar
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+StandardOutput=append:/var/log/blendit/blendit-api.log
+StandardError=append:/var/log/blendit/blendit-api-error.log
+
+[Install]
+WantedBy=multi-user.target
